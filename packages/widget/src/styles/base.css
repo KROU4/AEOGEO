@@ -1,0 +1,213 @@
+:host {
+  display: block;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.aeogeo-widget-root {
+  max-height: 600px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--aeogeo-border) transparent;
+}
+
+.aeogeo-widget-root::-webkit-scrollbar {
+  width: 6px;
+}
+
+.aeogeo-widget-root::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.aeogeo-widget-root::-webkit-scrollbar-thumb {
+  background: var(--aeogeo-border);
+  border-radius: 3px;
+}
+
+.aeogeo-widget-root::-webkit-scrollbar-thumb:hover {
+  background: var(--aeogeo-border-hover);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* FAQ Styles */
+
+.aeogeo-faq {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.aeogeo-faq-item {
+  border: 1px solid var(--aeogeo-border);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: border-color 0.2s ease;
+}
+
+.aeogeo-faq-item:hover {
+  border-color: var(--aeogeo-border-hover);
+}
+
+.aeogeo-faq-question {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 14px 16px;
+  border: none;
+  background: var(--aeogeo-card-bg);
+  color: var(--aeogeo-text);
+  font-size: 15px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  font-family: inherit;
+  line-height: 1.4;
+}
+
+.aeogeo-faq-question:hover {
+  background: var(--aeogeo-card-hover);
+}
+
+.aeogeo-faq-question:focus-visible {
+  outline: 2px solid var(--aeogeo-accent);
+  outline-offset: -2px;
+}
+
+.aeogeo-faq-question-text {
+  flex: 1;
+  margin-right: 12px;
+}
+
+.aeogeo-faq-chevron {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  color: var(--aeogeo-text-muted);
+  transition: transform 0.2s ease;
+}
+
+.aeogeo-faq-item--open .aeogeo-faq-chevron {
+  transform: rotate(180deg);
+}
+
+.aeogeo-faq-answer {
+  overflow: hidden;
+}
+
+.aeogeo-faq-answer-content {
+  padding: 0 16px 14px;
+  color: var(--aeogeo-text-secondary);
+  font-size: 14px;
+  line-height: 1.6;
+  background: var(--aeogeo-card-bg);
+}
+
+/* Blog Feed Styles */
+
+.aeogeo-blog-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.aeogeo-blog-card {
+  padding: 16px;
+  border: 1px solid var(--aeogeo-border);
+  border-radius: 8px;
+  background: var(--aeogeo-card-bg);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.aeogeo-blog-card:hover {
+  border-color: var(--aeogeo-border-hover);
+  box-shadow: 0 2px 8px var(--aeogeo-shadow);
+}
+
+.aeogeo-blog-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--aeogeo-text);
+  margin-bottom: 8px;
+  line-height: 1.3;
+}
+
+.aeogeo-blog-excerpt {
+  font-size: 14px;
+  color: var(--aeogeo-text-secondary);
+  line-height: 1.6;
+  margin-bottom: 10px;
+}
+
+.aeogeo-blog-date {
+  display: block;
+  font-size: 12px;
+  color: var(--aeogeo-text-muted);
+}
+
+/* Loading & Error States */
+
+.aeogeo-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  color: var(--aeogeo-text-muted);
+  font-size: 14px;
+}
+
+.aeogeo-loading-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--aeogeo-border);
+  border-top-color: var(--aeogeo-accent);
+  border-radius: 50%;
+  animation: aeogeo-spin 0.6s linear infinite;
+  margin-right: 10px;
+}
+
+@keyframes aeogeo-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.aeogeo-error {
+  padding: 16px;
+  border: 1px solid var(--aeogeo-error-border);
+  border-radius: 8px;
+  background: var(--aeogeo-error-bg);
+  color: var(--aeogeo-error-text);
+  font-size: 13px;
+  text-align: center;
+}
+
+/* Powered by */
+
+.aeogeo-powered {
+  margin-top: 12px;
+  text-align: right;
+  font-size: 11px;
+  color: var(--aeogeo-text-muted);
+  opacity: 0.7;
+}
+
+.aeogeo-powered a {
+  color: var(--aeogeo-text-muted);
+  text-decoration: none;
+}
+
+.aeogeo-powered a:hover {
+  text-decoration: underline;
+}

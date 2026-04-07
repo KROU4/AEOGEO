@@ -1,0 +1,66 @@
+{
+  "title": "Обзор ответов",
+  "subtitle": "Просматривайте и анализируйте ответы AI-движков по всем запускам",
+  "filters": {
+    "selectRun": "Выберите запуск",
+    "selectRunPlaceholder": "Выберите запуск...",
+    "engines": "Движки",
+    "allEngines": "Все движки",
+    "minScore": "Мин. оценка",
+    "scoreValue": "{{value}}",
+    "clear": "Сбросить фильтры"
+  },
+  "card": {
+    "query": "Запрос",
+    "engine": "Движок",
+    "score": "Оценка",
+    "expand": "Показать полный ответ",
+    "collapse": "Свернуть ответ",
+    "noScore": "Н/Д"
+  },
+  "mentions": {
+    "title": "Упоминания",
+    "brand": "Бренд",
+    "competitor": "Конкурент",
+    "product": "Продукт",
+    "recommended": "Рекомендован",
+    "position": "Позиция #{{pos}}"
+  },
+  "citations": {
+    "title": "Цитирования",
+    "clientSource": "Ваш источник",
+    "externalSource": "Внешний"
+  },
+  "sentiment": {
+    "positive": "Позитивный",
+    "neutral": "Нейтральный",
+    "negative": "Негативный"
+  },
+  "engines": {
+    "chatgpt": "ChatGPT",
+    "gemini": "Gemini",
+    "perplexity": "Perplexity",
+    "claude": "Claude",
+    "copilot": "Copilot"
+  },
+  "scoreBreakdown": {
+    "mention": "Упоминание",
+    "sentiment": "Тональность",
+    "position": "Позиция",
+    "accuracy": "Точность",
+    "citation": "Цитирование",
+    "recommendation": "Рекомендация",
+    "total": "Итого"
+  },
+  "feedback": {
+    "helpful": "Полезно",
+    "notHelpful": "Не полезно"
+  },
+  "emptyState": "Ответы не найдены. Выберите запуск для просмотра ответов AI-движков.",
+  "noRunSelected": "Выберите запуск из выпадающего списка выше для просмотра ответов.",
+  "loadMore": "Загрузить ещё",
+  "loading": "Загрузка ответов...",
+  "resultCount_one": "{{count}} ответ",
+  "resultCount_few": "{{count}} ответа",
+  "resultCount_many": "{{count}} ответов"
+}

@@ -1,0 +1,97 @@
+{
+  "nav": {
+    "overview": "Overview",
+    "visibility": "AI Visibility",
+    "reports": "Reports",
+    "content": "Content",
+    "widgets": "Widgets",
+    "projects": "Projects",
+    "settings": "Settings",
+    "adminKeys": "AI Keys",
+    "adminUsage": "AI Usage"
+  },
+  "navGroups": {
+    "platform": "Platform",
+    "manage": "Manage",
+    "monitor": "Monitor",
+    "publish": "Publish",
+    "analyze": "Analyze",
+    "admin": "Administration"
+  },
+  "actions": {
+    "save": "Save Changes",
+    "cancel": "Cancel",
+    "view": "View",
+    "share": "Share",
+    "copy": "Copy",
+    "copied": "Copied",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "generate": "Generate",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "submit": "Submit",
+    "search": "Search"
+  },
+  "status": {
+    "draft": "Draft",
+    "review": "In Review",
+    "published": "Published",
+    "archived": "Archived"
+  },
+  "contentType": {
+    "faq": "FAQ",
+    "blog": "Blog",
+    "comparison": "Comparison",
+    "buyer_guide": "Buyer Guide",
+    "pricing_clarifier": "Pricing Clarifier",
+    "glossary": "Glossary"
+  },
+  "roles": {
+    "owner": "Owner",
+    "admin": "Admin",
+    "member": "Member"
+  },
+  "topbar": {
+    "themeLabel": "Theme: {{theme}}",
+    "toggleTheme": "Toggle theme",
+    "notifications": "Notifications",
+    "profile": "Profile",
+    "logOut": "Log out",
+    "switchLanguage": "Русский"
+  },
+  "errors": {
+    "auth.invalid_credentials": "Invalid email or password",
+    "auth.invalid_token": "Invalid or expired token",
+    "auth.invalid_payload": "Invalid token payload",
+    "auth.user_not_found": "User not found or inactive",
+    "auth.invalid_refresh": "Invalid or expired refresh token",
+    "unknown": "Something went wrong. Please try again.",
+    "usage.limit_reached": "Usage limit reached. Contact your administrator.",
+    "usage.rate_limited": "Too many requests. Please try again shortly.",
+    "ai_key.not_found": "No API key configured for this provider.",
+    "ai_key.test_failed": "Key test failed: {{message}}",
+    "ai.provider_error": "AI provider error: {{message}}",
+    "auth.forbidden": "You do not have permission to access this resource.",
+    "auth.email_taken": "An account with this email already exists.",
+    "auth.company_name_required": "Company name is required to create your AEOGEO workspace.",
+    "auth.bootstrap_required": "Finish setting up your AEOGEO workspace first.",
+    "auth.cannot_invite_self": "You cannot invite your own email address.",
+    "auth.role_not_found": "The selected role could not be found.",
+    "auth.project_not_found": "The selected project could not be found.",
+    "auth.identity_conflict": "This email is already linked to a different account.",
+    "auth.invite_expired": "This invitation has expired.",
+    "auth.invite_not_found": "Invitation not found."
+  },
+  "time": {
+    "hoursAgo_one": "{{count}} hour ago",
+    "hoursAgo_other": "{{count}} hours ago",
+    "daysAgo_one": "{{count}} day ago",
+    "daysAgo_other": "{{count}} days ago",
+    "minutesAgo_one": "{{count}} minute ago",
+    "minutesAgo_other": "{{count}} minutes ago",
+    "justNow": "Just now"
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "title": "AI Visibility",
+  "subtitle": "Track how your brand appears across AI engines and monitor query rankings.",
+  "selectProject": "Select a project",
+  "selectProjectHint": "Choose a project to view visibility data",
+  "noProject": "No projects yet",
+  "noProjectHint": "Create a project to start tracking AI visibility and run recurring measurements.",
+  "createProject": "Create Project",
+  "noData": "No visibility data yet",
+  "noDataHint": "Run your first engine query to start tracking visibility scores.",
+  "overallScore": "Overall Visibility Score",
+  "outOf10": "/10",
+  "trend": "vs previous run",
+  "filters": {
+    "dateRange": "Date range",
+    "engine": "Engine",
+    "project": "Project",
+    "last7days": "Last 7 days",
+    "last30days": "Last 30 days",
+    "last90days": "Last 90 days",
+    "allEngines": "All Engines",
+    "allProjects": "All Projects"
+  },
+  "chart": {
+    "title": "Visibility Over Time",
+    "subtitle": "Total visibility score trend across runs",
+    "placeholder": "Chart visualization",
+    "loading": "Trend data loading...",
+    "score": "Score",
+    "noTrendData": "Not enough data for trend chart. Complete at least two runs."
+  },
+  "trafficCorrelation": {
+    "title": "Traffic vs. Visibility",
+    "subtitle": "See how your AI visibility scores correlate with website traffic",
+    "sessions": "Sessions",
+    "score": "Visibility"
+  },
+  "engineBreakdown": "Engine Breakdown",
+  "engineBreakdownHint": "Visibility score per AI engine from the latest run",
+  "scores": {
+    "mention": "Mention",
+    "sentiment": "Sentiment",
+    "position": "Position",
+    "accuracy": "Accuracy",
+    "citation": "Citation",
+    "recommendation": "Recommendation",
+    "total": "Total"
+  },
+  "sentimentBreakdown": "Sentiment Breakdown",
+  "sentimentHint": "How AI engines describe your brand",
+  "positive": "Positive",
+  "neutral": "Neutral",
+  "negative": "Negative",
+  "citationRate": "Citation Rate",
+  "citationRateHint": "Percentage of AI answers that cite your sources",
+  "totalCitations": "Total Citations",
+  "queryTracking": {
+    "title": "Query Tracking",
+    "subtitle": "Monitor your brand position for tracked queries across AI engines",
+    "query": "Query",
+    "engine": "Engine",
+    "position": "Position",
+    "mentions": "Mentions",
+    "trend": "Trend"
+  }
+}

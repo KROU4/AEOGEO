@@ -1,0 +1,80 @@
+{
+  "title": "Query Management",
+  "subtitle": "Create, organize, and manage the queries AI engines will answer about your brand",
+  "querySets": "Query Sets",
+  "newQuerySet": "New Query Set",
+  "createQuerySet": "Create Query Set",
+  "createQuerySetHelp": "A query set is the group of prompts you will generate, review, and run for this project.",
+  "querySetName": "Name",
+  "querySetNamePlaceholder": "e.g. Brand Visibility Q1 2026",
+  "querySetDescription": "Description",
+  "querySetDescriptionPlaceholder": "Describe the purpose of this query set...",
+  "queryCount_one": "{{count}} query",
+  "queryCount_other": "{{count}} queries",
+  "clusterCount_one": "{{count}} cluster",
+  "clusterCount_other": "{{count}} clusters",
+  "actions": {
+    "generate": "Generate Queries",
+    "cluster": "Auto-Cluster",
+    "view": "View Queries",
+    "approve": "Approve",
+    "reject": "Reject",
+    "delete": "Delete",
+    "addQuery": "Add Query"
+  },
+  "table": {
+    "text": "Query Text",
+    "category": "Category",
+    "priority": "Priority",
+    "status": "Status",
+    "actions": "Actions",
+    "cluster": "Cluster"
+  },
+  "status": {
+    "pending": "Pending",
+    "approved": "Approved",
+    "rejected": "Rejected"
+  },
+  "category": {
+    "brand": "Brand",
+    "product": "Product",
+    "comparison": "Comparison",
+    "industry": "Industry",
+    "competitor": "Competitor",
+    "general": "General"
+  },
+  "priority": {
+    "high": "High",
+    "medium": "Medium",
+    "low": "Low"
+  },
+  "generating": "Generating queries...",
+  "clustering": "Clustering queries...",
+  "emptyState": "No query sets yet. Create one to start building your query library.",
+  "emptyStateTitle": "Start with a query set",
+  "emptyStateDescription": "Query sets are the containers you run against AI engines. Create one first, then fill it with queries and launch a run.",
+  "flow": {
+    "createSetTitle": "Create a query set",
+    "createSetDescription": "Use one set per workflow, market, or reporting period you want to track.",
+    "addQueriesTitle": "Generate or add queries",
+    "addQueriesDescription": "Draft with AI or add manual prompts, then keep the ones you actually want to monitor.",
+    "runTitle": "Approve and run",
+    "runDescription": "Once the set looks right, launch it against the engines from the Runs tab."
+  },
+  "emptyQueries": "No queries in this set yet. Generate queries or add your own from the actions above.",
+  "addQueryTitle": "Add Query",
+  "addQueryPlaceholder": "Enter query text...",
+  "queryAdded": "Query added successfully",
+  "queryDeleted": "Query deleted",
+  "generated_one": "{{count}} query generated",
+  "generated_other": "{{count}} queries generated",
+  "clustered": "Queries clustered into {{count}} groups",
+  "bulk": {
+    "selected_one": "{{count}} selected",
+    "selected_other": "{{count}} selected"
+  },
+  "setStatus": {
+    "active": "Active",
+    "archived": "Archived"
+  }
+}

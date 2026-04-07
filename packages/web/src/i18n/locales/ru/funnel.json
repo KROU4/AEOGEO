@@ -1,0 +1,128 @@
+{
+  "title": "Настройка проекта",
+  "steps": {
+    "createProject": "Создать проект",
+    "crawl": "Сканирование",
+    "knowledge": "База знаний",
+    "keywords": "Ключевые слова",
+    "questions": "Вопросы",
+    "runEngines": "Проверка ИИ",
+    "scores": "Оценки",
+    "recommendations": "Улучшения"
+  },
+  "navigation": {
+    "continue": "Продолжить",
+    "back": "Назад",
+    "stepOf": "Шаг {{current}} из {{total}}"
+  },
+  "createProject": {
+    "heading": "Создайте проект",
+    "description": "Расскажите о вашем бренде для отслеживания видимости в ИИ.",
+    "nameLabel": "Название проекта",
+    "namePlaceholder": "напр., Моя Компания",
+    "urlLabel": "URL сайта",
+    "urlPlaceholder": "напр., example.com",
+    "submit": "Создать и продолжить",
+    "checking": "Проверяем...",
+    "invalidDomain": "Некорректный домен",
+    "unreachable": "Сайт недоступен — можно продолжить"
+  },
+  "crawl": {
+    "heading": "Сканируем ваш сайт",
+    "description": "Анализируем содержимое сайта для создания базы знаний.",
+    "connecting": "Подключение к сайту...",
+    "crawling": "Обнаружение страниц...",
+    "crawlingProgress": "Просканировано {{done}} из {{total}} страниц",
+    "extracting": "Извлечение данных...",
+    "extractingProgress": "Обработано {{done}} из {{total}} страниц",
+    "embedding": "Завершение...",
+    "pagesFound": "{{count}} страниц обнаружено",
+    "complete": "Сканирование завершено!",
+    "failed": "Ошибка сканирования",
+    "entriesCreated": "{{count}} записей извлечено"
+  },
+  "knowledge": {
+    "heading": "Создаём базу знаний",
+    "description": "Генерируем профиль бренда и записи на основе контента сайта.",
+    "building": "Обработка контента...",
+    "complete": "База знаний готова!",
+    "entriesCount": "{{count}} записей",
+    "brandExtracted": "Профиль бренда извлечён"
+  },
+  "keywords": {
+    "heading": "SEO ключевые слова",
+    "description": "Мы сгенерировали ключевые слова для вашего бренда в ИИ-ответах. Проверьте и отредактируйте список.",
+    "generating": "Генерация ключевых слов...",
+    "addKeyword": "Добавить слово",
+    "addPlaceholder": "Введите ключевое слово...",
+    "removeTooltip": "Удалить",
+    "keywordCount_one": "{{count}} слово",
+    "keywordCount_few": "{{count}} слова",
+    "keywordCount_many": "{{count}} слов",
+    "categories": {
+      "product": "Продукт",
+      "brand": "Бренд",
+      "industry": "Отрасль",
+      "competitor": "Конкурент",
+      "informational": "Информационный",
+      "general": "Общий"
+    }
+  },
+  "questions": {
+    "heading": "Вопросы для отслеживания",
+    "description": "Эти вопросы будут заданы ИИ-движкам для измерения видимости.",
+    "generating": "Генерация вопросов...",
+    "questionCount_one": "{{count}} вопрос",
+    "questionCount_few": "{{count}} вопроса",
+    "questionCount_many": "{{count}} вопросов",
+    "toggleAll": "Выбрать все"
+  },
+  "runEngines": {
+    "heading": "Проверяем ответы ИИ",
+    "description": "Запускаем вопросы через ИИ-движки для измерения видимости.",
+    "launching": "Запуск движков...",
+    "complete": "Все движки завершили работу!",
+    "failed": "Не удалось запустить движки",
+    "stages": {
+      "engine": "Запрос к ИИ",
+      "parse": "Разбор ответов",
+      "score": "Оценка"
+    },
+    "stageStatus": {
+      "pending": "Ожидание",
+      "running": "Выполняется",
+      "completed": "Готово",
+      "partial": "Частично",
+      "failed": "Ошибка"
+    }
+  },
+  "scores": {
+    "heading": "Ваши оценки видимости в ИИ",
+    "description": "Вот как ИИ-движки видят ваш бренд сейчас.",
+    "overallScore": "Общая оценка",
+    "perEngine": "По движкам",
+    "mention": "Упоминание",
+    "sentiment": "Тональность",
+    "position": "Позиция",
+    "accuracy": "Точность",
+    "citation": "Цитирование",
+    "recommendation": "Рекомендация"
+  },
+  "recommendations": {
+    "heading": "Рекомендации по улучшению",
+    "description": "ИИ-рекомендации для повышения видимости вашего бренда.",
+    "generating": "Анализируем оценки...",
+    "goToDashboard": "Перейти к панели",
+    "priorities": {
+      "high": "Высокий приоритет",
+      "medium": "Средний приоритет",
+      "low": "Низкий приоритет"
+    },
+    "categories": {
+      "content": "Контент",
+      "seo": "SEO",
+      "brand_positioning": "Позиционирование",
+      "technical": "Технический"
+    }
+  }
+}

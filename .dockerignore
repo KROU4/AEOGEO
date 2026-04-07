@@ -1,0 +1,6 @@
+.git
+node_modules
+packages/web/node_modules
+packages/web/dist
+packages/web/.tanstack
+packages/web/tsconfig.tsbuildinfo

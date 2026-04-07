@@ -1,0 +1,15 @@
+:host {
+  --aeogeo-bg: #1c1917;
+  --aeogeo-card-bg: #292524;
+  --aeogeo-card-hover: #33302e;
+  --aeogeo-text: #fafaf9;
+  --aeogeo-text-secondary: #d6d3d1;
+  --aeogeo-text-muted: #78716c;
+  --aeogeo-border: #44403c;
+  --aeogeo-border-hover: #57534e;
+  --aeogeo-accent: #2dd4bf;
+  --aeogeo-shadow: rgba(0, 0, 0, 0.3);
+  --aeogeo-error-bg: #450a0a;
+  --aeogeo-error-border: #7f1d1d;
+  --aeogeo-error-text: #fca5a5;
+}

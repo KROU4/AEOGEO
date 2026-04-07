@@ -1,0 +1,10 @@
+{
+  "name": "@aeogeo/api",
+  "private": true,
+  "scripts": {
+    "dev": "uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000",
+    "export:openapi": "uv run python -m app.export_openapi",
+    "lint": "uv run ruff check .",
+    "format": "uv run ruff format ."
+  }
+}

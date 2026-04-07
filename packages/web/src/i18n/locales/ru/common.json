@@ -1,0 +1,100 @@
+{
+  "nav": {
+    "overview": "Обзор",
+    "visibility": "AI-видимость",
+    "reports": "Отчёты",
+    "content": "Контент",
+    "widgets": "Виджеты",
+    "projects": "Проекты",
+    "settings": "Настройки",
+    "adminKeys": "Ключи AI",
+    "adminUsage": "Использование AI"
+  },
+  "navGroups": {
+    "platform": "Платформа",
+    "manage": "Управление",
+    "monitor": "Мониторинг",
+    "publish": "Публикация",
+    "analyze": "Аналитика",
+    "admin": "Администрирование"
+  },
+  "actions": {
+    "save": "Сохранить",
+    "cancel": "Отмена",
+    "view": "Просмотр",
+    "share": "Поделиться",
+    "copy": "Копировать",
+    "copied": "Скопировано",
+    "delete": "Удалить",
+    "edit": "Редактировать",
+    "create": "Создать",
+    "generate": "Сгенерировать",
+    "close": "Закрыть",
+    "back": "Назад",
+    "next": "Далее",
+    "submit": "Отправить",
+    "search": "Поиск"
+  },
+  "status": {
+    "draft": "Черновик",
+    "review": "На проверке",
+    "published": "Опубликовано",
+    "archived": "В архиве"
+  },
+  "contentType": {
+    "faq": "FAQ",
+    "blog": "Блог",
+    "comparison": "Сравнение",
+    "buyer_guide": "Руководство покупателя",
+    "pricing_clarifier": "Пояснение цен",
+    "glossary": "Глоссарий"
+  },
+  "roles": {
+    "owner": "Владелец",
+    "admin": "Администратор",
+    "member": "Участник"
+  },
+  "topbar": {
+    "themeLabel": "Тема: {{theme}}",
+    "toggleTheme": "Переключить тему",
+    "notifications": "Уведомления",
+    "profile": "Профиль",
+    "logOut": "Выйти",
+    "switchLanguage": "English"
+  },
+  "errors": {
+    "auth.invalid_credentials": "Неверный email или пароль",
+    "auth.invalid_token": "Недействительный или просроченный токен",
+    "auth.invalid_payload": "Некорректные данные токена",
+    "auth.user_not_found": "Пользователь не найден или неактивен",
+    "auth.invalid_refresh": "Недействительный или просроченный токен обновления",
+    "unknown": "Что-то пошло не так. Попробуйте ещё раз.",
+    "usage.limit_reached": "Лимит использования исчерпан. Обратитесь к администратору.",
+    "usage.rate_limited": "Слишком много запросов. Попробуйте позже.",
+    "ai_key.not_found": "API-ключ для этого провайдера не настроен.",
+    "ai_key.test_failed": "Ошибка проверки ключа: {{message}}",
+    "ai.provider_error": "Ошибка AI-провайдера: {{message}}",
+    "auth.forbidden": "У вас нет прав для доступа к этому ресурсу.",
+    "auth.email_taken": "Аккаунт с таким email уже существует.",
+    "auth.company_name_required": "Чтобы создать рабочее пространство AEOGEO, укажите название компании.",
+    "auth.bootstrap_required": "Сначала завершите настройку рабочего пространства AEOGEO.",
+    "auth.cannot_invite_self": "Нельзя пригласить свой собственный email.",
+    "auth.role_not_found": "Выбранная роль не найдена.",
+    "auth.project_not_found": "Выбранный проект не найден.",
+    "auth.identity_conflict": "Этот email уже связан с другим аккаунтом.",
+    "auth.invite_expired": "Срок действия приглашения истёк.",
+    "auth.invite_not_found": "Приглашение не найдено."
+  },
+  "time": {
+    "hoursAgo_one": "{{count}} час назад",
+    "hoursAgo_few": "{{count}} часа назад",
+    "hoursAgo_many": "{{count}} часов назад",
+    "daysAgo_one": "{{count}} день назад",
+    "daysAgo_few": "{{count}} дня назад",
+    "daysAgo_many": "{{count}} дней назад",
+    "minutesAgo_one": "{{count}} минуту назад",
+    "minutesAgo_few": "{{count}} минуты назад",
+    "minutesAgo_many": "{{count}} минут назад",
+    "justNow": "Только что"
+  }
+}

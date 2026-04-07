@@ -1,0 +1,58 @@
+{
+  "title": "Виджеты",
+  "subtitle": "Создавайте встраиваемые виджеты для вашего сайта",
+  "createWidget": "Создать виджет",
+  "createWidgetDescription": "Настройте новый встраиваемый виджет для проекта",
+  "emptyState": {
+    "title": "Виджетов пока нет",
+    "description": "Создайте первый виджет, чтобы встроить AI-контент на ваш сайт."
+  },
+  "config": {
+    "title": "Настройка виджета",
+    "subtitle": "Настройте внешний вид и поведение виджета",
+    "widgetName": "Название виджета",
+    "widgetNamePlaceholder": "Введите название виджета",
+    "project": "Проект",
+    "projectPlaceholder": "Выберите проект",
+    "theme": "Тема",
+    "themeLight": "Светлая",
+    "themeDark": "Тёмная",
+    "themeCustom": "Другая",
+    "position": "Позиция",
+    "posBottomRight": "Внизу справа",
+    "posBottomLeft": "Внизу слева",
+    "posTopRight": "Вверху справа",
+    "posTopLeft": "Вверху слева",
+    "posInline": "Встроенный",
+    "mode": "Режим",
+    "modeFaq": "FAQ",
+    "modeBlogFeed": "Лента блога",
+    "modeAiConsultant": "AI-консультант",
+    "maxItems": "Макс. элементов",
+    "borderRadius": "Скругление углов",
+    "fontFamily": "Шрифт",
+    "save": "Сохранить настройки"
+  },
+  "preview": {
+    "title": "Предпросмотр",
+    "placeholder": "Предпросмотр виджета",
+    "modeTheme": "Режим: {{mode}} | Тема: {{theme}}"
+  },
+  "analytics": {
+    "title": "Вовлечение",
+    "impressions": "Показы",
+    "interactions": "Взаимодействия",
+    "topContent": "Топ-контент",
+    "empty": "Данных о вовлечении пока нет."
+  },
+  "embed": {
+    "title": "Код вставки",
+    "jsSnippet": "JS-код",
+    "iframe": "iframe"
+  },
+  "deleteWidget": {
+    "button": "Удалить",
+    "title": "Удалить виджет",
+    "description": "Вы уверены, что хотите удалить «{{name}}»? Это действие необратимо. Все встроенные экземпляры перестанут работать."
+  }
+}

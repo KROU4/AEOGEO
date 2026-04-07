@@ -1,0 +1,105 @@
+{
+  "title": "Content",
+  "subtitle": "Create, manage, and optimize your content for AI engines",
+  "aiGenerate": "AI Generate",
+  "createContent": "Create Content",
+  "filters": {
+    "allProjects": "All projects",
+    "projectPlaceholder": "Filter by project",
+    "noProjectsHint": "Create a project first before generating or drafting content."
+  },
+  "tabs": {
+    "all": "All",
+    "drafts": "Drafts",
+    "review": "In Review",
+    "published": "Published",
+    "archived": "Archived"
+  },
+  "table": {
+    "title": "Title",
+    "project": "Project",
+    "status": "Status",
+    "author": "Author",
+    "updated": "Updated",
+    "actions": "Actions",
+    "unknownAuthor": "Unknown author"
+  },
+  "actions": {
+    "open": "Open",
+    "submitForReview": "Submit for Review",
+    "publish": "Publish",
+    "returnToDraft": "Return to Draft",
+    "archive": "Archive",
+    "saveDraft": "Save Draft",
+    "createDraft": "Create Draft"
+  },
+  "editor": {
+    "createTitle": "Create Content Draft",
+    "editTitle": "Edit Content",
+    "createDescription": "Create a draft inside a project and manage it through review and publishing from one place.",
+    "editDescription": "Edit the draft, inspect generation metadata, and move it through the publishing workflow.",
+    "project": "Project",
+    "projectPlaceholder": "Select a project...",
+    "contentType": "Content type",
+    "titleLabel": "Title",
+    "titlePlaceholder": "Enter a content title",
+    "bodyLabel": "Body",
+    "bodyPlaceholder": "Write or refine the content body...",
+    "metadata": "Metadata",
+    "status": "Status",
+    "template": "Template",
+    "noTemplate": "Manual draft",
+    "reviewerNotes": "Reviewer notes",
+    "unknownProject": "Unknown project"
+  },
+  "emptyState": "No content items match the current filter.",
+  "generate": {
+    "title": "Generate AI Content",
+    "description": "Create high-quality, AI-optimized content grounded in your knowledge pack.",
+    "selectTemplate": "Choose a content template",
+    "project": "Project",
+    "selectProject": "Select a project...",
+    "topic": "Topic",
+    "topicPlaceholder": "e.g. How does AI visibility scoring work?",
+    "extraContext": "Additional context",
+    "extraContextPlaceholder": "Add any extra details, keywords, or instructions for the AI...",
+    "extraContextHint": "Optional. Provide additional guidance to refine the generated content.",
+    "next": "Next",
+    "back": "Back",
+    "submit": "Generate Draft",
+    "generateButton": "Generate",
+    "generating": "Generating...",
+    "success": "Content generated successfully!",
+    "templates": {
+      "faq": {
+        "title": "FAQ",
+        "description": "Frequently asked questions that AI engines love to cite"
+      },
+      "blog": {
+        "title": "Blog Article",
+        "description": "Long-form content optimized for AI answer engines"
+      },
+      "comparison": {
+        "title": "Comparison",
+        "description": "Side-by-side analysis that engines use for recommendations"
+      },
+      "buyer_guide": {
+        "title": "Buyer Guide",
+        "description": "Purchase decision content for AI shopping assistants"
+      },
+      "pricing_clarifier": {
+        "title": "Pricing Clarifier",
+        "description": "Transparent pricing content to correct AI misquotes"
+      },
+      "glossary": {
+        "title": "Glossary",
+        "description": "Term definitions that become AI knowledge sources"
+      }
+    }
+  },
+  "jsonLd": {
+    "title": "JSON-LD Schema",
+    "copy": "Copy",
+    "copied": "Copied!"
+  }
+}

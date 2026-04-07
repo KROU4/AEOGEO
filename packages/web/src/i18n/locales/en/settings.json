@@ -1,0 +1,170 @@
+{
+  "title": "Settings",
+  "subtitle": "Manage your account and organization preferences",
+  "tabs": {
+    "profile": "Profile",
+    "project": "Project Settings",
+    "team": "Team & Invitations",
+    "apiKeys": "API Keys",
+    "billing": "Billing",
+    "notifications": "Notifications",
+    "integrations": "Integrations"
+  },
+  "profile": {
+    "title": "Profile Settings",
+    "subtitle": "Update your personal information and preferences",
+    "changeAvatar": "Change avatar",
+    "fullName": "Full Name",
+    "emailAddress": "Email Address",
+    "emailHelp": "Contact your administrator to change your email.",
+    "language": "Language",
+    "languageDesc": "Select your preferred language for the interface"
+  },
+  "projectSettings": {
+    "enginesTitle": "Default Engines",
+    "enginesDesc": "Select which AI engines to include by default when creating new runs",
+    "enginesHint_one": "{{count}} engine selected",
+    "enginesHint_other": "{{count}} engines selected",
+    "selectProject": "Select a project to configure",
+    "selectProjectPlaceholder": "Choose a project...",
+    "contentLocaleTitle": "Content Language",
+    "contentLocaleDesc": "Select the language for AI-generated content in this project",
+    "sampleTitle": "Default Sample Count",
+    "sampleDesc": "Set the default number of queries to sample per run",
+    "sampleHint": "Each run will sample {{count}} queries by default"
+  },
+  "team": {
+    "title": "Team Members",
+    "subtitle": "Manage your team and send invitations",
+    "inviteMember": "Invite Member",
+    "member": "Member",
+    "status": "Status",
+    "role": "Role",
+    "projects": "Projects",
+    "joined": "Joined",
+    "actions": "Actions",
+    "you": "You",
+    "loading": "Loading team members...",
+    "empty": "No team members yet",
+    "activeStatus": "Active",
+    "pendingStatus": "Pending",
+    "activeAction": "Active member",
+    "pendingAction": "Invitation pending",
+    "noRole": "No role assigned",
+    "noProjects": "No project access",
+    "inviteTitle": "Grow your team",
+    "inviteHint": "Invite colleagues to collaborate on projects, review content, and monitor AI visibility together.",
+    "invite": {
+      "title": "Invite a teammate",
+      "subtitle": "Create or resend a Clerk invitation and assign AEOGEO access up front.",
+      "emailLabel": "Email",
+      "emailPlaceholder": "colleague@company.com",
+      "roleLabel": "Role",
+      "rolePlaceholder": "Select a role",
+      "projectLabel": "Project Access",
+      "projectPlaceholder": "Choose a project",
+      "noProject": "No project yet",
+      "loadingRoles": "Loading roles...",
+      "loadingProjects": "Loading projects...",
+      "submit": "Send invitation",
+      "submitting": "Sending invitation...",
+      "errors": {
+        "emailRequired": "Email is required",
+        "roleRequired": "Role is required",
+        "failed": "Could not send the invitation. Please try again."
+      }
+    }
+  },
+  "apiKeys": {
+    "warningTitle": "Keep your API keys secure",
+    "warningText": "Do not share your API keys publicly or commit them to version control. Rotate keys regularly for security.",
+    "aiKeysTitle": "AI Engine Keys",
+    "aiKeysDesc": "Manage API keys for AI providers (OpenAI, Anthropic, Google, OpenRouter) used by your engine runs.",
+    "manageAiKeys": "Manage AI Keys",
+    "emptyTitle": "No API keys yet",
+    "emptyText": "Generate API keys for programmatic access to AEOGEO services.",
+    "generate": "Generate API Key"
+  },
+  "billing": {
+    "title": "AI Usage",
+    "subtitle": "Your organization's AI consumption this month",
+    "tokenBudget": "Token Budget",
+    "costBudget": "Cost Budget",
+    "requestsToday": "Requests Today",
+    "requestsThisMonth": "Requests This Month",
+    "used": "{{current}} used",
+    "xOfY": "{{current}} of {{max}}",
+    "unlimited": "Unlimited",
+    "percentage": "{{pct}}%",
+    "byProvider": "By Provider",
+    "byModel": "By Model",
+    "provider": "Provider",
+    "model": "Model",
+    "tokens": "Tokens",
+    "cost": "Cost",
+    "requests": "Requests",
+    "warningMessage": "You are approaching your usage limit. Contact your administrator for increased capacity.",
+    "limitReached": "Usage limit reached. Contact your administrator.",
+    "contactAdmin": "Contact Admin",
+    "noUsage": "No usage this month"
+  },
+  "notifications": {
+    "title": "Notification Preferences",
+    "subtitle": "Choose what notifications you want to receive",
+    "weeklyReports": "Weekly visibility reports",
+    "weeklyReportsDesc": "Receive a weekly summary of your visibility scores",
+    "citationAlerts": "Citation alerts",
+    "citationAlertsDesc": "Get notified when your brand is cited by an AI engine",
+    "competitorMovements": "Competitor movements",
+    "competitorMovementsDesc": "Alerts when competitors gain or lose significant visibility",
+    "contentPublished": "Content published",
+    "contentPublishedDesc": "Notification when team members publish new content",
+    "teamActivity": "Team activity",
+    "teamActivityDesc": "Updates about new members, role changes, and invitations"
+  },
+  "integrations": {
+    "title": "Analytics Integrations",
+    "subtitle": "Connect analytics accounts to see traffic data alongside visibility scores",
+    "selectProject": "Select a project to configure",
+    "selectProjectPlaceholder": "Choose a project...",
+    "noProjects": "Create a project first to configure integrations.",
+    "ga": {
+      "title": "Google Analytics (GA4)",
+      "description": "Import traffic and engagement data from GA4",
+      "propertyId": "GA4 Property ID",
+      "propertyIdPlaceholder": "123456789",
+      "propertyIdHint": "Find this in GA4 Admin > Property Settings",
+      "credentials": "Service Account JSON Key",
+      "credentialsPlaceholder": "Paste your service account JSON here",
+      "credentialsHint": "Create a service account in Google Cloud Console with GA4 read access"
+    },
+    "ym": {
+      "title": "Yandex Metrica",
+      "description": "Import traffic data from Yandex Metrica",
+      "counterId": "Counter ID",
+      "counterIdPlaceholder": "12345678",
+      "counterIdHint": "Find this in your Yandex Metrica counter settings",
+      "oauthToken": "OAuth Token",
+      "oauthTokenPlaceholder": "Your Yandex OAuth token",
+      "oauthTokenHint": "Generate an OAuth token at oauth.yandex.com"
+    },
+    "status": {
+      "connected": "Connected",
+      "disconnected": "Not connected",
+      "lastSynced": "Last synced: {{time}}"
+    },
+    "actions": {
+      "save": "Save",
+      "testConnection": "Test Connection",
+      "disconnect": "Disconnect",
+      "syncNow": "Sync Now",
+      "syncing": "Syncing..."
+    },
+    "testResult": {
+      "success": "Connection successful",
+      "failure": "Connection failed"
+    },
+    "saved": "Integration saved",
+    "deleted": "Integration disconnected"
+  }
+}

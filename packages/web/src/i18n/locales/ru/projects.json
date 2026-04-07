@@ -1,0 +1,203 @@
+{
+  "title": "Проекты",
+  "subtitle": "Управляйте клиентскими проектами и отслеживайте их видимость",
+  "newProject": "Новый проект",
+  "viewProject": "Просмотр проекта",
+  "noDescription": "Без описания",
+  "member_one": "{{count}} участник",
+  "member_few": "{{count}} участника",
+  "member_many": "{{count}} участников",
+  "loading": "Загрузка...",
+  "errorLoad": "Не удалось загрузить проекты. Попробуйте ещё раз.",
+  "emptyState": "Пока нет проектов. Создайте первый, чтобы начать.",
+  "deleteProject": "Удалить проект",
+  "deleteConfirmTitle": "Удалить «{{name}}»?",
+  "deleteConfirmDescription": "Проект будет удалён навсегда вместе со всеми запросами, прогонами, оценками и контентом. Это действие нельзя отменить.",
+  "deleteConfirm": "Удалить",
+  "deleteCancel": "Отмена",
+  "emptyTitle": "Пока нет проектов",
+  "emptyDescription": "Создайте первый проект, чтобы начать отслеживание AI-видимости вашего бренда или клиентов.",
+  "summary": {
+    "totalProjects": "Всего проектов",
+    "connectedDomains": "Подключённые домены",
+    "avgVisibility": "Средняя видимость",
+    "avgVisibilityEmpty": "Нет оценки"
+  },
+  "filters": {
+    "searchPlaceholder": "Поиск по проекту, клиенту, домену или описанию",
+    "sortLabel": "Сортировка",
+    "sortRecent": "Последняя активность",
+    "sortName": "Название проекта",
+    "sortScore": "Оценка видимости",
+    "results": "{{visible}} из {{total}} проектов",
+    "emptyTitle": "Ничего не найдено",
+    "emptyDescription": "Измените поиск или сортировку, чтобы найти нужный проект."
+  },
+  "grid": {
+    "projectActions": "Действия проекта",
+    "menuLabel": "Быстрые действия",
+    "menuKnowledge": "Открыть базу знаний",
+    "menuQueries": "Открыть запросы",
+    "menuRuns": "Открыть запуски",
+    "menuEdit": "Редактировать проект",
+    "openKnowledge": "База знаний",
+    "visibilityScore": "{{score}}/10",
+    "needsRun": "Нужен первый прогон",
+    "membersLabel": "Команда",
+    "updatedLabel": "Обновлён",
+    "clientLabel": "Клиент",
+    "noDomain": "Домен не подключён"
+  },
+  "projectEditor": {
+    "title": "Редактировать проект",
+    "description": "Обновите данные проекта, которые отображаются в рабочем пространстве.",
+    "fields": {
+      "name": "Название проекта",
+      "clientName": "Название клиента",
+      "domain": "Домен",
+      "description": "Описание"
+    },
+    "placeholders": {
+      "name": "Программа видимости Acme",
+      "clientName": "Acme",
+      "domain": "acme.com",
+      "description": "Что отслеживает этот проект и зачем он нужен."
+    },
+    "save": "Сохранить изменения",
+    "saving": "Сохранение...",
+    "saveSuccess": "Проект обновлён.",
+    "saveError": "Не удалось обновить проект."
+  },
+  "knowledge": {
+    "title": "База знаний",
+    "description": "Информация о бренде, продуктах, конкурентах и курируемые записи проекта.",
+    "overviewTitle": "Знания проекта",
+    "overviewDescription": "Профиль бренда, продукты, конкуренты и извлечённые записи.",
+    "entryCount": "Записей: {{count}}",
+    "fileCount": "Файлов: {{count}}",
+    "productCount": "Продуктов: {{count}}",
+    "competitorCount": "Конкурентов: {{count}}",
+    "brandSectionTitle": "Профиль бренда",
+    "brandEmpty": "Профиль бренда ещё не настроен.",
+    "brandFields": {
+      "description": "Описание",
+      "positioning": "Позиционирование",
+      "website": "Сайт",
+      "voiceGuidelines": "Рекомендации по тону",
+      "allowedPhrases": "Допустимые фразы",
+      "forbiddenPhrases": "Запрещённые фразы"
+    },
+    "productsSectionTitle": "Продукты",
+    "productsEmpty": "Продукты пока не добавлены.",
+    "competitorsSectionTitle": "Конкуренты",
+    "competitorsEmpty": "Конкуренты пока не отслеживаются.",
+    "loadError": "Не удалось загрузить базу знаний проекта.",
+    "createPackTitle": "Создайте базу знаний проекта",
+    "createPackDescription": "У этого проекта ещё нет базы знаний. Сначала создайте её из данных проекта, затем сможете добавлять ручные записи и загружать исходные файлы.",
+    "createPackAction": "Создать базу знаний",
+    "creatingPack": "Создание...",
+    "createPackSuccess": "База знаний создана.",
+    "createPackError": "Не удалось создать базу знаний.",
+    "entriesTitle": "Записи базы знаний",
+    "entriesDescription": "Ключевые факты, FAQ, claims и proof points, на которые может опираться продукт.",
+    "emptyTitle": "Пока нет записей",
+    "emptyDescription": "Добавьте ручную запись или загрузите файлы, чтобы начать наполнять контекст проекта.",
+    "embeddingReady": "Эмбеддинг готов",
+    "versionLabel": "v{{version}}",
+    "editEntry": "Редактировать запись",
+    "deleteEntry": "Удалить запись",
+    "editTitle": "Редактировать запись",
+    "addTitle": "Добавить запись",
+    "editorDescription": "Ручные записи подходят для фактов, которые должны сразу попадать в промпты и сгенерированный контент.",
+    "fields": {
+      "type": "Тип записи",
+      "sourceUrl": "URL источника",
+      "content": "Содержимое"
+    },
+    "placeholders": {
+      "sourceUrl": "https://example.com/pricing",
+      "content": "Добавьте точный факт, FAQ, claim или differentiator."
+    },
+    "addEntry": "Добавить запись",
+    "saveEntry": "Сохранить запись",
+    "saving": "Сохранение...",
+    "cancelEditing": "Отменить редактирование",
+    "clearDraft": "Очистить",
+    "createSuccess": "Запись базы знаний добавлена.",
+    "createError": "Не удалось добавить запись базы знаний.",
+    "updateSuccess": "Запись базы знаний обновлена.",
+    "updateError": "Не удалось обновить запись базы знаний.",
+    "deleteSuccess": "Запись базы знаний удалена.",
+    "deleteError": "Не удалось удалить запись базы знаний.",
+    "confirmDeleteEntry": "Удалить запись типа {{type}}?",
+    "filesTitle": "Файлы-источники",
+    "filesDescription": "Загружайте документы, брифы, one-pager и расшифровки, чтобы весь контекст проекта был в одном месте.",
+    "filesEmpty": "Файлы пока не загружены.",
+    "uploadAction": "Загрузить файлы",
+    "uploading": "Загрузка {{count}} файлов...",
+    "uploadSuccess_one": "Загружен {{count}} файл.",
+    "uploadSuccess_few": "Загружено {{count}} файла.",
+    "uploadSuccess_many": "Загружено {{count}} файлов.",
+    "uploadError": "Не удалось загрузить выбранные файлы.",
+    "deleteFile": "Удалить файл",
+    "deleteFileSuccess": "Файл удалён.",
+    "deleteFileError": "Не удалось удалить файл.",
+    "confirmDeleteFile": "Удалить этот файл из базы знаний?",
+    "crawlTitle": "Краулинг сайта",
+    "crawlDescription": "Автоматически импортируйте записи базы знаний с вашего сайта.",
+    "crawlDomainPlaceholder": "example.com",
+    "crawlAction": "Краулить сайт",
+    "crawling": "Краулинг...",
+    "crawlSuccess": "Краулинг завершён: {{entries}} записей извлечено с {{pages}} страниц.",
+    "crawlNoEntries": "Обработано {{pages}} страниц, но извлечь записи не удалось. Проверьте настройки AI-ключей или добавьте записи вручную.",
+    "crawlPartialError": "Извлечено {{entries}} записей с {{pages}} страниц ({{errors}} страниц с ошибкой извлечения).",
+    "crawlError": "Краулинг сайта не удался. Проверьте URL и попробуйте ещё раз.",
+    "close": "Закрыть",
+    "editKnowledgeBase": "Редактировать базу знаний"
+  },
+  "detail": {
+    "overview": "Обзор",
+    "projectInfo": "Информация о проекте",
+    "quickSummary": "Краткая сводка",
+    "labels": {
+      "name": "Название",
+      "domain": "Домен",
+      "description": "Описание",
+      "querySets": "Наборы запросов",
+      "totalQueries": "Всего запросов",
+      "engineRuns": "Запуски движков"
+    }
+  },
+  "workflow": {
+    "title": "Следующие шаги",
+    "description": "После онбординга это самый быстрый путь к получению реальных данных по видимости проекта.",
+    "currentStep": "Рекомендуемое следующее действие",
+    "completed": "Базовый флоу завершён",
+    "status": {
+      "done": "Готово",
+      "next": "Дальше",
+      "pending": "Ожидает"
+    },
+    "steps": {
+      "createSet": {
+        "title": "Создайте набор запросов",
+        "description": "Откройте управление запросами и создайте первый набор для этого бренда."
+      },
+      "addQueries": {
+        "title": "Наполните набор",
+        "description": "Сгенерируйте запросы через AI или добавьте их вручную, затем оставьте только нужные."
+      },
+      "runEngines": {
+        "title": "Запустите движки",
+        "description": "Во вкладке запусков выполните набор по одному или нескольким AI-движкам."
+      }
+    },
+    "actions": {
+      "createSet": "Создать первый набор",
+      "addQueries": "Добавить запросы",
+      "startRun": "Запустить первый прогон",
+      "viewQueries": "Открыть запросы",
+      "viewRuns": "Открыть запуски"
+    }
+  }
+}

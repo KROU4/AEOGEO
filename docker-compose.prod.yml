@@ -1,0 +1,99 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: packages/web/Dockerfile.prod
+      args:
+        VITE_API_URL: ${VITE_API_URL:-https://api.sand-source.com}
+        VITE_CLERK_PUBLISHABLE_KEY: ${CLERK_PUBLISHABLE_KEY:-}
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8030:80"
+    networks:
+      - aeogeo
+
+  api:
+    build:
+      context: ./packages/api
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8020:8000"
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://aeogeo:aeogeo_prod_pw@db:5432/aeogeo
+      - REDIS_URL=redis://redis:6379
+      - SECRET_KEY=${SECRET_KEY:-change-me-in-production}
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY:-}
+      - CORS_ORIGINS=https://sand-source.com
+      - DEBUG=false
+      - TEMPORAL_HOST=temporal:7233
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - TAVILY_API_KEY=${TAVILY_API_KEY:-}
+      - CLERK_PUBLISHABLE_KEY=${CLERK_PUBLISHABLE_KEY:-}
+      - CLERK_SECRET_KEY=${CLERK_SECRET_KEY:-}
+      - CLERK_INVITATION_REDIRECT_URL=${CLERK_INVITATION_REDIRECT_URL:-https://sand-source.com/accept-invite}
+    depends_on:
+      - db
+      - redis
+    networks:
+      - aeogeo
+
+  db:
+    image: pgvector/pgvector:pg16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: aeogeo
+      POSTGRES_PASSWORD: aeogeo_prod_pw
+      POSTGRES_DB: aeogeo
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - aeogeo
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    networks:
+      - aeogeo
+
+  temporal:
+    image: temporalio/auto-setup:1.24
+    restart: unless-stopped
+    environment:
+      - DB=postgres12
+      - DB_PORT=5432
+      - POSTGRES_USER=aeogeo
+      - POSTGRES_PWD=aeogeo_prod_pw
+      - POSTGRES_SEEDS=db
+    depends_on:
+      - db
+    networks:
+      - aeogeo
+
+  temporal-worker:
+    build:
+      context: ./packages/api
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    command: uv run python -m app.workflows.worker
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://aeogeo:aeogeo_prod_pw@db:5432/aeogeo
+      - REDIS_URL=redis://redis:6379
+      - SECRET_KEY=${SECRET_KEY:-change-me-in-production}
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY:-}
+      - TEMPORAL_HOST=temporal:7233
+      - DEBUG=false
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+    depends_on:
+      - db
+      - redis
+      - temporal
+    networks:
+      - aeogeo
+
+networks:
+  aeogeo:
+    driver: bridge
+
+volumes:
+  pgdata:

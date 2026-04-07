@@ -1,0 +1,201 @@
+{
+  "title": "Projects",
+  "subtitle": "Manage your client projects and track their visibility",
+  "newProject": "New Project",
+  "viewProject": "View Project",
+  "noDescription": "No description",
+  "member_one": "{{count}} member",
+  "member_other": "{{count}} members",
+  "loading": "Loading...",
+  "errorLoad": "Failed to load projects. Please try again.",
+  "emptyState": "No projects yet. Create your first one to get started.",
+  "deleteProject": "Delete Project",
+  "deleteConfirmTitle": "Delete \"{{name}}\"?",
+  "deleteConfirmDescription": "This will permanently delete the project along with all its queries, runs, scores, and content. This action cannot be undone.",
+  "deleteConfirm": "Delete",
+  "deleteCancel": "Cancel",
+  "emptyTitle": "No projects yet",
+  "emptyDescription": "Create your first project to start tracking AI visibility for your brand or clients.",
+  "summary": {
+    "totalProjects": "Total Projects",
+    "connectedDomains": "Connected Domains",
+    "avgVisibility": "Average Visibility",
+    "avgVisibilityEmpty": "No score"
+  },
+  "filters": {
+    "searchPlaceholder": "Search by project, client, domain, or description",
+    "sortLabel": "Sort by",
+    "sortRecent": "Recent activity",
+    "sortName": "Project name",
+    "sortScore": "Visibility score",
+    "results": "{{visible}} of {{total}} projects",
+    "emptyTitle": "No matching projects",
+    "emptyDescription": "Adjust the search or sort controls to find the project you need."
+  },
+  "grid": {
+    "projectActions": "Project actions",
+    "menuLabel": "Quick actions",
+    "menuKnowledge": "Open knowledge pack",
+    "menuQueries": "Open queries",
+    "menuRuns": "Open runs",
+    "menuEdit": "Edit project",
+    "openKnowledge": "Knowledge Pack",
+    "visibilityScore": "{{score}}/10",
+    "needsRun": "Needs first run",
+    "membersLabel": "Team",
+    "updatedLabel": "Updated",
+    "clientLabel": "Client",
+    "noDomain": "No domain connected"
+  },
+  "projectEditor": {
+    "title": "Edit Project",
+    "description": "Update the project details shown across the workspace.",
+    "fields": {
+      "name": "Project name",
+      "clientName": "Client name",
+      "domain": "Domain",
+      "description": "Description"
+    },
+    "placeholders": {
+      "name": "Acme visibility program",
+      "clientName": "Acme",
+      "domain": "acme.com",
+      "description": "What this project tracks and why it exists."
+    },
+    "save": "Save Changes",
+    "saving": "Saving...",
+    "saveSuccess": "Project updated.",
+    "saveError": "Could not update the project."
+  },
+  "knowledge": {
+    "title": "Knowledge Pack",
+    "description": "All brand intelligence, products, competitors, and curated entries for this project.",
+    "overviewTitle": "Project Knowledge",
+    "overviewDescription": "Brand profile, products, competitors, and extracted knowledge entries.",
+    "entryCount": "Entries: {{count}}",
+    "fileCount": "Files: {{count}}",
+    "productCount": "Products: {{count}}",
+    "competitorCount": "Competitors: {{count}}",
+    "brandSectionTitle": "Brand Profile",
+    "brandEmpty": "Brand profile not configured yet.",
+    "brandFields": {
+      "description": "Description",
+      "positioning": "Positioning",
+      "website": "Website",
+      "voiceGuidelines": "Voice Guidelines",
+      "allowedPhrases": "Allowed Phrases",
+      "forbiddenPhrases": "Forbidden Phrases"
+    },
+    "productsSectionTitle": "Products",
+    "productsEmpty": "No products added yet.",
+    "competitorsSectionTitle": "Competitors",
+    "competitorsEmpty": "No competitors tracked yet.",
+    "loadError": "Could not load this project's knowledge pack.",
+    "createPackTitle": "Create the project knowledge pack",
+    "createPackDescription": "This project does not have a brand knowledge pack yet. Create it from the project details first, then you can add manual notes and upload source files.",
+    "createPackAction": "Create Knowledge Pack",
+    "creatingPack": "Creating...",
+    "createPackSuccess": "Knowledge pack created.",
+    "createPackError": "Could not create the knowledge pack.",
+    "entriesTitle": "Knowledge Entries",
+    "entriesDescription": "High-signal facts, FAQs, claims, and proof points that the product can rely on.",
+    "emptyTitle": "No entries yet",
+    "emptyDescription": "Add a manual note or upload supporting files to start grounding answers and content.",
+    "embeddingReady": "Embedding ready",
+    "versionLabel": "v{{version}}",
+    "editEntry": "Edit entry",
+    "deleteEntry": "Delete entry",
+    "editTitle": "Edit Entry",
+    "addTitle": "Add Entry",
+    "editorDescription": "Use manual entries for facts you want immediately available in prompts and generated content.",
+    "fields": {
+      "type": "Entry type",
+      "sourceUrl": "Source URL",
+      "content": "Content"
+    },
+    "placeholders": {
+      "sourceUrl": "https://example.com/pricing",
+      "content": "Add a precise fact, FAQ, claim, or differentiator."
+    },
+    "addEntry": "Add Entry",
+    "saveEntry": "Save Entry",
+    "saving": "Saving...",
+    "cancelEditing": "Cancel Editing",
+    "clearDraft": "Clear",
+    "createSuccess": "Knowledge entry added.",
+    "createError": "Could not add the knowledge entry.",
+    "updateSuccess": "Knowledge entry updated.",
+    "updateError": "Could not update the knowledge entry.",
+    "deleteSuccess": "Knowledge entry deleted.",
+    "deleteError": "Could not delete the knowledge entry.",
+    "confirmDeleteEntry": "Delete this {{type}} entry?",
+    "filesTitle": "Source Files",
+    "filesDescription": "Upload docs, briefs, one-pagers, or transcripts to keep project context in one place.",
+    "filesEmpty": "No files uploaded yet.",
+    "uploadAction": "Upload Files",
+    "uploading": "Uploading {{count}} files...",
+    "uploadSuccess_one": "{{count}} file uploaded.",
+    "uploadSuccess_other": "{{count}} files uploaded.",
+    "uploadError": "Could not upload the selected files.",
+    "deleteFile": "Delete file",
+    "deleteFileSuccess": "File deleted.",
+    "deleteFileError": "Could not delete the file.",
+    "confirmDeleteFile": "Delete this file from the knowledge pack?",
+    "crawlTitle": "Website Crawl",
+    "crawlDescription": "Import knowledge entries from your website automatically.",
+    "crawlDomainPlaceholder": "example.com",
+    "crawlAction": "Crawl Website",
+    "crawling": "Crawling...",
+    "crawlSuccess": "Crawl complete: {{entries}} entries extracted from {{pages}} pages.",
+    "crawlNoEntries": "Crawled {{pages}} pages but no knowledge could be extracted. Check AI key settings or add entries manually.",
+    "crawlPartialError": "{{entries}} entries extracted from {{pages}} pages ({{errors}} pages failed extraction).",
+    "crawlError": "Website crawl failed. Please check the URL and try again.",
+    "close": "Close",
+    "editKnowledgeBase": "Edit Knowledge Base"
+  },
+  "detail": {
+    "overview": "Overview",
+    "projectInfo": "Project Info",
+    "quickSummary": "Quick Summary",
+    "labels": {
+      "name": "Name",
+      "domain": "Domain",
+      "description": "Description",
+      "querySets": "Query Sets",
+      "totalQueries": "Total Queries",
+      "engineRuns": "Engine Runs"
+    }
+  },
+  "workflow": {
+    "title": "Next Steps",
+    "description": "After onboarding, this is the fastest path to getting real visibility data into the project.",
+    "currentStep": "Recommended next action",
+    "completed": "Core flow completed",
+    "status": {
+      "done": "Done",
+      "next": "Next",
+      "pending": "Pending"
+    },
+    "steps": {
+      "createSet": {
+        "title": "Create a query set",
+        "description": "Open Query Management and create the first set you want to use for this brand."
+      },
+      "addQueries": {
+        "title": "Populate the set",
+        "description": "Generate queries with AI or add them manually, then review what should stay in scope."
+      },
+      "runEngines": {
+        "title": "Start an engine run",
+        "description": "Use the Runs tab to execute the set against one or more AI engines."
+      }
+    },
+    "actions": {
+      "createSet": "Create First Query Set",
+      "addQueries": "Add Queries",
+      "startRun": "Start First Run",
+      "viewQueries": "Open Queries",
+      "viewRuns": "Open Runs"
+    }
+  }
+}

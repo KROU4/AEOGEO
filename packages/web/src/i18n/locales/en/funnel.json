@@ -1,0 +1,126 @@
+{
+  "title": "Set Up Your Project",
+  "steps": {
+    "createProject": "Create Project",
+    "crawl": "Crawl Website",
+    "knowledge": "Knowledge Set",
+    "keywords": "Keywords",
+    "questions": "Questions",
+    "runEngines": "AI Check",
+    "scores": "Scores",
+    "recommendations": "Improvements"
+  },
+  "navigation": {
+    "continue": "Continue",
+    "back": "Back",
+    "stepOf": "Step {{current}} of {{total}}"
+  },
+  "createProject": {
+    "heading": "Create your project",
+    "description": "Tell us about your brand to start tracking AI visibility.",
+    "nameLabel": "Project name",
+    "namePlaceholder": "e.g., My Company",
+    "urlLabel": "Website URL",
+    "urlPlaceholder": "e.g., example.com",
+    "submit": "Create & Continue",
+    "checking": "Checking...",
+    "invalidDomain": "Invalid domain",
+    "unreachable": "Site not reachable — you can continue anyway"
+  },
+  "crawl": {
+    "heading": "Crawling your website",
+    "description": "We're analyzing your website to build a knowledge base.",
+    "connecting": "Connecting to site...",
+    "crawling": "Discovering pages...",
+    "crawlingProgress": "Crawled {{done}} of {{total}} pages",
+    "extracting": "Extracting knowledge...",
+    "extractingProgress": "Processed {{done}} of {{total}} pages",
+    "embedding": "Finalizing...",
+    "pagesFound": "{{count}} pages discovered",
+    "complete": "Crawl complete!",
+    "failed": "Crawl failed",
+    "entriesCreated": "{{count}} content entries extracted"
+  },
+  "knowledge": {
+    "heading": "Building your knowledge set",
+    "description": "Generating brand profile and knowledge entries from your website content.",
+    "building": "Processing content...",
+    "complete": "Knowledge set ready!",
+    "entriesCount": "{{count}} knowledge entries",
+    "brandExtracted": "Brand profile extracted"
+  },
+  "keywords": {
+    "heading": "Your SEO keywords",
+    "description": "We generated keywords your brand should rank for in AI answers. Review and curate the list.",
+    "generating": "Generating keywords...",
+    "addKeyword": "Add keyword",
+    "addPlaceholder": "Type a keyword...",
+    "removeTooltip": "Remove keyword",
+    "keywordCount_one": "{{count}} keyword",
+    "keywordCount_other": "{{count}} keywords",
+    "categories": {
+      "product": "Product",
+      "brand": "Brand",
+      "industry": "Industry",
+      "competitor": "Competitor",
+      "informational": "Informational",
+      "general": "General"
+    }
+  },
+  "questions": {
+    "heading": "Tracking questions",
+    "description": "These questions will be asked to AI engines to track your visibility.",
+    "generating": "Generating questions...",
+    "questionCount_one": "{{count}} question",
+    "questionCount_other": "{{count}} questions",
+    "toggleAll": "Toggle all"
+  },
+  "runEngines": {
+    "heading": "Checking AI answers",
+    "description": "Running your questions through AI engines to measure visibility.",
+    "launching": "Launching engines...",
+    "complete": "All engines finished!",
+    "failed": "Failed to launch engine runs",
+    "stages": {
+      "engine": "Querying",
+      "parse": "Parsing answers",
+      "score": "Scoring"
+    },
+    "stageStatus": {
+      "pending": "Pending",
+      "running": "In progress",
+      "completed": "Done",
+      "partial": "Partial",
+      "failed": "Failed"
+    }
+  },
+  "scores": {
+    "heading": "Your AI visibility scores",
+    "description": "Here's how AI engines see your brand right now.",
+    "overallScore": "Overall Score",
+    "perEngine": "Per Engine",
+    "mention": "Mention",
+    "sentiment": "Sentiment",
+    "position": "Position",
+    "accuracy": "Accuracy",
+    "citation": "Citation",
+    "recommendation": "Recommendation"
+  },
+  "recommendations": {
+    "heading": "Improvement suggestions",
+    "description": "AI-generated recommendations to boost your visibility.",
+    "generating": "Analyzing scores...",
+    "goToDashboard": "Go to Dashboard",
+    "priorities": {
+      "high": "High priority",
+      "medium": "Medium priority",
+      "low": "Low priority"
+    },
+    "categories": {
+      "content": "Content",
+      "seo": "SEO",
+      "brand_positioning": "Brand Positioning",
+      "technical": "Technical"
+    }
+  }
+}

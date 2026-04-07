@@ -1,0 +1,56 @@
+[project]
+name = "aeogeo-api"
+version = "0.1.0"
+description = "AEOGEO FastAPI backend"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi",
+    "uvicorn[standard]",
+    "pydantic>=2.0",
+    "email-validator",
+    "pydantic-settings",
+    "python-dotenv",
+    "sqlalchemy[asyncio]",
+    "alembic",
+    "asyncpg",
+    "python-jose[cryptography]",
+    "passlib[bcrypt]",
+    "cryptography",
+    "redis[hiredis]",
+    "httpx",
+    "tiktoken",
+    "pgvector",
+    "crawl4ai",
+    "pymupdf",
+    "python-docx",
+    "temporalio",
+    "numpy",
+    "playwright",
+    "python-multipart",
+]
+
+[dependency-groups]
+dev = [
+    "ruff",
+    "mypy",
+    "pytest",
+    "httpx",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["app"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 88
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true

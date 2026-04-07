@@ -1,0 +1,58 @@
+{
+  "title": "Widgets",
+  "subtitle": "Create embeddable widgets for your website",
+  "createWidget": "Create Widget",
+  "createWidgetDescription": "Configure a new embeddable widget for your project",
+  "emptyState": {
+    "title": "No widgets yet",
+    "description": "Create your first widget to embed AI-powered content on your website."
+  },
+  "config": {
+    "title": "Widget Configuration",
+    "subtitle": "Customize the appearance and behavior of your widget",
+    "widgetName": "Widget Name",
+    "widgetNamePlaceholder": "Enter widget name",
+    "project": "Project",
+    "projectPlaceholder": "Select a project",
+    "theme": "Theme",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "themeCustom": "Custom",
+    "position": "Position",
+    "posBottomRight": "Bottom Right",
+    "posBottomLeft": "Bottom Left",
+    "posTopRight": "Top Right",
+    "posTopLeft": "Top Left",
+    "posInline": "Inline",
+    "mode": "Mode",
+    "modeFaq": "FAQ",
+    "modeBlogFeed": "Blog Feed",
+    "modeAiConsultant": "AI Consultant",
+    "maxItems": "Max Items",
+    "borderRadius": "Border Radius",
+    "fontFamily": "Font Family",
+    "save": "Save Configuration"
+  },
+  "preview": {
+    "title": "Preview",
+    "placeholder": "Widget preview",
+    "modeTheme": "Mode: {{mode}} | Theme: {{theme}}"
+  },
+  "analytics": {
+    "title": "Engagement",
+    "impressions": "Impressions",
+    "interactions": "Interactions",
+    "topContent": "Top Content",
+    "empty": "No engagement data yet."
+  },
+  "embed": {
+    "title": "Embed Code",
+    "jsSnippet": "JS Snippet",
+    "iframe": "iframe"
+  },
+  "deleteWidget": {
+    "button": "Delete",
+    "title": "Delete Widget",
+    "description": "Are you sure you want to delete \"{{name}}\"? This action cannot be undone. Any embedded instances will stop working."
+  }
+}

@@ -1,0 +1,94 @@
+{
+  "title": "Reports",
+  "subtitle": "Generate and manage your analytics reports",
+  "generateNew": "Generate New Report",
+  "types": {
+    "visibility_audit": "Visibility Audit",
+    "competitive_analysis": "Competitive Analysis",
+    "content_performance": "Content Performance"
+  },
+  "errorLoad": "Failed to load reports. Please try again.",
+  "emptyState": "No reports yet. Generate your first one to get started.",
+  "emptyTitle": "No reports yet",
+  "emptyDescription": "Generate your first report to get insights into your AI visibility, competitive positioning, and content performance.",
+  "deleteReport": "Delete",
+  "deleteConfirmTitle": "Delete \"{{name}}\"?",
+  "deleteConfirmDescription": "This will permanently delete the report and its shared links. This action cannot be undone.",
+  "deleteConfirm": "Delete",
+  "deleteCancel": "Cancel",
+  "dialog": {
+    "title": "Generate Report",
+    "description": "Select a project and report type to generate an analytics report from your latest pipeline data.",
+    "selectProject": "Select project",
+    "project": "Project",
+    "reportType": "Report type",
+    "selectType": "Select report type",
+    "generate": "Generate",
+    "generating": "Generating..."
+  },
+  "share": {
+    "title": "Share Report",
+    "description": "Create a public link for \"{{title}}\".",
+    "linkReady": "Shareable link",
+    "empty": "This report does not have a public link yet.",
+    "generate": "Generate Link",
+    "regenerate": "Regenerate Link",
+    "openLink": "Open Public Link",
+    "expiresAt": "Link expires {{date}}.",
+    "copyError": "Could not copy the share link."
+  },
+  "shared": {
+    "badge": "Shared report",
+    "unavailableTitle": "This shared report is unavailable",
+    "unavailableDescription": "The link may be invalid or expired."
+  },
+  "detail": {
+    "loadError": "Could not load this report.",
+    "unknownShape": "This report payload could not be rendered.",
+    "unknownEngine": "Unknown engine",
+    "brandMentions": "Brand mentions",
+    "notAvailable": "N/A",
+    "noContent": "No published content was included in this report.",
+    "unpublished": "Not published",
+    "publishedAt": "Published {{date}}",
+    "queryCount_one": "{{count}} query analyzed",
+    "queryCount_other": "{{count}} queries analyzed",
+    "lowestScoringDimension": "Lowest scoring dimension",
+    "sections": {
+      "engineBreakdown": "Engine Breakdown",
+      "engineBreakdownHint": "Average scoring across tracked engines included in this report.",
+      "topGaps": "Top Gaps",
+      "topGapsHint": "The weakest dimensions in the latest visibility scoring.",
+      "competitors": "Competitor Mentions",
+      "competitorsHint": "How competitors appeared across the analyzed answers.",
+      "brandCoverage": "Brand Coverage",
+      "competitorAnalysis": "Competitor Analysis",
+      "competitorAnalysisHint": "Mention counts, sentiment, and average position for tracked competitors.",
+      "positioning": "Positioning Snapshot",
+      "positioningHint": "Mention-rate view of competitors across the analyzed answer set.",
+      "contentInventory": "Published Content",
+      "contentInventoryHint": "Published assets included in the content performance report."
+    },
+    "labels": {
+      "mention": "Mention",
+      "mentions": "Mentions",
+      "sentiment": "Sentiment",
+      "citation": "Citation",
+      "recommendation": "Recommendation",
+      "avgPosition": "Avg. position",
+      "answers": "Answers",
+      "contentItems": "Content items"
+    }
+  },
+  "metrics": {
+    "overallScore": "Overall Score",
+    "enginesTracked": "Engines Tracked",
+    "queriesAnalyzed": "Queries Analyzed",
+    "competitors": "Competitors",
+    "shareOfVoice": "Share of Voice",
+    "ranking": "Ranking",
+    "articlesTracked": "Articles Tracked",
+    "avgCitations": "Avg. Citations",
+    "topPerformer": "Top Performer"
+  }
+}

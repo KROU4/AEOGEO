@@ -1,0 +1,85 @@
+{
+  "title": "Dashboard",
+  "welcome": "Welcome back, {{name}}. Here is how your brand is performing across AI engines.",
+  "noProject": "Welcome! Start by creating a project",
+  "noProjectHint": "Projects let you track how your brand appears across AI engines like ChatGPT, Gemini, and Perplexity. Create your first one to get started.",
+  "createProject": "Create Your First Project",
+  "projectSelector": {
+    "label": "Project",
+    "placeholder": "Select a project"
+  },
+  "noMetrics": "No visibility data yet",
+  "noMetricsHint": "Run your first visibility scan to see how your brand performs across AI engines.",
+  "metrics": {
+    "visibilityScore": "Visibility Score",
+    "shareOfVoice": "Share of Voice",
+    "sentiment": "Sentiment",
+    "citations": "Citations",
+    "percentPositive": "% positive",
+    "outOf100": "/10",
+    "outOf10": "/10",
+    "noData": "--"
+  },
+  "quickActions": {
+    "title": "Quick Actions",
+    "newRun": "New Run",
+    "generateContent": "Generate Content",
+    "viewReports": "View Reports",
+    "generateReport": "Generate Report",
+    "createContent": "Create Content",
+    "runAudit": "Run Audit"
+  },
+  "heroVisibility": {
+    "title": "Visibility Score",
+    "trend": "vs previous run"
+  },
+  "heroSentiment": {
+    "title": "Sentiment Analysis",
+    "positive": "Positive",
+    "neutral": "Neutral",
+    "negative": "Negative"
+  },
+  "scoreTrend": {
+    "title": "Visibility Over Time",
+    "subtitle": "Total score trend across analysis runs",
+    "score": "Score",
+    "noData": "Not enough data for a trend chart yet. Run at least two scans."
+  },
+  "engineBreakdown": {
+    "title": "Per-Engine Breakdown",
+    "subtitle": "How your brand scores across each AI engine",
+    "noData": "No engine data yet",
+    "scores": {
+      "mention": "Mention",
+      "sentiment": "Sentiment",
+      "citation": "Citation"
+    }
+  },
+  "traffic": {
+    "title": "Website Traffic",
+    "subtitle": "Data from Google Analytics and Yandex Metrica",
+    "sessions": "Sessions",
+    "pageviews": "Pageviews",
+    "users": "Users",
+    "sources": "Traffic Sources",
+    "noData": "No traffic data",
+    "noDataHint": "Connect Google Analytics or Yandex Metrica in Settings > Integrations",
+    "last30": "Last 30 days"
+  },
+  "recentActivity": {
+    "title": "Recent Activity",
+    "subtitle": "Latest updates for the selected project",
+    "empty": "No recent activity",
+    "emptyHint": "Activity will appear here as you run queries and publish content.",
+    "visibilityIncreased": "Visibility score increased to {{score}}",
+    "visibilityImproved": "Your overall AI visibility improved by {{points}} points this week",
+    "newCitation": "New citation detected on {{engine}} for \"{{query}}\"",
+    "citationPosition": "Your brand was mentioned in position #{{position}}",
+    "contentPublished": "Content published: {{title}}",
+    "contentTracking": "Blog post is now live and being tracked across {{count}} engines",
+    "competitorAlert": "Competitor alert: {{name}} gained +{{points}} in visibility",
+    "competitorMoved": "{{name}} moved ahead on {{count}} tracked queries",
+    "weeklyReport": "Weekly report generated automatically",
+    "weeklyReportReady": "{{period}} report is ready for review"
+  }
+}

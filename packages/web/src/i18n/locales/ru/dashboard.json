@@ -1,0 +1,85 @@
+{
+  "title": "Панель управления",
+  "welcome": "С возвращением, {{name}}. Вот как ваш бренд выглядит в AI-движках.",
+  "noProject": "Добро пожаловать! Начните с создания проекта",
+  "noProjectHint": "Проекты позволяют отслеживать, как ваш бренд представлен в AI-движках: ChatGPT, Gemini, Perplexity. Создайте первый, чтобы начать.",
+  "createProject": "Создать первый проект",
+  "projectSelector": {
+    "label": "Проект",
+    "placeholder": "Выберите проект"
+  },
+  "noMetrics": "Данных о видимости пока нет",
+  "noMetricsHint": "Запустите первое сканирование видимости, чтобы увидеть, как ваш бренд выглядит в AI-движках.",
+  "metrics": {
+    "visibilityScore": "Оценка видимости",
+    "shareOfVoice": "Доля голоса",
+    "sentiment": "Тональность",
+    "citations": "Цитирования",
+    "percentPositive": "% положит.",
+    "outOf100": "/10",
+    "outOf10": "/10",
+    "noData": "--"
+  },
+  "quickActions": {
+    "title": "Быстрые действия",
+    "newRun": "Новый запуск",
+    "generateContent": "Создать контент",
+    "viewReports": "Отчёты",
+    "generateReport": "Создать отчёт",
+    "createContent": "Создать контент",
+    "runAudit": "Запустить аудит"
+  },
+  "heroVisibility": {
+    "title": "Оценка видимости",
+    "trend": "к предыдущему запуску"
+  },
+  "heroSentiment": {
+    "title": "Анализ тональности",
+    "positive": "Позитивная",
+    "neutral": "Нейтральная",
+    "negative": "Негативная"
+  },
+  "scoreTrend": {
+    "title": "Динамика видимости",
+    "subtitle": "Тренд общей оценки по запускам",
+    "score": "Оценка",
+    "noData": "Недостаточно данных. Выполните минимум два запуска."
+  },
+  "engineBreakdown": {
+    "title": "Разбивка по движкам",
+    "subtitle": "Оценка бренда по каждому AI-движку",
+    "noData": "Данных по движкам пока нет",
+    "scores": {
+      "mention": "Упоминание",
+      "sentiment": "Тональность",
+      "citation": "Цитирование"
+    }
+  },
+  "traffic": {
+    "title": "Трафик сайта",
+    "subtitle": "Данные из Google Analytics и Яндекс Метрики",
+    "sessions": "Сессии",
+    "pageviews": "Просмотры",
+    "users": "Пользователи",
+    "sources": "Источники трафика",
+    "noData": "Нет данных о трафике",
+    "noDataHint": "Подключите Google Analytics или Яндекс Метрику в Настройки > Интеграции",
+    "last30": "За 30 дней"
+  },
+  "recentActivity": {
+    "title": "Последние события",
+    "subtitle": "Последние обновления по выбранному проекту",
+    "empty": "Нет активности",
+    "emptyHint": "Здесь будут отображаться события по мере работы с запросами и контентом.",
+    "visibilityIncreased": "Оценка видимости выросла до {{score}}",
+    "visibilityImproved": "Общая видимость в AI улучшилась на {{points}} пунктов за неделю",
+    "newCitation": "Новое цитирование в {{engine}} по запросу \"{{query}}\"",
+    "citationPosition": "Ваш бренд упомянут на позиции #{{position}}",
+    "contentPublished": "Контент опубликован: {{title}}",
+    "contentTracking": "Статья опубликована и отслеживается в {{count}} движках",
+    "competitorAlert": "Конкурент: {{name}} набрал +{{points}} в видимости",
+    "competitorMoved": "{{name}} обошёл вас по {{count}} отслеживаемым запросам",
+    "weeklyReport": "Еженедельный отчёт сгенерирован автоматически",
+    "weeklyReportReady": "Отчёт {{period}} готов к просмотру"
+  }
+}

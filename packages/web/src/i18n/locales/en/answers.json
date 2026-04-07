@@ -1,0 +1,65 @@
+{
+  "title": "Answer Explorer",
+  "subtitle": "Browse and analyze AI engine responses across all runs",
+  "filters": {
+    "selectRun": "Select Run",
+    "selectRunPlaceholder": "Choose a run...",
+    "engines": "Engines",
+    "allEngines": "All Engines",
+    "minScore": "Min Score",
+    "scoreValue": "{{value}}",
+    "clear": "Clear Filters"
+  },
+  "card": {
+    "query": "Query",
+    "engine": "Engine",
+    "score": "Score",
+    "expand": "Show full response",
+    "collapse": "Collapse response",
+    "noScore": "N/A"
+  },
+  "mentions": {
+    "title": "Mentions",
+    "brand": "Brand",
+    "competitor": "Competitor",
+    "product": "Product",
+    "recommended": "Recommended",
+    "position": "Position #{{pos}}"
+  },
+  "citations": {
+    "title": "Citations",
+    "clientSource": "Your source",
+    "externalSource": "External"
+  },
+  "sentiment": {
+    "positive": "Positive",
+    "neutral": "Neutral",
+    "negative": "Negative"
+  },
+  "engines": {
+    "chatgpt": "ChatGPT",
+    "gemini": "Gemini",
+    "perplexity": "Perplexity",
+    "claude": "Claude",
+    "copilot": "Copilot"
+  },
+  "scoreBreakdown": {
+    "mention": "Mention",
+    "sentiment": "Sentiment",
+    "position": "Position",
+    "accuracy": "Accuracy",
+    "citation": "Citation",
+    "recommendation": "Recommendation",
+    "total": "Total"
+  },
+  "feedback": {
+    "helpful": "Helpful",
+    "notHelpful": "Not helpful"
+  },
+  "emptyState": "No answers found. Select a run to explore AI engine responses.",
+  "noRunSelected": "Select a run from the dropdown above to view answers.",
+  "loadMore": "Load More",
+  "loading": "Loading answers...",
+  "resultCount_one": "{{count}} answer",
+  "resultCount_other": "{{count}} answers"
+}

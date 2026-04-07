@@ -1,0 +1,171 @@
+{
+  "title": "Настройки",
+  "subtitle": "Управляйте аккаунтом и настройками организации",
+  "tabs": {
+    "profile": "Профиль",
+    "project": "Настройки проекта",
+    "team": "Команда и приглашения",
+    "apiKeys": "API-ключи",
+    "billing": "Оплата",
+    "notifications": "Уведомления",
+    "integrations": "Интеграции"
+  },
+  "profile": {
+    "title": "Настройки профиля",
+    "subtitle": "Обновите личную информацию и предпочтения",
+    "changeAvatar": "Сменить аватар",
+    "fullName": "Полное имя",
+    "emailAddress": "Email",
+    "emailHelp": "Обратитесь к администратору для смены email.",
+    "language": "Язык",
+    "languageDesc": "Выберите предпочтительный язык интерфейса"
+  },
+  "projectSettings": {
+    "enginesTitle": "Движки по умолчанию",
+    "enginesDesc": "Выберите AI-движки, которые будут включены по умолчанию при создании запусков",
+    "enginesHint_one": "{{count}} движок выбран",
+    "enginesHint_few": "{{count}} движка выбрано",
+    "enginesHint_many": "{{count}} движков выбрано",
+    "selectProject": "Выберите проект для настройки",
+    "selectProjectPlaceholder": "Выберите проект...",
+    "contentLocaleTitle": "Язык контента",
+    "contentLocaleDesc": "Выберите язык для AI-сгенерированного контента в этом проекте",
+    "sampleTitle": "Количество выборок по умолчанию",
+    "sampleDesc": "Установите количество запросов для выборки по умолчанию",
+    "sampleHint": "Каждый запуск будет использовать {{count}} запросов по умолчанию"
+  },
+  "team": {
+    "title": "Участники команды",
+    "subtitle": "Управляйте командой и отправляйте приглашения",
+    "inviteMember": "Пригласить участника",
+    "member": "Участник",
+    "status": "Статус",
+    "role": "Роль",
+    "projects": "Проекты",
+    "joined": "Присоединился",
+    "actions": "Действия",
+    "you": "Вы",
+    "loading": "Загрузка участников команды...",
+    "empty": "Участников команды пока нет",
+    "activeStatus": "Активен",
+    "pendingStatus": "Ожидает",
+    "activeAction": "Активный участник",
+    "pendingAction": "Приглашение ожидает принятия",
+    "noRole": "Роль не назначена",
+    "noProjects": "Нет доступа к проектам",
+    "inviteTitle": "Расширьте команду",
+    "inviteHint": "Пригласите коллег для совместной работы над проектами, проверки контента и мониторинга AI-видимости.",
+    "invite": {
+      "title": "Пригласить коллегу",
+      "subtitle": "Создайте или повторно отправьте приглашение Clerk и сразу назначьте доступы AEOGEO.",
+      "emailLabel": "Email",
+      "emailPlaceholder": "colleague@company.com",
+      "roleLabel": "Роль",
+      "rolePlaceholder": "Выберите роль",
+      "projectLabel": "Доступ к проекту",
+      "projectPlaceholder": "Выберите проект",
+      "noProject": "Без проекта",
+      "loadingRoles": "Загрузка ролей...",
+      "loadingProjects": "Загрузка проектов...",
+      "submit": "Отправить приглашение",
+      "submitting": "Отправляем приглашение...",
+      "errors": {
+        "emailRequired": "Укажите email",
+        "roleRequired": "Выберите роль",
+        "failed": "Не удалось отправить приглашение. Попробуйте ещё раз."
+      }
+    }
+  },
+  "apiKeys": {
+    "warningTitle": "Храните API-ключи в безопасности",
+    "warningText": "Не публикуйте API-ключи и не добавляйте их в систему контроля версий. Регулярно обновляйте ключи.",
+    "aiKeysTitle": "Ключи AI-движков",
+    "aiKeysDesc": "Управляйте API-ключами для AI-провайдеров (OpenAI, Anthropic, Google, OpenRouter), используемых вашими запусками.",
+    "manageAiKeys": "Управление AI-ключами",
+    "emptyTitle": "API-ключей пока нет",
+    "emptyText": "Сгенерируйте API-ключи для программного доступа к сервисам AEOGEO.",
+    "generate": "Сгенерировать API-ключ"
+  },
+  "billing": {
+    "title": "Использование AI",
+    "subtitle": "Потребление AI вашей организацией за этот месяц",
+    "tokenBudget": "Лимит токенов",
+    "costBudget": "Лимит расходов",
+    "requestsToday": "Запросов сегодня",
+    "requestsThisMonth": "Запросов за месяц",
+    "used": "{{current}} использовано",
+    "xOfY": "{{current}} из {{max}}",
+    "unlimited": "Без ограничений",
+    "percentage": "{{pct}}%",
+    "byProvider": "По провайдеру",
+    "byModel": "По модели",
+    "provider": "Провайдер",
+    "model": "Модель",
+    "tokens": "Токены",
+    "cost": "Стоимость",
+    "requests": "Запросы",
+    "warningMessage": "Вы приближаетесь к лимиту использования. Обратитесь к администратору для увеличения лимита.",
+    "limitReached": "Лимит использования исчерпан. Обратитесь к администратору.",
+    "contactAdmin": "Связаться с администратором",
+    "noUsage": "Нет данных за этот месяц"
+  },
+  "notifications": {
+    "title": "Настройки уведомлений",
+    "subtitle": "Выберите, какие уведомления хотите получать",
+    "weeklyReports": "Еженедельные отчёты о видимости",
+    "weeklyReportsDesc": "Получайте еженедельную сводку оценок видимости",
+    "citationAlerts": "Уведомления о цитировании",
+    "citationAlertsDesc": "Узнавайте, когда ваш бренд цитируется AI-движком",
+    "competitorMovements": "Действия конкурентов",
+    "competitorMovementsDesc": "Оповещения, когда конкуренты значительно изменяют позиции",
+    "contentPublished": "Публикация контента",
+    "contentPublishedDesc": "Уведомления о публикации нового контента участниками команды",
+    "teamActivity": "Активность команды",
+    "teamActivityDesc": "Обновления о новых участниках, изменениях ролей и приглашениях"
+  },
+  "integrations": {
+    "title": "Интеграции аналитики",
+    "subtitle": "Подключите аналитику, чтобы видеть данные о трафике рядом с оценками видимости",
+    "selectProject": "Выберите проект для настройки",
+    "selectProjectPlaceholder": "Выберите проект...",
+    "noProjects": "Сначала создайте проект, чтобы настроить интеграции.",
+    "ga": {
+      "title": "Google Analytics (GA4)",
+      "description": "Импорт данных о трафике и вовлечённости из GA4",
+      "propertyId": "ID свойства GA4",
+      "propertyIdPlaceholder": "123456789",
+      "propertyIdHint": "Найдите в GA4 Администратор > Настройки свойства",
+      "credentials": "JSON-ключ сервисного аккаунта",
+      "credentialsPlaceholder": "Вставьте JSON сервисного аккаунта",
+      "credentialsHint": "Создайте сервисный аккаунт в Google Cloud Console с доступом к GA4"
+    },
+    "ym": {
+      "title": "Яндекс Метрика",
+      "description": "Импорт данных о трафике из Яндекс Метрики",
+      "counterId": "ID счётчика",
+      "counterIdPlaceholder": "12345678",
+      "counterIdHint": "Найдите в настройках счётчика Яндекс Метрики",
+      "oauthToken": "OAuth-токен",
+      "oauthTokenPlaceholder": "Ваш OAuth-токен Яндекса",
+      "oauthTokenHint": "Получите OAuth-токен на oauth.yandex.com"
+    },
+    "status": {
+      "connected": "Подключено",
+      "disconnected": "Не подключено",
+      "lastSynced": "Последняя синхронизация: {{time}}"
+    },
+    "actions": {
+      "save": "Сохранить",
+      "testConnection": "Проверить соединение",
+      "disconnect": "Отключить",
+      "syncNow": "Синхронизировать",
+      "syncing": "Синхронизация..."
+    },
+    "testResult": {
+      "success": "Соединение установлено",
+      "failure": "Не удалось подключиться"
+    },
+    "saved": "Интеграция сохранена",
+    "deleted": "Интеграция отключена"
+  }
+}
