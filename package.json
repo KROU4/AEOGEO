@@ -3,7 +3,7 @@
   "private": true,
   "workspaces": ["packages/*"],
   "scripts": {
-    "dev": "concurrently \"bun run dev:api\" \"bun run dev:widget\" \"bun run dev:web\"",
+    "dev": "docker compose up --build",
     "dev:api": "cd packages/api && uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000",
     "dev:widget": "cd packages/widget && bun run dev",
     "dev:web": "cd packages/web && bun run dev",
