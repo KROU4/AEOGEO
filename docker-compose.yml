@@ -6,41 +6,55 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./packages/api:/app
+      - ./packages/api/app:/app/app
+      - ./packages/api/alembic:/app/alembic
+      - ./packages/api/alembic.ini:/app/alembic.ini
     env_file:
-      - ./packages/api/.env.example
+      - ./packages/api/.env
     depends_on:
       - db
       - redis
-    command: uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+    restart: unless-stopped
+    command: sh -lc "uv run alembic upgrade head && uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000"
 
   web:
     build:
-      context: ./packages/web
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./packages/web/Dockerfile
     ports:
       - "5173:5173"
     volumes:
-      - ./packages/web:/app
+      - ./packages/web:/app/packages/web
+      - ./packages/widget:/app/packages/widget
       - /app/node_modules
+      - /app/packages/web/node_modules
+      - /app/packages/widget/node_modules
     depends_on:
       - api
+    restart: unless-stopped
 
   db:
     image: pgvector/pgvector:pg16
     ports:
       - "5432:5432"
     environment:
-      POSTGRES_USER: aeogeo
-      POSTGRES_PASSWORD: localdev
-      POSTGRES_DB: aeogeo
+      POSTGRES_USER: ${POSTGRES_USER:-aeogeo}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-localdev}
+      POSTGRES_DB: ${POSTGRES_DB:-aeogeo}
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-aeogeo} -d ${POSTGRES_DB:-aeogeo}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
 
   redis:
     image: redis:7-alpine
     ports:
       - "6379:6379"
+    restart: unless-stopped
 
   temporal:
     image: temporalio/auto-setup:1.24
@@ -48,11 +62,18 @@ services:
       - "7233:7233"
     environment:
       - DB=postgres12
-      - POSTGRES_USER=aeogeo
-      - POSTGRES_PWD=localdev
+      - DB_PORT=5432
+      - LOG_LEVEL=error
+      - SKIP_SCHEMA_SETUP=true
+      - SKIP_DEFAULT_NAMESPACE_CREATION=true
+      - SKIP_ADD_CUSTOM_SEARCH_ATTRIBUTES=true
+      - POSTGRES_USER=${POSTGRES_USER:-aeogeo}
+      - POSTGRES_PWD=${POSTGRES_PASSWORD:-localdev}
       - POSTGRES_SEEDS=db
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+    restart: unless-stopped
 
   temporal-ui:
     image: temporalio/ui:latest
@@ -62,6 +83,7 @@ services:
       - TEMPORAL_ADDRESS=temporal:7233
     depends_on:
       - temporal
+    restart: unless-stopped
 
   temporal-worker:
     build:
@@ -69,13 +91,16 @@ services:
       dockerfile: Dockerfile
     command: uv run python -m app.workflows.worker
     env_file:
-      - ./packages/api/.env.example
+      - ./packages/api/.env
     volumes:
-      - ./packages/api:/app
+      - ./packages/api/app:/app/app
+      - ./packages/api/alembic:/app/alembic
+      - ./packages/api/alembic.ini:/app/alembic.ini
     depends_on:
       - db
       - redis
       - temporal
+    restart: unless-stopped
 
 volumes:
   pgdata:
