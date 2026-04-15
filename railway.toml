@@ -1,6 +1,17 @@
 # Railway Config as Code — build из корня репозитория (см. docs/RAILWAY.md).
 # В UI: Root Directory = repo root, Dockerfile = packages/api/Dockerfile
+#
+# Pre-deploy: отдельный контейнер, тот же образ; явный cd под WORKDIR образа.
 
 [build]
 builder = "DOCKERFILE"
 dockerfilePath = "packages/api/Dockerfile"
+
+[deploy]
+preDeployCommand = [
+  "sh",
+  "-c",
+  "cd /work/packages/api && uv run alembic upgrade head",
+]
+healthcheckPath = "/api/v1/health"
+healthcheckTimeout = 120

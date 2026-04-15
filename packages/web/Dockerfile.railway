@@ -1,0 +1,38 @@
+# Сборка из корня репозитория:
+#   docker build -f packages/web/Dockerfile.railway .
+# Railway: отдельный сервис, Root = корень репо, Dockerfile = packages/web/Dockerfile.railway
+#
+# Build-time (обязательно в Variables сервиса, scope Build):
+#   VITE_API_URL=https://<твой-api>.up.railway.app
+#   VITE_CLERK_PUBLISHABLE_KEY=pk_live_...
+
+FROM oven/bun:1 AS build
+WORKDIR /app
+
+COPY package.json bun.lock ./
+COPY packages/api/package.json ./packages/api/package.json
+COPY packages/web/package.json ./packages/web/package.json
+COPY packages/widget/package.json ./packages/widget/package.json
+
+RUN bun install --frozen-lockfile || bun install
+
+COPY packages/web ./packages/web
+COPY packages/widget ./packages/widget
+
+ARG VITE_API_URL
+ARG VITE_CLERK_PUBLISHABLE_KEY
+ENV VITE_API_URL=$VITE_API_URL
+ENV VITE_CLERK_PUBLISHABLE_KEY=$VITE_CLERK_PUBLISHABLE_KEY
+
+WORKDIR /app/packages/web
+RUN bun run build
+
+# Статика: слушаем $PORT (Railway подставляет сам)
+FROM node:22-alpine
+WORKDIR /srv
+RUN npm install -g serve@14
+COPY --from=build /app/packages/web/dist ./dist
+ENV NODE_ENV=production
+EXPOSE 3000
+# Railway задаёт PORT; serve принимает номер порта в -l
+CMD ["sh", "-c", "serve -s dist -l ${PORT:-3000}"]
