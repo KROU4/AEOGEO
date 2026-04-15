@@ -21,6 +21,7 @@ class Settings(BaseSettings):
     clerk_frontend_api_url: str = ""
     clerk_api_url: str = "https://api.clerk.com/v1"
     clerk_invitation_redirect_url: str = ""
+    clerk_webhook_secret: str = ""
 
     model_config = {"env_file": ".env"}
 

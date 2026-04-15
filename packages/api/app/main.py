@@ -7,6 +7,7 @@ from app.routers import (
     ai,
     analytics,
     attribution,
+    audit,
     auth,
     brands,
     content,
@@ -65,6 +66,8 @@ app.include_router(ai.router, prefix="/api/v1")
 
 # Public routes — NO auth dependency (embed_token is the credential)
 app.include_router(public.router, prefix="/api/v1")
+# Public quick GEO audit (rate-limited by IP hash)
+app.include_router(audit.router, prefix="/api/v1")
 
 
 @app.get("/api/v1/health")

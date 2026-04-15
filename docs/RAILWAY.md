@@ -1,0 +1,232 @@
+# Подробная инструкция: AEOGEO на Railway
+
+Этот документ описывает, как развернуть **backend (FastAPI)** из монорепозитория на [Railway](https://railway.app). Фронтенд (`packages/web`) и **Temporal worker** рассматриваются отдельно — на Railway их обычно выносят в отдельные сервисы или оставляют на VPS.
+
+---
+
+## Что вы получите в итоге
+
+- Репозиторий на GitHub подключён к Railway: **каждый push** в выбранную ветку (например `main`) **автоматически** пересобирает и деплоит API.
+- Отдельные managed-сервисы **PostgreSQL** (с расширением pgvector — см. ниже) и **Redis**.
+- Публичный HTTPS-URL для API (например `https://xxx.up.railway.app`).
+
+---
+
+## Предварительные требования
+
+1. Аккаунт [Railway](https://railway.app) (можно войти через GitHub).
+2. Репозиторий AEOGEO на GitHub (код уже в `main` или другой ветке).
+3. Настроенный **Clerk** (ключи приложения) — без них авторизация в приложении не заработает.
+4. Понимание, что **Dockerfile API** в репозитории рассчитан на **контекст сборки = корень репозитория** (файл `packages/api/Dockerfile` копирует `packages/geo-audit` и `packages/api`).
+
+---
+
+## Шаг 1. Создать проект и подключить репозиторий
+
+1. В Railway: **New Project** → **Deploy from GitHub**.
+2. Разрешите Railway доступ к нужным репозиториям (GitHub OAuth).
+3. Выберите репозиторий **AEOGEO**.
+4. Railway может предложить автодетект — **не используйте** автосборку из подпапки как единственный вариант без проверки: для API нужен **корень репо** и путь к Dockerfile (см. шаг 3).
+
+После создания появится первый сервис (часто с ошибкой сборки — это нормально, пока не настроен Dockerfile).
+
+---
+
+## Шаг 2. Добавить PostgreSQL и Redis
+
+### PostgreSQL
+
+1. В том же **Project** нажмите **+ New** → **Database** → **PostgreSQL**.
+2. Дождитесь provisioning. В карточке Postgres откройте **Variables** (или **Connect**).
+3. Railway выдаёт переменные вроде `DATABASE_URL`, `PGHOST`, `PGUSER`, `PGPASSWORD`, `PGDATABASE`.
+
+Важно для этого проекта:
+
+- Приложение ожидает **`DATABASE_URL`** в формате **SQLAlchemy async**:
+  - нужно: `postgresql+asyncpg://...`
+  - у Railway часто: `postgresql://...` (драйвер `psycopg2` по умолчанию в URL)
+
+**Что сделать:** в переменных сервиса **API** (не Postgres) задайте `DATABASE_URL` вручную, скопировав логин/пароль/хост/порт/имя БД из переменных Postgres, и замените префикс:
+
+```text
+postgresql://user:pass@host:port/db
+  →
+postgresql+asyncpg://user:pass@host:port/db
+```
+
+Либо используйте **Reference** в Railway UI: подставьте компоненты `${{ Postgres.VAR }}` (название сервиса Postgres может отличаться — выберите свой из выпадающего списка), собрав строку с `postgresql+asyncpg://`.
+
+### Расширение pgvector
+
+Образ в Docker для API основан на приложении, которое использует **pgvector**. Стандартный Postgres на Railway **может не включать** расширение `vector`. Варианты:
+
+- Подключить **внешний** Postgres с уже включённым pgvector (Neon, Supabase, свой VPS).
+- Или использовать кастомный образ/плагин с pgvector, если появится в вашем стеке.
+
+Если миграции упадут на `CREATE EXTENSION vector`, смотрите логи деплоя и документацию выбранной БД.
+
+### Redis
+
+1. **+ New** → **Database** → **Redis**.
+2. Скопируйте **внутренний** URL (часто `REDIS_URL` или `PRIVATE_URL`) — его укажете в API.
+
+---
+
+## Шаг 3. Настроить сервис API (Docker из монорепозитория)
+
+1. Откройте сервис, который собирает ваше приложение (или создайте **Empty Service** и привяжите репозиторий).
+2. Вкладка **Settings** (или **Build**):
+
+   - **Source**: репозиторий AEOGEO, ветка `main` (или ваша прод-ветка).
+   - **Root Directory**: оставьте **пустым** или `/` — корень репозитория.
+   - **Builder**: **Dockerfile**.
+   - **Dockerfile path**: `packages/api/Dockerfile`.
+
+3. Файл **`railway.toml`** в корне репозитория уже содержит:
+
+   ```toml
+   [build]
+   builder = "DOCKERFILE"
+   dockerfilePath = "packages/api/Dockerfile"
+   ```
+
+   Если Railway подхватывает config-as-code, настройки совпадут. Если нет — продублируйте их в UI.
+
+4. **Start command** (если Railway позволяет переопределить):
+
+   - По умолчанию в Dockerfile:  
+     `uv run uvicorn app.main:app --host 0.0.0.0 --port 8000`
+   - Railway обычно задаёт `PORT` — убедитесь, что приложение слушает **`0.0.0.0` и порт из `$PORT`**, если платформа подставляет переменную.  
+   - Если образ жёстко использует порт `8000`, в настройках сервиса выставьте **Port** `8000` или добавьте в Dockerfile CMD с `$PORT` (при необходимости — отдельный патч репозитория).
+
+5. **Release Command** (миграции Alembic), если доступно в вашем плане/UI:
+
+   ```bash
+   uv run alembic upgrade head
+   ```
+
+   Выполняйте **перед** стартом новой версии, чтобы схема БД совпадала с кодом. Если Release Command недоступен — один раз выполните миграции через **Railway Shell** (см. раздел «Проверка»).
+
+6. Включите **Auto Deploy** на нужную ветку: **Settings** → **Triggers** / **Deploy** → deploy on push.
+
+---
+
+## Шаг 4. Переменные окружения API
+
+В сервисе API откройте **Variables** и задайте (имена как в `app/config.py` / `.env` — Railway передаёт их в контейнер):
+
+| Переменная | Описание |
+|------------|----------|
+| `DATABASE_URL` | `postgresql+asyncpg://...` (см. шаг 2) |
+| `REDIS_URL` | URL Redis из плагина (internal) |
+| `SECRET_KEY` | Случайная длинная строка для сессий/подписей |
+| `CORS_ORIGINS` | Через запятую: URL фронта и при необходимости URL preview, например `https://app.yourdomain.com,https://yourapp.up.railway.app` |
+| `DEBUG` | Для прода: `false` |
+| `ENCRYPTION_KEY` | Ключ Fernet (как в проде; не коммитьте в git) |
+| `CLERK_PUBLISHABLE_KEY` | Из Clerk Dashboard |
+| `CLERK_SECRET_KEY` | Из Clerk Dashboard |
+| `CLERK_FRONTEND_API_URL` | При необходимости (см. Clerk) |
+| `CLERK_INVITATION_REDIRECT_URL` | Публичный URL фронта, путь `/accept-invite` |
+| `CLERK_WEBHOOK_SECRET` | Signing secret для webhook `user.created` (Svix) |
+| `TAVILY_API_KEY` | Если используете Tavily |
+| Прочие ключи AI | По необходимости из вашего `packages/api/.env` |
+
+Публичный URL API после деплоя возьмите в **Settings → Networking → Generate Domain** (или свой домен).
+
+Обновите:
+
+- **`CORS_ORIGINS`** — добавьте origin фронтенда.
+- В **Clerk**: разрешённые origins / redirect URLs под ваш прод-фронт и API при необходимости.
+
+### Webhook Clerk
+
+В Clerk → **Webhooks** добавьте endpoint:
+
+```text
+https://<ваш-api-домен>/api/v1/auth/webhook
+```
+
+Событие: **`user.created`**. Вставьте **`CLERK_WEBHOOK_SECRET`** из настроек webhook в переменные Railway.
+
+---
+
+## Шаг 5. Сеть и домен
+
+1. В сервисе API: **Networking** → **Generate Domain** — получите `https://xxx.up.railway.app`.
+2. Привязка своего домена: **Custom Domain** → следуйте подсказкам Railway (DNS CNAME).
+3. Убедитесь, что **HTTPS** включён (по умолчанию у Railway).
+
+Проверка живости приложения:
+
+```http
+GET https://<ваш-домен>/api/v1/health
+```
+
+Ожидается JSON вроде `{"status":"healthy",...}`.
+
+---
+
+## Шаг 6. Фронтенд (`packages/web`)
+
+Railway **не обязан** хостить фронт в том же проекте. Типичные варианты:
+
+1. **Отдельный сервис Railway** (Nixpacks): Root Directory `packages/web`, install `bun`, build `bun run build`, start статики или `vite preview` (для прод лучше отдавать `dist` через nginx/caddy — отдельный Dockerfile).
+2. **Vercel / Netlify / Cloudflare Pages**: подключить тот же GitHub-репозиторий, root `packages/web`, задать `VITE_API_URL=https://<ваш-api>`.
+
+Во всех случаях при сборке фронта нужен **`VITE_API_URL`** = публичный базовый URL API (без `/api/v1` в конце, если так заведено в `api-client`).
+
+---
+
+## Шаг 7. Temporal и фоновый worker
+
+В репозитории пайплайн завязан на **Temporal** (`app.workflows.worker`). На Railway **нет** managed Temporal «из коробки». Варианты:
+
+- Поднять **Temporal** отдельно (отдельный Railway-сервис с `temporalio/auto-setup`, свой Postgres, сложнее в проде).
+- Использовать **[Temporal Cloud](https://temporal.io/cloud)** и прописать `TEMPORAL_HOST`, сертификаты/mTLS по их доке.
+- Оставить **worker на VPS**, а API — на Railway (worker должен видеть тот же `TEMPORAL_HOST` и очередь `aeogeo-pipeline`).
+
+Без worker очереди **не обработаются**, но HTTP API и БД могут работать.
+
+---
+
+## Сборка Docker и типичные проблемы
+
+1. **Таймаут сборки**  
+   Dockerfile ставит **Playwright + Chromium** (`uv run playwright install --with-deps chromium`) — сборка долгая. В Railway увеличьте **Build timeout** в настройках сервиса / проекта.
+
+2. **Неверный контекст**  
+   Ошибки вроде «не найден `packages/geo-audit`» означают, что **Root Directory** не корень репозитория или Dockerfile path неверный.
+
+3. **Порт**  
+   Если контейнер слушает только `8000`, а Railway проксирует `$PORT`, выровняйте CMD или настройку порта в панели.
+
+4. **Миграции**  
+   Если таблиц нет — выполните вручную один раз:
+
+   ```bash
+   uv run alembic upgrade head
+   ```
+
+   через **Railway Shell** в контейнере API (или Release Command).
+
+---
+
+## Краткий чеклист
+
+- [ ] Проект Railway + GitHub, ветка с автодеплоем  
+- [ ] Postgres + Redis, `DATABASE_URL` с `+asyncpg`, `REDIS_URL`  
+- [ ] Сервис API: Dockerfile `packages/api/Dockerfile`, root = корень репо  
+- [ ] Все секреты и Clerk; `CORS_ORIGINS`; webhook Clerk на `/api/v1/auth/webhook`  
+- [ ] Домен API; `/api/v1/health` отвечает  
+- [ ] Миграции применены  
+- [ ] Фронт задеплоен отдельно с `VITE_API_URL`  
+- [ ] План по Temporal/worker (отдельно от этой инструкции)  
+
+---
+
+## Полезные ссылки
+
+- [Railway Docs](https://docs.railway.app/)  
+- [Deploy with Docker](https://docs.railway.app/guides/dockerfiles)  
+- [Variables and referencing](https://docs.railway.app/develop/variables)  
+- [Clerk webhooks](https://clerk.com/docs/users/sync-data-to-your-backend)  

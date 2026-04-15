@@ -1,19 +1,22 @@
+# Build from repository root: docker build -f packages/api/Dockerfile .
 FROM python:3.12-slim AS base
 
-WORKDIR /app
+WORKDIR /work/packages/api
 
 RUN pip install --no-cache-dir uv
 
-COPY pyproject.toml ./
+# Dependency manifests (monorepo: geo-audit path = ../geo-audit)
+COPY packages/api/pyproject.toml packages/api/uv.lock ./
+COPY packages/geo-audit ../geo-audit
 
 RUN uv sync --no-dev
 
 # Install Chromium for Crawl4AI website crawling
 RUN uv run playwright install --with-deps chromium
 
-COPY app ./app
-COPY alembic ./alembic
-COPY alembic.ini ./
+COPY packages/api/app ./app
+COPY packages/api/alembic ./alembic
+COPY packages/api/alembic.ini ./
 
 EXPOSE 8000
 

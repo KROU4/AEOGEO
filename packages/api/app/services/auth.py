@@ -1,18 +1,19 @@
 from __future__ import annotations
 
-from collections import defaultdict
 import logging
 import re
 import secrets
+from collections import defaultdict
 from typing import Any
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.config import Settings
 from app.models.project import Project, ProjectMember
+from app.models.public_audit import PublicAudit
 from app.models.role import Permission, Role, RolePermission, UserRole
 from app.models.tenant import Tenant
 from app.models.user import User
@@ -76,7 +77,9 @@ class AuthService:
 
     async def get_user_by_email(self, email: str) -> User | None:
         normalized_email = self.normalize_email(email)
-        result = await self.db.execute(select(User).where(User.email == normalized_email))
+        result = await self.db.execute(
+            select(User).where(User.email == normalized_email)
+        )
         return result.scalar_one_or_none()
 
     async def get_user_by_clerk_user_id(self, clerk_user_id: str) -> User | None:
@@ -239,7 +242,9 @@ class AuthService:
             select(User)
             .where(User.tenant_id == current_user.tenant_id)
             .options(
-                selectinload(User.project_memberships).selectinload(ProjectMember.project)
+                selectinload(User.project_memberships).selectinload(
+                    ProjectMember.project
+                )
             )
             .order_by(User.created_at.asc())
         )
@@ -270,7 +275,9 @@ class AuthService:
 
         members: list[dict[str, Any]] = []
         for user in users:
-            invitation = None if user.clerk_user_id else invitations_by_email.get(user.email)
+            invitation = (
+                None if user.clerk_user_id else invitations_by_email.get(user.email)
+            )
             project_memberships = []
             for membership in user.project_memberships:
                 project = membership.project
@@ -294,8 +301,12 @@ class AuthService:
                     "projects": project_memberships,
                     "is_current_user": user.id == current_user.id,
                     "invitation_id": invitation.invitation_id if invitation else None,
-                    "invited_at": invitation.created_at if invitation else user.created_at,
-                    "invitation_expires_at": invitation.expires_at if invitation else None,
+                    "invited_at": invitation.created_at
+                    if invitation
+                    else user.created_at,
+                    "invitation_expires_at": invitation.expires_at
+                    if invitation
+                    else None,
                 }
             )
 
@@ -415,7 +426,9 @@ class AuthService:
             return None
 
         result = await self.db.execute(
-            select(Project).where(Project.id == project_id, Project.tenant_id == tenant_id)
+            select(Project).where(
+                Project.id == project_id, Project.tenant_id == tenant_id
+            )
         )
         project = result.scalar_one_or_none()
         if project is None:
@@ -424,7 +437,9 @@ class AuthService:
 
     async def _ensure_user_role(self, user_id: UUID, role_id: UUID) -> None:
         result = await self.db.execute(
-            select(UserRole).where(UserRole.user_id == user_id, UserRole.role_id == role_id)
+            select(UserRole).where(
+                UserRole.user_id == user_id, UserRole.role_id == role_id
+            )
         )
         if result.scalar_one_or_none() is None:
             self.db.add(UserRole(user_id=user_id, role_id=role_id))
@@ -440,6 +455,83 @@ class AuthService:
             self.db.add(
                 ProjectMember(project_id=project_id, user_id=user_id, role="member")
             )
+
+    async def _link_public_audits_for_email(self, user_id: UUID, email: str) -> None:
+        normalized = self.normalize_email(email)
+        await self.db.execute(
+            update(PublicAudit)
+            .where(
+                PublicAudit.email == normalized,
+                PublicAudit.linked_user_id.is_(None),
+            )
+            .values(linked_user_id=user_id),
+        )
+
+    async def provision_from_clerk_user_created(
+        self,
+        *,
+        clerk_user_id: str,
+        email: str,
+        display_name: str,
+    ) -> User | None:
+        """Create tenant + user from Clerk user.created, or link existing.
+
+        Returns None when the email is tied to a different Clerk account.
+        """
+        existing = await self.get_user_by_clerk_user_id(clerk_user_id)
+        if existing is not None:
+            await self._link_public_audits_for_email(existing.id, email)
+            await self.db.commit()
+            await self.db.refresh(existing)
+            return existing
+
+        normalized = self.normalize_email(email)
+        by_email = await self.get_user_by_email(normalized)
+        if by_email is not None:
+            if by_email.clerk_user_id and by_email.clerk_user_id != clerk_user_id:
+                logger.warning(
+                    "Clerk webhook: email %s already linked to a different Clerk user",
+                    normalized,
+                )
+                return None
+            by_email.clerk_user_id = clerk_user_id
+            if not by_email.name.strip():
+                by_email.name = self._webhook_display_name(display_name, normalized)
+            await self.db.flush()
+            await self._link_public_audits_for_email(by_email.id, normalized)
+            await self.db.commit()
+            await self.db.refresh(by_email)
+            return by_email
+
+        tenant_label = display_name.strip() or normalized.split("@", 1)[0]
+        tenant = await self._create_tenant(tenant_label)
+        roles = await self._ensure_default_roles(tenant.id)
+
+        user = User(
+            email=normalized,
+            clerk_user_id=clerk_user_id,
+            hashed_password=hash_password(secrets.token_urlsafe(32)),
+            name=self._webhook_display_name(display_name, normalized),
+            tenant_id=tenant.id,
+            is_active=True,
+        )
+        self.db.add(user)
+        await self.db.flush()
+
+        self.db.add(UserRole(user_id=user.id, role_id=roles["Admin"].id))
+        await self.db.flush()
+
+        await self._link_public_audits_for_email(user.id, normalized)
+        await self.db.commit()
+        await self.db.refresh(user)
+        return user
+
+    @staticmethod
+    def _webhook_display_name(display_name: str, email: str) -> str:
+        candidate = display_name.strip()
+        if candidate:
+            return candidate
+        return email.split("@", 1)[0]
 
     @staticmethod
     def normalize_email(email: str) -> str:

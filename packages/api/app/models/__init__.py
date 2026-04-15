@@ -13,6 +13,7 @@ from .base import Base, TimestampMixin, UUIDMixin  # noqa: F401
 # Leaf models (no forward-ref relationships to other new models)
 from .tenant import Tenant  # noqa: F401
 from .user import User  # noqa: F401
+from .public_audit import PublicAudit  # noqa: F401
 from .role import Permission, Role, RolePermission, UserRole  # noqa: F401
 from .ai_provider_key import AIProviderKey  # noqa: F401
 from .ai_usage_event import AIUsageEvent  # noqa: F401
@@ -76,6 +77,7 @@ __all__ = [
     "Project",
     "ProjectEngine",
     "ProjectMember",
+    "PublicAudit",
     "Query",
     "QueryCluster",
     "QuerySet",

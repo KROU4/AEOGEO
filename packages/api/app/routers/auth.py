@@ -1,7 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.ext.asyncio import AsyncSession
+import logging
 
-from app.dependencies import get_clerk_identity, get_current_user, get_db
+from fastapi import APIRouter, Depends, HTTPException, Request, status
+from sqlalchemy.ext.asyncio import AsyncSession
+from svix.webhooks import Webhook, WebhookVerificationError
+
+from app.config import Settings
+from app.dependencies import get_clerk_identity, get_current_user, get_db, get_settings
 from app.models.user import User
 from app.schemas.auth import (
     BootstrapRequest,
@@ -13,6 +17,8 @@ from app.schemas.auth import (
 )
 from app.services.auth import AuthService
 from app.services.clerk import ClerkIdentity
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -125,3 +131,75 @@ async def team(
 @router.post("/logout", response_model=MessageResponse)
 async def logout() -> MessageResponse:
     return MessageResponse(message="Signed out")
+
+
+def _clerk_user_primary_email(data: dict) -> str | None:
+    addresses = data.get("email_addresses") or []
+    primary_id = data.get("primary_email_address_id")
+    for entry in addresses:
+        if entry.get("id") == primary_id and entry.get("email_address"):
+            return str(entry["email_address"]).strip().lower()
+    for entry in addresses:
+        ea = entry.get("email_address")
+        if ea:
+            return str(ea).strip().lower()
+    return None
+
+
+def _clerk_user_display_name(data: dict) -> str:
+    first = (data.get("first_name") or "").strip()
+    last = (data.get("last_name") or "").strip()
+    if first or last:
+        return f"{first} {last}".strip()
+    username = (data.get("username") or "").strip()
+    if username:
+        return username
+    return ""
+
+
+@router.post("/webhook")
+async def clerk_webhook(
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+    settings: Settings = Depends(get_settings),
+) -> dict:
+    """Clerk Svix webhook: provision Tenant + User on user.created.
+
+    Links prior PublicAudit rows by email when present.
+    """
+    if not settings.clerk_webhook_secret.strip():
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={"code": "auth.webhook_not_configured"},
+        )
+
+    body = await request.body()
+    wh = Webhook(settings.clerk_webhook_secret)
+    try:
+        payload = wh.verify(body, dict(request.headers))
+    except WebhookVerificationError as exc:
+        logger.warning("Clerk webhook verification failed: %s", exc)
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"code": "auth.invalid_webhook_signature"},
+        ) from exc
+
+    if payload.get("type") != "user.created":
+        return {"ok": True, "ignored": True}
+
+    data = payload.get("data") or {}
+    clerk_user_id = data.get("id")
+    email = _clerk_user_primary_email(data)
+    display_name = _clerk_user_display_name(data)
+    if not clerk_user_id or not email:
+        return {"ok": True, "ignored": True, "reason": "missing_id_or_email"}
+
+    service = AuthService(db, settings=settings)
+    user = await service.provision_from_clerk_user_created(
+        clerk_user_id=clerk_user_id,
+        email=email,
+        display_name=display_name,
+    )
+    if user is None:
+        return {"ok": True, "skipped": True}
+    return {"ok": True, "user_id": str(user.id)}

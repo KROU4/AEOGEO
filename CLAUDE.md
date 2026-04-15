@@ -17,7 +17,9 @@ Core loop: measure AI visibility → generate/publish AI-readable content → mo
 
 ## Development
 
-**No local dev.** Everything is tested on the production VPS. Never start Docker containers or dev servers locally.
+**Production** is still validated on the VPS per deploy scripts below.
+
+**Local stack (optional):** `docker compose up --build` from the repo root — Postgres (pgvector), Redis, Temporal (+ UI), API, web, temporal-worker. Copy `compose.env.example` → `.env` for ports; ensure `packages/api/.env` exists. Compose sets `DATABASE_URL` / `REDIS_URL` to Docker service names (`db`, `redis`), overriding `localhost` from `.env`. See `docs/RAILWAY.md` for cloud deploy on Railway.
 
 ## Common commands
 

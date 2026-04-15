@@ -1,0 +1,6 @@
+# Railway Config as Code — build из корня репозитория (см. docs/RAILWAY.md).
+# В UI: Root Directory = repo root, Dockerfile = packages/api/Dockerfile
+
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "packages/api/Dockerfile"

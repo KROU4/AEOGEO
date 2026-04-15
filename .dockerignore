@@ -1,6 +1,11 @@
 .git
-node_modules
-packages/web/node_modules
+**/.venv
+**/__pycache__
+**/*.pyc
+.pytest_cache
+.mypy_cache
+**/node_modules
 packages/web/dist
 packages/web/.tanstack
 packages/web/tsconfig.tsbuildinfo
+packages/widget/dist

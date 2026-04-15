@@ -27,7 +27,12 @@ dependencies = [
     "numpy",
     "playwright",
     "python-multipart",
+    "svix",
+    "aeogeo-geo-audit",
 ]
+
+[tool.uv.sources]
+aeogeo-geo-audit = { path = "../geo-audit", editable = true }
 
 [dependency-groups]
 dev = [

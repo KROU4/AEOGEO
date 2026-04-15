@@ -1,42 +1,29 @@
+# Local dev: `docker compose up --build`
+#
+# Важно: в контейнере API переменные DATABASE_URL / REDIS_URL задаются ниже (хосты db, redis),
+# они перекрывают packages/api/.env, если там указан localhost.
+#
+# Порты и префиксы: скопируйте compose.env.example → .env в корне репозитория.
+#
+name: aeogeo
+
+x-api-build: &api-build
+  context: .
+  dockerfile: packages/api/Dockerfile
+
+x-api-environment: &api-environment
+  DATABASE_URL: ${DATABASE_URL:-postgresql+asyncpg://aeogeo:localdev@db:5432/aeogeo}
+  REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+  TEMPORAL_HOST: ${TEMPORAL_HOST:-temporal:7233}
+  TEMPORAL_NAMESPACE: ${TEMPORAL_NAMESPACE:-default}
+  TEMPORAL_TASK_QUEUE: ${TEMPORAL_TASK_QUEUE:-aeogeo-pipeline}
+  CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173}
+
 services:
-  api:
-    build:
-      context: ./packages/api
-      dockerfile: Dockerfile
-    ports:
-      - "8000:8000"
-    volumes:
-      - ./packages/api/app:/app/app
-      - ./packages/api/alembic:/app/alembic
-      - ./packages/api/alembic.ini:/app/alembic.ini
-    env_file:
-      - ./packages/api/.env
-    depends_on:
-      - db
-      - redis
-    restart: unless-stopped
-    command: sh -lc "uv run alembic upgrade head && uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000"
-
-  web:
-    build:
-      context: .
-      dockerfile: ./packages/web/Dockerfile
-    ports:
-      - "5173:5173"
-    volumes:
-      - ./packages/web:/app/packages/web
-      - ./packages/widget:/app/packages/widget
-      - /app/node_modules
-      - /app/packages/web/node_modules
-      - /app/packages/widget/node_modules
-    depends_on:
-      - api
-    restart: unless-stopped
-
   db:
     image: pgvector/pgvector:pg16
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT:-5432}:5432"
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-aeogeo}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-localdev}
@@ -44,63 +31,125 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-aeogeo} -d ${POSTGRES_DB:-aeogeo}"]
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-aeogeo} -d ${POSTGRES_DB:-aeogeo}",
+        ]
       interval: 5s
       timeout: 3s
       retries: 20
+      start_period: 10s
     restart: unless-stopped
 
   redis:
     image: redis:7-alpine
     ports:
-      - "6379:6379"
+      - "${REDIS_PORT:-6379}:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
     restart: unless-stopped
 
   temporal:
     image: temporalio/auto-setup:1.24
     ports:
-      - "7233:7233"
+      - "${TEMPORAL_GRPC_PORT:-7233}:7233"
     environment:
-      - DB=postgres12
-      - DB_PORT=5432
-      - LOG_LEVEL=error
-      - SKIP_SCHEMA_SETUP=true
-      - SKIP_DEFAULT_NAMESPACE_CREATION=true
-      - SKIP_ADD_CUSTOM_SEARCH_ATTRIBUTES=true
-      - POSTGRES_USER=${POSTGRES_USER:-aeogeo}
-      - POSTGRES_PWD=${POSTGRES_PASSWORD:-localdev}
-      - POSTGRES_SEEDS=db
+      DB: postgres12
+      DB_PORT: 5432
+      LOG_LEVEL: error
+      SKIP_SCHEMA_SETUP: "true"
+      SKIP_DEFAULT_NAMESPACE_CREATION: "true"
+      SKIP_ADD_CUSTOM_SEARCH_ATTRIBUTES: "true"
+      POSTGRES_USER: ${POSTGRES_USER:-aeogeo}
+      POSTGRES_PWD: ${POSTGRES_PASSWORD:-localdev}
+      POSTGRES_SEEDS: db
     depends_on:
       db:
         condition: service_healthy
     restart: unless-stopped
 
   temporal-ui:
-    image: temporalio/ui:latest
+    image: temporalio/ui:2.28
     ports:
-      - "8233:8080"
+      - "${TEMPORAL_UI_PORT:-8233}:8080"
     environment:
-      - TEMPORAL_ADDRESS=temporal:7233
+      TEMPORAL_ADDRESS: temporal:7233
     depends_on:
       - temporal
     restart: unless-stopped
 
-  temporal-worker:
-    build:
-      context: ./packages/api
-      dockerfile: Dockerfile
-    command: uv run python -m app.workflows.worker
+  api:
+    build: *api-build
+    ports:
+      - "${API_PORT:-8000}:8000"
+    environment:
+      <<: *api-environment
     env_file:
       - ./packages/api/.env
     volumes:
-      - ./packages/api/app:/app/app
-      - ./packages/api/alembic:/app/alembic
-      - ./packages/api/alembic.ini:/app/alembic.ini
+      - ./packages/api/app:/work/packages/api/app
+      - ./packages/api/alembic:/work/packages/api/alembic
+      - ./packages/api/alembic.ini:/work/packages/api/alembic.ini
+      - ./packages/geo-audit:/work/packages/geo-audit
     depends_on:
-      - db
-      - redis
-      - temporal
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    command: >-
+      sh -lc "uv run alembic upgrade head &&
+      uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000"
+
+  web:
+    build:
+      context: .
+      dockerfile: ./packages/web/Dockerfile
+    ports:
+      - "${WEB_PORT:-5173}:5173"
+    environment:
+      VITE_API_URL: ${VITE_API_URL:-http://localhost:8000}
+    volumes:
+      - ./packages/web:/app/packages/web
+      - ./packages/widget:/app/packages/widget
+      - web_node_modules:/app/node_modules
+      - web_pkg_modules:/app/packages/web/node_modules
+      - widget_pkg_modules:/app/packages/widget/node_modules
+    depends_on:
+      - api
+    restart: unless-stopped
+
+  temporal-worker:
+    build: *api-build
+    environment:
+      <<: *api-environment
+    env_file:
+      - ./packages/api/.env
+    volumes:
+      - ./packages/api/app:/work/packages/api/app
+      - ./packages/api/alembic:/work/packages/api/alembic
+      - ./packages/api/alembic.ini:/work/packages/api/alembic.ini
+      - ./packages/geo-audit:/work/packages/geo-audit
+    command: uv run python -m app.workflows.worker
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      temporal:
+        condition: service_started
     restart: unless-stopped
 
 volumes:
   pgdata:
+  redisdata:
+  web_node_modules:
+  web_pkg_modules:
+  widget_pkg_modules:

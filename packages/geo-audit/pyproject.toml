@@ -1,0 +1,22 @@
+[project]
+name = "aeogeo-geo-audit"
+version = "0.1.0"
+description = "Wrapper around geo-seo-claude scripts and native GEO quick audit"
+requires-python = ">=3.12"
+dependencies = [
+    "pydantic>=2.0",
+    "httpx",
+    "beautifulsoup4",
+    "lxml",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["geo_audit"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 88
