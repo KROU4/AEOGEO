@@ -10,7 +10,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.brand import Brand
 from app.models.competitor import Competitor
-from app.models.knowledge import KnowledgeEntry
 from app.models.product import Product
 from app.models.project import Project
 from app.models.query import Query, QueryCluster, QuerySet
@@ -338,15 +337,6 @@ class QueryAgentService:
         )
         competitors = list(competitors_result.scalars().all())
 
-        # Load knowledge entries (up to 50 most recent)
-        knowledge_result = await self.db.execute(
-            select(KnowledgeEntry)
-            .where(KnowledgeEntry.brand_id == brand.id)
-            .order_by(KnowledgeEntry.created_at.desc())
-            .limit(50)
-        )
-        knowledge_entries = list(knowledge_result.scalars().all())
-
         # Build context strings
         products_text = "\n".join(
             f"- {p.name}: {p.description or 'No description'}"
@@ -362,10 +352,7 @@ class QueryAgentService:
             for c in competitors
         ) or "No competitors listed"
 
-        knowledge_text = "\n".join(
-            f"- [{ke.type}] {ke.content[:200]}"
-            for ke in knowledge_entries
-        ) or "No knowledge entries"
+        knowledge_text = "No knowledge base (not used in this product scope)"
 
         prompt = f"""You are an AI visibility analyst. Your job is to generate search queries that real users would ask AI assistants (ChatGPT, Gemini, Perplexity, Claude, etc.) where the brand "{brand.name}" SHOULD ideally appear in the AI's answer — but the query itself must NOT mention the brand name.
 

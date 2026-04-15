@@ -2,12 +2,7 @@ import {
   LayoutDashboard,
   Eye,
   FileText,
-  PenTool,
-  Code,
-  FolderOpen,
   Settings,
-  KeyRound,
-  BarChart3,
   Link2,
   Trophy,
   Layers,
@@ -21,43 +16,37 @@ export interface NavItem {
   icon: LucideIcon;
 }
 
+/** Primary app navigation (legacy export) */
 export const mainNavItems: NavItem[] = [
   { labelKey: "nav.overview", href: "/overview", icon: LayoutDashboard },
   { labelKey: "nav.visibility", href: "/visibility", icon: Eye },
   { labelKey: "nav.reports", href: "/reports", icon: FileText },
-  { labelKey: "nav.content", href: "/content", icon: PenTool },
-  { labelKey: "nav.widgets", href: "/widgets", icon: Code },
-  { labelKey: "nav.projects", href: "/projects", icon: FolderOpen },
 ];
 
-// Grouped navigation for sidebar
-export const monitorNavItems: NavItem[] = [
+/** ANALYTICS — visibility metrics and breakdowns */
+export const analyticsNavItems: NavItem[] = [
   { labelKey: "nav.overview", href: "/overview", icon: LayoutDashboard },
-  { labelKey: "nav.projects", href: "/projects", icon: FolderOpen },
   { labelKey: "nav.visibility", href: "/visibility", icon: Eye },
-];
-
-export const publishNavItems: NavItem[] = [
-  { labelKey: "nav.content", href: "/content", icon: PenTool },
-  { labelKey: "nav.widgets", href: "/widgets", icon: Code },
-];
-
-export const analyzeNavItems: NavItem[] = [
-  { labelKey: "nav.reports", href: "/reports", icon: FileText },
   { labelKey: "nav.citations", href: "/citations", icon: Link2 },
   { labelKey: "nav.competitors", href: "/competitors", icon: Trophy },
   { labelKey: "nav.platforms", href: "/platforms", icon: Layers },
-  { labelKey: "nav.assistant", href: "/assistant", icon: MessageSquare },
 ];
 
-export const adminNavItems: NavItem[] = [
-  { labelKey: "nav.adminKeys", href: "/admin/ai-keys", icon: KeyRound },
-  { labelKey: "nav.adminUsage", href: "/admin/ai-usage", icon: BarChart3 },
+/** INTELLIGENCE — AI assistant + reports */
+export const intelligenceNavItems: NavItem[] = [
+  { labelKey: "nav.assistant", href: "/assistant", icon: MessageSquare },
+  { labelKey: "nav.reports", href: "/reports", icon: FileText },
 ];
 
 export const systemNavItems: NavItem[] = [
   { labelKey: "nav.settings", href: "/settings", icon: Settings },
 ];
+
+/** @deprecated narrow slices — kept for any legacy imports */
+export const monitorNavItems = analyticsNavItems;
+export const analyzeNavItems: NavItem[] = [];
+export const publishNavItems: NavItem[] = [];
+export const adminNavItems: NavItem[] = [];
 
 export const contentStatuses = ["draft", "review", "published", "archived"] as const;
 export type ContentStatus = (typeof contentStatuses)[number];

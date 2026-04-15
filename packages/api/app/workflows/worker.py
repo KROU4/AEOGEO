@@ -17,14 +17,6 @@ from temporalio.worker import Worker
 from app.workflows.activities import (
     parse_answers_activity,
     score_run_activity,
-    crawl_website_activity,
-    extract_knowledge_activity,
-    generate_embeddings_activity,
-)
-from app.workflows.content_audit import (
-    ContentAuditWorkflow,
-    find_auditable_content_activity,
-    trigger_audit_run_activity,
 )
 from app.workflows.full_pipeline import FullPipelineWorkflow
 from app.workflows.run_engine import (
@@ -36,7 +28,6 @@ from app.workflows.run_engine import (
 from app.workflows.parse_answers import ParseAnswersWorkflow, parse_run_answers_activity
 from app.workflows.score_run import ScoreRunWorkflow
 from app.workflows.scheduled_run import ScheduledRunWorkflow, create_engine_run_activity
-from app.workflows.ingestion import IngestionWorkflow
 
 logger = logging.getLogger(__name__)
 
@@ -68,22 +59,15 @@ async def main() -> None:
             ParseAnswersWorkflow,
             ScoreRunWorkflow,
             ScheduledRunWorkflow,
-            IngestionWorkflow,
-            ContentAuditWorkflow,
         ],
         activities=[
             parse_answers_activity,
             parse_run_answers_activity,
             score_run_activity,
-            crawl_website_activity,
-            extract_knowledge_activity,
-            generate_embeddings_activity,
             update_run_status_activity,
             load_run_queries_activity,
             execute_single_query_activity,
             create_engine_run_activity,
-            find_auditable_content_activity,
-            trigger_audit_run_activity,
         ],
     )
 

@@ -13,16 +13,13 @@ import { Route as FunnelRouteImport } from "./routes/_funnel"
 import { Route as DashboardRouteImport } from "./routes/_dashboard"
 import { Route as AuthRouteImport } from "./routes/_auth"
 import { Route as IndexRouteImport } from "./routes/index"
-import { Route as EmbedEmbedTokenRouteImport } from "./routes/embed.$embedToken"
 import { Route as FunnelNewProjectRouteImport } from "./routes/_funnel/new-project"
-import { Route as DashboardWidgetsRouteImport } from "./routes/_dashboard/widgets"
 import { Route as DashboardVisibilityRouteImport } from "./routes/_dashboard/visibility"
 import { Route as DashboardSettingsRouteImport } from "./routes/_dashboard/settings"
 import { Route as DashboardReportsRouteImport } from "./routes/_dashboard/reports"
 import { Route as DashboardProjectsRouteImport } from "./routes/_dashboard/projects"
 import { Route as DashboardPlatformsRouteImport } from "./routes/_dashboard/platforms"
 import { Route as DashboardOverviewRouteImport } from "./routes/_dashboard/overview"
-import { Route as DashboardContentRouteImport } from "./routes/_dashboard/content"
 import { Route as DashboardCompetitorsRouteImport } from "./routes/_dashboard/competitors"
 import { Route as DashboardCitationsRouteImport } from "./routes/_dashboard/citations"
 import { Route as DashboardAssistantRouteImport } from "./routes/_dashboard/assistant"
@@ -36,13 +33,9 @@ import { Route as SharedReportsShareTokenRouteImport } from "./routes/shared.rep
 import { Route as DashboardReportsReportIdRouteImport } from "./routes/_dashboard/reports.$reportId"
 import { Route as DashboardProjectsNewRouteImport } from "./routes/_dashboard/projects_.new"
 import { Route as DashboardProjectsProjectIdRouteImport } from "./routes/_dashboard/projects.$projectId"
-import { Route as DashboardAdminAiUsageRouteImport } from "./routes/_dashboard/admin/ai-usage"
-import { Route as DashboardAdminAiKeysRouteImport } from "./routes/_dashboard/admin/ai-keys"
-import { Route as DashboardProjectsProjectIdKnowledgeRouteImport } from "./routes/_dashboard/projects_.$projectId_.knowledge"
 import { Route as DashboardProjectsProjectIdRunsRouteImport } from "./routes/_dashboard/projects.$projectId.runs"
 import { Route as DashboardProjectsProjectIdQueriesRouteImport } from "./routes/_dashboard/projects.$projectId.queries"
 import { Route as DashboardProjectsProjectIdAnswersRouteImport } from "./routes/_dashboard/projects.$projectId.answers"
-import { Route as DashboardAdminAiUsageTenantIdRouteImport } from "./routes/_dashboard/admin/ai-usage.$tenantId"
 
 const FunnelRoute = FunnelRouteImport.update({
   id: "/_funnel",
@@ -61,20 +54,10 @@ const IndexRoute = IndexRouteImport.update({
   path: "/",
   getParentRoute: () => rootRouteImport,
 } as any)
-const EmbedEmbedTokenRoute = EmbedEmbedTokenRouteImport.update({
-  id: "/embed/$embedToken",
-  path: "/embed/$embedToken",
-  getParentRoute: () => rootRouteImport,
-} as any)
 const FunnelNewProjectRoute = FunnelNewProjectRouteImport.update({
   id: "/new-project",
   path: "/new-project",
   getParentRoute: () => FunnelRoute,
-} as any)
-const DashboardWidgetsRoute = DashboardWidgetsRouteImport.update({
-  id: "/widgets",
-  path: "/widgets",
-  getParentRoute: () => DashboardRoute,
 } as any)
 const DashboardVisibilityRoute = DashboardVisibilityRouteImport.update({
   id: "/visibility",
@@ -104,11 +87,6 @@ const DashboardPlatformsRoute = DashboardPlatformsRouteImport.update({
 const DashboardOverviewRoute = DashboardOverviewRouteImport.update({
   id: "/overview",
   path: "/overview",
-  getParentRoute: () => DashboardRoute,
-} as any)
-const DashboardContentRoute = DashboardContentRouteImport.update({
-  id: "/content",
-  path: "/content",
   getParentRoute: () => DashboardRoute,
 } as any)
 const DashboardCompetitorsRoute = DashboardCompetitorsRouteImport.update({
@@ -178,22 +156,6 @@ const DashboardProjectsProjectIdRoute =
     path: "/$projectId",
     getParentRoute: () => DashboardProjectsRoute,
   } as any)
-const DashboardAdminAiUsageRoute = DashboardAdminAiUsageRouteImport.update({
-  id: "/admin/ai-usage",
-  path: "/admin/ai-usage",
-  getParentRoute: () => DashboardRoute,
-} as any)
-const DashboardAdminAiKeysRoute = DashboardAdminAiKeysRouteImport.update({
-  id: "/admin/ai-keys",
-  path: "/admin/ai-keys",
-  getParentRoute: () => DashboardRoute,
-} as any)
-const DashboardProjectsProjectIdKnowledgeRoute =
-  DashboardProjectsProjectIdKnowledgeRouteImport.update({
-    id: "/projects_/$projectId_/knowledge",
-    path: "/projects/$projectId/knowledge",
-    getParentRoute: () => DashboardRoute,
-  } as any)
 const DashboardProjectsProjectIdRunsRoute =
   DashboardProjectsProjectIdRunsRouteImport.update({
     id: "/runs",
@@ -212,12 +174,6 @@ const DashboardProjectsProjectIdAnswersRoute =
     path: "/answers",
     getParentRoute: () => DashboardProjectsProjectIdRoute,
   } as any)
-const DashboardAdminAiUsageTenantIdRoute =
-  DashboardAdminAiUsageTenantIdRouteImport.update({
-    id: "/$tenantId",
-    path: "/$tenantId",
-    getParentRoute: () => DashboardAdminAiUsageRoute,
-  } as any)
 
 export interface FileRoutesByFullPath {
   "/": typeof IndexRoute
@@ -230,27 +186,20 @@ export interface FileRoutesByFullPath {
   "/assistant": typeof DashboardAssistantRoute
   "/citations": typeof DashboardCitationsRoute
   "/competitors": typeof DashboardCompetitorsRoute
-  "/content": typeof DashboardContentRoute
   "/overview": typeof DashboardOverviewRoute
   "/platforms": typeof DashboardPlatformsRoute
   "/projects": typeof DashboardProjectsRouteWithChildren
   "/reports": typeof DashboardReportsRouteWithChildren
   "/settings": typeof DashboardSettingsRoute
   "/visibility": typeof DashboardVisibilityRoute
-  "/widgets": typeof DashboardWidgetsRoute
   "/new-project": typeof FunnelNewProjectRoute
-  "/embed/$embedToken": typeof EmbedEmbedTokenRoute
-  "/admin/ai-keys": typeof DashboardAdminAiKeysRoute
-  "/admin/ai-usage": typeof DashboardAdminAiUsageRouteWithChildren
   "/projects/$projectId": typeof DashboardProjectsProjectIdRouteWithChildren
   "/projects/new": typeof DashboardProjectsNewRoute
   "/reports/$reportId": typeof DashboardReportsReportIdRoute
   "/shared/reports/$shareToken": typeof SharedReportsShareTokenRoute
-  "/admin/ai-usage/$tenantId": typeof DashboardAdminAiUsageTenantIdRoute
   "/projects/$projectId/answers": typeof DashboardProjectsProjectIdAnswersRoute
   "/projects/$projectId/queries": typeof DashboardProjectsProjectIdQueriesRoute
   "/projects/$projectId/runs": typeof DashboardProjectsProjectIdRunsRoute
-  "/projects/$projectId/knowledge": typeof DashboardProjectsProjectIdKnowledgeRoute
 }
 export interface FileRoutesByTo {
   "/": typeof IndexRoute
@@ -263,27 +212,20 @@ export interface FileRoutesByTo {
   "/assistant": typeof DashboardAssistantRoute
   "/citations": typeof DashboardCitationsRoute
   "/competitors": typeof DashboardCompetitorsRoute
-  "/content": typeof DashboardContentRoute
   "/overview": typeof DashboardOverviewRoute
   "/platforms": typeof DashboardPlatformsRoute
   "/projects": typeof DashboardProjectsRouteWithChildren
   "/reports": typeof DashboardReportsRouteWithChildren
   "/settings": typeof DashboardSettingsRoute
   "/visibility": typeof DashboardVisibilityRoute
-  "/widgets": typeof DashboardWidgetsRoute
   "/new-project": typeof FunnelNewProjectRoute
-  "/embed/$embedToken": typeof EmbedEmbedTokenRoute
-  "/admin/ai-keys": typeof DashboardAdminAiKeysRoute
-  "/admin/ai-usage": typeof DashboardAdminAiUsageRouteWithChildren
   "/projects/$projectId": typeof DashboardProjectsProjectIdRouteWithChildren
   "/projects/new": typeof DashboardProjectsNewRoute
   "/reports/$reportId": typeof DashboardReportsReportIdRoute
   "/shared/reports/$shareToken": typeof SharedReportsShareTokenRoute
-  "/admin/ai-usage/$tenantId": typeof DashboardAdminAiUsageTenantIdRoute
   "/projects/$projectId/answers": typeof DashboardProjectsProjectIdAnswersRoute
   "/projects/$projectId/queries": typeof DashboardProjectsProjectIdQueriesRoute
   "/projects/$projectId/runs": typeof DashboardProjectsProjectIdRunsRoute
-  "/projects/$projectId/knowledge": typeof DashboardProjectsProjectIdKnowledgeRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -300,27 +242,20 @@ export interface FileRoutesById {
   "/_dashboard/assistant": typeof DashboardAssistantRoute
   "/_dashboard/citations": typeof DashboardCitationsRoute
   "/_dashboard/competitors": typeof DashboardCompetitorsRoute
-  "/_dashboard/content": typeof DashboardContentRoute
   "/_dashboard/overview": typeof DashboardOverviewRoute
   "/_dashboard/platforms": typeof DashboardPlatformsRoute
   "/_dashboard/projects": typeof DashboardProjectsRouteWithChildren
   "/_dashboard/reports": typeof DashboardReportsRouteWithChildren
   "/_dashboard/settings": typeof DashboardSettingsRoute
   "/_dashboard/visibility": typeof DashboardVisibilityRoute
-  "/_dashboard/widgets": typeof DashboardWidgetsRoute
   "/_funnel/new-project": typeof FunnelNewProjectRoute
-  "/embed/$embedToken": typeof EmbedEmbedTokenRoute
-  "/_dashboard/admin/ai-keys": typeof DashboardAdminAiKeysRoute
-  "/_dashboard/admin/ai-usage": typeof DashboardAdminAiUsageRouteWithChildren
   "/_dashboard/projects/$projectId": typeof DashboardProjectsProjectIdRouteWithChildren
   "/_dashboard/projects_/new": typeof DashboardProjectsNewRoute
   "/_dashboard/reports/$reportId": typeof DashboardReportsReportIdRoute
   "/shared/reports/$shareToken": typeof SharedReportsShareTokenRoute
-  "/_dashboard/admin/ai-usage/$tenantId": typeof DashboardAdminAiUsageTenantIdRoute
   "/_dashboard/projects/$projectId/answers": typeof DashboardProjectsProjectIdAnswersRoute
   "/_dashboard/projects/$projectId/queries": typeof DashboardProjectsProjectIdQueriesRoute
   "/_dashboard/projects/$projectId/runs": typeof DashboardProjectsProjectIdRunsRoute
-  "/_dashboard/projects_/$projectId_/knowledge": typeof DashboardProjectsProjectIdKnowledgeRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -335,27 +270,20 @@ export interface FileRouteTypes {
     | "/assistant"
     | "/citations"
     | "/competitors"
-    | "/content"
     | "/overview"
     | "/platforms"
     | "/projects"
     | "/reports"
     | "/settings"
     | "/visibility"
-    | "/widgets"
     | "/new-project"
-    | "/embed/$embedToken"
-    | "/admin/ai-keys"
-    | "/admin/ai-usage"
     | "/projects/$projectId"
     | "/projects/new"
     | "/reports/$reportId"
     | "/shared/reports/$shareToken"
-    | "/admin/ai-usage/$tenantId"
     | "/projects/$projectId/answers"
     | "/projects/$projectId/queries"
     | "/projects/$projectId/runs"
-    | "/projects/$projectId/knowledge"
   fileRoutesByTo: FileRoutesByTo
   to:
     | "/"
@@ -368,27 +296,20 @@ export interface FileRouteTypes {
     | "/assistant"
     | "/citations"
     | "/competitors"
-    | "/content"
     | "/overview"
     | "/platforms"
     | "/projects"
     | "/reports"
     | "/settings"
     | "/visibility"
-    | "/widgets"
     | "/new-project"
-    | "/embed/$embedToken"
-    | "/admin/ai-keys"
-    | "/admin/ai-usage"
     | "/projects/$projectId"
     | "/projects/new"
     | "/reports/$reportId"
     | "/shared/reports/$shareToken"
-    | "/admin/ai-usage/$tenantId"
     | "/projects/$projectId/answers"
     | "/projects/$projectId/queries"
     | "/projects/$projectId/runs"
-    | "/projects/$projectId/knowledge"
   id:
     | "__root__"
     | "/"
@@ -404,27 +325,20 @@ export interface FileRouteTypes {
     | "/_dashboard/assistant"
     | "/_dashboard/citations"
     | "/_dashboard/competitors"
-    | "/_dashboard/content"
     | "/_dashboard/overview"
     | "/_dashboard/platforms"
     | "/_dashboard/projects"
     | "/_dashboard/reports"
     | "/_dashboard/settings"
     | "/_dashboard/visibility"
-    | "/_dashboard/widgets"
     | "/_funnel/new-project"
-    | "/embed/$embedToken"
-    | "/_dashboard/admin/ai-keys"
-    | "/_dashboard/admin/ai-usage"
     | "/_dashboard/projects/$projectId"
     | "/_dashboard/projects_/new"
     | "/_dashboard/reports/$reportId"
     | "/shared/reports/$shareToken"
-    | "/_dashboard/admin/ai-usage/$tenantId"
     | "/_dashboard/projects/$projectId/answers"
     | "/_dashboard/projects/$projectId/queries"
     | "/_dashboard/projects/$projectId/runs"
-    | "/_dashboard/projects_/$projectId_/knowledge"
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -432,7 +346,6 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRouteWithChildren
   DashboardRoute: typeof DashboardRouteWithChildren
   FunnelRoute: typeof FunnelRouteWithChildren
-  EmbedEmbedTokenRoute: typeof EmbedEmbedTokenRoute
   SharedReportsShareTokenRoute: typeof SharedReportsShareTokenRoute
 }
 
@@ -466,26 +379,12 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    "/embed/$embedToken": {
-      id: "/embed/$embedToken"
-      path: "/embed/$embedToken"
-      fullPath: "/embed/$embedToken"
-      preLoaderRoute: typeof EmbedEmbedTokenRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     "/_funnel/new-project": {
       id: "/_funnel/new-project"
       path: "/new-project"
       fullPath: "/new-project"
       preLoaderRoute: typeof FunnelNewProjectRouteImport
       parentRoute: typeof FunnelRoute
-    }
-    "/_dashboard/widgets": {
-      id: "/_dashboard/widgets"
-      path: "/widgets"
-      fullPath: "/widgets"
-      preLoaderRoute: typeof DashboardWidgetsRouteImport
-      parentRoute: typeof DashboardRoute
     }
     "/_dashboard/visibility": {
       id: "/_dashboard/visibility"
@@ -527,13 +426,6 @@ declare module "@tanstack/react-router" {
       path: "/overview"
       fullPath: "/overview"
       preLoaderRoute: typeof DashboardOverviewRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    "/_dashboard/content": {
-      id: "/_dashboard/content"
-      path: "/content"
-      fullPath: "/content"
-      preLoaderRoute: typeof DashboardContentRouteImport
       parentRoute: typeof DashboardRoute
     }
     "/_dashboard/competitors": {
@@ -627,27 +519,6 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof DashboardProjectsProjectIdRouteImport
       parentRoute: typeof DashboardProjectsRoute
     }
-    "/_dashboard/admin/ai-usage": {
-      id: "/_dashboard/admin/ai-usage"
-      path: "/admin/ai-usage"
-      fullPath: "/admin/ai-usage"
-      preLoaderRoute: typeof DashboardAdminAiUsageRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    "/_dashboard/admin/ai-keys": {
-      id: "/_dashboard/admin/ai-keys"
-      path: "/admin/ai-keys"
-      fullPath: "/admin/ai-keys"
-      preLoaderRoute: typeof DashboardAdminAiKeysRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    "/_dashboard/projects_/$projectId_/knowledge": {
-      id: "/_dashboard/projects_/$projectId_/knowledge"
-      path: "/projects/$projectId/knowledge"
-      fullPath: "/projects/$projectId/knowledge"
-      preLoaderRoute: typeof DashboardProjectsProjectIdKnowledgeRouteImport
-      parentRoute: typeof DashboardRoute
-    }
     "/_dashboard/projects/$projectId/runs": {
       id: "/_dashboard/projects/$projectId/runs"
       path: "/runs"
@@ -668,13 +539,6 @@ declare module "@tanstack/react-router" {
       fullPath: "/projects/$projectId/answers"
       preLoaderRoute: typeof DashboardProjectsProjectIdAnswersRouteImport
       parentRoute: typeof DashboardProjectsProjectIdRoute
-    }
-    "/_dashboard/admin/ai-usage/$tenantId": {
-      id: "/_dashboard/admin/ai-usage/$tenantId"
-      path: "/$tenantId"
-      fullPath: "/admin/ai-usage/$tenantId"
-      preLoaderRoute: typeof DashboardAdminAiUsageTenantIdRouteImport
-      parentRoute: typeof DashboardAdminAiUsageRoute
     }
   }
 }
@@ -741,54 +605,30 @@ const DashboardReportsRouteChildren: DashboardReportsRouteChildren = {
 const DashboardReportsRouteWithChildren =
   DashboardReportsRoute._addFileChildren(DashboardReportsRouteChildren)
 
-interface DashboardAdminAiUsageRouteChildren {
-  DashboardAdminAiUsageTenantIdRoute: typeof DashboardAdminAiUsageTenantIdRoute
-}
-
-const DashboardAdminAiUsageRouteChildren: DashboardAdminAiUsageRouteChildren = {
-  DashboardAdminAiUsageTenantIdRoute: DashboardAdminAiUsageTenantIdRoute,
-}
-
-const DashboardAdminAiUsageRouteWithChildren =
-  DashboardAdminAiUsageRoute._addFileChildren(
-    DashboardAdminAiUsageRouteChildren,
-  )
-
 interface DashboardRouteChildren {
   DashboardAssistantRoute: typeof DashboardAssistantRoute
   DashboardCitationsRoute: typeof DashboardCitationsRoute
   DashboardCompetitorsRoute: typeof DashboardCompetitorsRoute
-  DashboardContentRoute: typeof DashboardContentRoute
   DashboardOverviewRoute: typeof DashboardOverviewRoute
   DashboardPlatformsRoute: typeof DashboardPlatformsRoute
   DashboardProjectsRoute: typeof DashboardProjectsRouteWithChildren
   DashboardReportsRoute: typeof DashboardReportsRouteWithChildren
   DashboardSettingsRoute: typeof DashboardSettingsRoute
   DashboardVisibilityRoute: typeof DashboardVisibilityRoute
-  DashboardWidgetsRoute: typeof DashboardWidgetsRoute
-  DashboardAdminAiKeysRoute: typeof DashboardAdminAiKeysRoute
-  DashboardAdminAiUsageRoute: typeof DashboardAdminAiUsageRouteWithChildren
   DashboardProjectsNewRoute: typeof DashboardProjectsNewRoute
-  DashboardProjectsProjectIdKnowledgeRoute: typeof DashboardProjectsProjectIdKnowledgeRoute
 }
 
 const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardAssistantRoute: DashboardAssistantRoute,
   DashboardCitationsRoute: DashboardCitationsRoute,
   DashboardCompetitorsRoute: DashboardCompetitorsRoute,
-  DashboardContentRoute: DashboardContentRoute,
   DashboardOverviewRoute: DashboardOverviewRoute,
   DashboardPlatformsRoute: DashboardPlatformsRoute,
   DashboardProjectsRoute: DashboardProjectsRouteWithChildren,
   DashboardReportsRoute: DashboardReportsRouteWithChildren,
   DashboardSettingsRoute: DashboardSettingsRoute,
   DashboardVisibilityRoute: DashboardVisibilityRoute,
-  DashboardWidgetsRoute: DashboardWidgetsRoute,
-  DashboardAdminAiKeysRoute: DashboardAdminAiKeysRoute,
-  DashboardAdminAiUsageRoute: DashboardAdminAiUsageRouteWithChildren,
   DashboardProjectsNewRoute: DashboardProjectsNewRoute,
-  DashboardProjectsProjectIdKnowledgeRoute:
-    DashboardProjectsProjectIdKnowledgeRoute,
 }
 
 const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
@@ -811,7 +651,6 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRouteWithChildren,
   DashboardRoute: DashboardRouteWithChildren,
   FunnelRoute: FunnelRouteWithChildren,
-  EmbedEmbedTokenRoute: EmbedEmbedTokenRoute,
   SharedReportsShareTokenRoute: SharedReportsShareTokenRoute,
 }
 export const routeTree = rootRouteImport

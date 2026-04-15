@@ -10,7 +10,6 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from app.config import Settings
-from app.models.content_template import ContentTemplate
 from app.models.engine import Engine
 from app.models.role import Permission, Role, RolePermission, UserRole
 from app.models.tenant import Tenant
@@ -56,80 +55,6 @@ ENGINES = [
     ("Copilot", "copilot", "openrouter", None, False, "https://cdn.aeogeo.com/icons/copilot.svg"),
 ]
 
-# (name, content_type, template_prompt)
-CONTENT_TEMPLATES = [
-    (
-        "FAQ Generator",
-        "faq",
-        (
-            "Generate FAQ entries for the brand's product or service. "
-            "Format the output as Q&A pairs. Each question should address a real customer concern. "
-            "Each answer should be concise (2-3 sentences), factual, and directly reference "
-            "information from the knowledge base. Use a helpful, authoritative tone. "
-            "Number each pair. Do not invent features, pricing, or claims not present in the facts."
-        ),
-    ),
-    (
-        "Blog Post Writer",
-        "blog",
-        (
-            "Write a blog post that is informative, engaging, and SEO-optimized. "
-            "Start with a compelling headline (H1). Use H2 subheadings to organize sections. "
-            "Include an introduction that states the problem, body paragraphs with concrete details, "
-            "and a conclusion with a clear takeaway. Keep paragraphs short (3-4 sentences). "
-            "Naturally incorporate the brand name where relevant. All claims must come from "
-            "the provided knowledge base. Do not make up statistics or testimonials."
-        ),
-    ),
-    (
-        "Product Comparison",
-        "comparison",
-        (
-            "Create a fair, balanced comparison between the brand's product and alternatives. "
-            "Structure the comparison with clear categories (features, pricing, ease of use, support). "
-            "Use a table-friendly format with ## headings for each product or category. "
-            "Highlight the brand's genuine strengths without disparaging competitors. "
-            "Only include factual differentiators from the knowledge base. "
-            "End with a summary of who each option is best for."
-        ),
-    ),
-    (
-        "Buyer's Guide",
-        "buyer_guide",
-        (
-            "Write a buyer's guide helping customers choose the right solution in this category. "
-            "Structure it as numbered steps or considerations. Start with 'What to look for' criteria, "
-            "then explain each factor in detail. Include specific questions buyers should ask. "
-            "Position the brand's offering naturally within the guide without being overly promotional. "
-            "All recommendations must be grounded in facts from the knowledge base."
-        ),
-    ),
-    (
-        "Pricing Clarifier",
-        "pricing_clarifier",
-        (
-            "Create clear, transparent pricing content that explains the brand's value proposition. "
-            "Break down pricing tiers or plans if applicable. Explain what is included at each level. "
-            "Address common pricing objections and explain the value behind the price. "
-            "Compare value (not just price) against alternatives when relevant. "
-            "Only reference pricing and features that exist in the knowledge base. "
-            "Do not invent pricing tiers or discounts."
-        ),
-    ),
-    (
-        "Glossary Builder",
-        "glossary",
-        (
-            "Create glossary entries for key terms in the brand's industry or product domain. "
-            "Format each entry with the term as a ## heading followed by a clear, concise definition "
-            "(1-3 sentences). Where relevant, explain how the term relates to the brand's product. "
-            "Order terms alphabetically. Use plain language accessible to non-experts. "
-            "Only define terms and concepts that are relevant to the knowledge base content."
-        ),
-    ),
-]
-
-
 async def seed() -> None:
     engine = create_async_engine(settings.database_url, echo=False)
 
@@ -170,12 +95,6 @@ async def seed() -> None:
         for name, slug, provider, model_id, is_active, icon_url in ENGINES:
             await _get_or_create_engine(
                 db, name, slug, provider, is_active, icon_url
-            )
-
-        # --- Content Templates ---
-        for name, content_type, template_prompt in CONTENT_TEMPLATES:
-            await _get_or_create_content_template(
-                db, name, content_type, template_prompt
             )
 
         await db.commit()
@@ -326,33 +245,6 @@ async def _get_or_create_engine(
     else:
         print(f"  Engine already exists: {name} ({provider})")
     return engine
-
-
-async def _get_or_create_content_template(
-    db: AsyncSession,
-    name: str,
-    content_type: str,
-    template_prompt: str,
-) -> ContentTemplate:
-    result = await db.execute(
-        select(ContentTemplate).where(
-            ContentTemplate.name == name,
-            ContentTemplate.content_type == content_type,
-        )
-    )
-    template = result.scalar_one_or_none()
-    if template is None:
-        template = ContentTemplate(
-            name=name,
-            content_type=content_type,
-            template_prompt=template_prompt,
-        )
-        db.add(template)
-        await db.flush()
-        print(f"  Created content template: {name} ({content_type})")
-    else:
-        print(f"  Content template already exists: {name} ({content_type})")
-    return template
 
 
 if __name__ == "__main__":

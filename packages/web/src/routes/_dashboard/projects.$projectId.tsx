@@ -178,10 +178,6 @@ function ProjectDetailPage() {
         project={project}
         onEditKnowledge={() => {
           setShowKnowledgeDialog(false);
-          navigate({
-            to: "/projects/$projectId/knowledge",
-            params: { projectId },
-          });
         }}
       />
 

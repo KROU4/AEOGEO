@@ -1,5 +1,5 @@
 import { useClerk } from "@clerk/react";
-import { Bell, Sun, Moon, Monitor, LogOut, User, Languages } from "lucide-react";
+import { Bell, Sun, Moon, Monitor, LogOut, User } from "lucide-react";
 import { Link, useLocation, useNavigate, useSearch } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { SidebarTrigger } from "@/components/ui/sidebar";
@@ -15,7 +15,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useCurrentUser } from "@/hooks/use-auth";
 import { useTheme } from "@/hooks/use-theme";
-import { useLocale } from "@/hooks/use-locale";
 import {
   DASHBOARD_PERIODS,
   type DashboardPeriod,
@@ -27,6 +26,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { LocaleSegmentToggle } from "@/components/ui/locale-segment-toggle";
 
 interface TopbarProps {
   title: string;
@@ -43,7 +43,6 @@ export function Topbar({ title }: TopbarProps) {
   const location = useLocation();
   const { data: user } = useCurrentUser();
   const { theme, setTheme } = useTheme();
-  const { locale, setLocale } = useLocale();
   const { t } = useTranslation("common");
 
   const cycleTheme = () => {
@@ -67,13 +66,19 @@ export function Topbar({ title }: TopbarProps) {
     theme === "dark" ? Moon : theme === "light" ? Sun : Monitor;
 
   return (
-    <header className="flex h-14 items-center justify-between border-b bg-card px-4">
-      <div className="flex min-w-0 flex-1 items-center gap-3">
+    <header className="sticky top-0 z-40 flex h-[52px] shrink-0 items-center justify-between border-b border-border bg-card px-6 dark:border-white/5 dark:bg-[#0d0e0f]/85 dark:backdrop-blur-md dark:supports-[backdrop-filter]:bg-[#0d0e0f]/75">
+      <div className="flex min-w-0 flex-1 items-center gap-4">
         <SidebarTrigger />
-        <Separator orientation="vertical" className="h-5" />
-        <h1 className="truncate text-lg font-semibold text-foreground">{title}</h1>
+        <Separator orientation="vertical" className="h-4 dark:bg-white/10" />
+        <h1
+          className="truncate text-lg font-semibold text-foreground dark:font-bold dark:uppercase dark:tracking-tight dark:text-white"
+          style={{ fontFamily: "var(--font-avop-display, var(--font-sans))" }}
+        >
+          {title}
+        </h1>
       </div>
       <div className="flex shrink-0 items-center gap-2">
+        <LocaleSegmentToggle variant="app" />
         <Select
           value={period}
           onValueChange={(value: DashboardPeriod) => {
@@ -87,7 +92,10 @@ export function Topbar({ title }: TopbarProps) {
             });
           }}
         >
-          <SelectTrigger className="h-9 w-[120px]" aria-label={t("topbar.periodLabel")}>
+          <SelectTrigger
+            className="h-9 w-[120px] dark:border-white/10 dark:bg-white/5 dark:text-white dark:data-[placeholder]:text-neutral-400"
+            aria-label={t("topbar.periodLabel")}
+          >
             <SelectValue placeholder={t("topbar.periodLabel")} />
           </SelectTrigger>
           <SelectContent>
@@ -103,12 +111,13 @@ export function Topbar({ title }: TopbarProps) {
           size="icon"
           onClick={cycleTheme}
           title={t("topbar.themeLabel", { theme })}
+          className="dark:text-neutral-400 dark:hover:bg-white/5 dark:hover:text-white"
         >
-          <ThemeIcon className="size-4 text-muted-foreground" />
+          <ThemeIcon className="size-4" />
           <span className="sr-only">{t("topbar.toggleTheme")}</span>
         </Button>
-        <Button variant="ghost" size="icon">
-          <Bell className="size-4 text-muted-foreground" />
+        <Button variant="ghost" size="icon" className="dark:text-neutral-400 dark:hover:bg-white/5 dark:hover:text-white">
+          <Bell className="size-4" />
           <span className="sr-only">{t("topbar.notifications")}</span>
         </Button>
         <DropdownMenu>
@@ -125,12 +134,6 @@ export function Topbar({ title }: TopbarProps) {
                 <User className="size-4" />
                 {t("topbar.profile")}
               </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => setLocale(locale === "en" ? "ru" : "en")}
-            >
-              <Languages className="size-4" />
-              {t("topbar.switchLanguage")}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout} variant="destructive">

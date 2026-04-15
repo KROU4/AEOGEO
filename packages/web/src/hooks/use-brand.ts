@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { apiGet, apiPost, apiPut, apiDelete, apiUpload } from "@/lib/api-client";
+import { apiGet, apiPost, apiPut, apiDelete } from "@/lib/api-client";
 import type {
   Brand,
   BrandCreate,
@@ -134,76 +134,63 @@ export function useSuggestCompetitors(projectId: string) {
   });
 }
 
-// -- Knowledge Entries --
+// -- Knowledge / crawl (backend removed; stubs keep onboarding from crashing) --
+
+const _emptyKnowledgePage = (): Promise<PaginatedResponse<KnowledgeEntry>> =>
+  Promise.resolve({ items: [], next_cursor: null, has_more: false });
+
+const _emptyCrawlResponse = (): CrawlResponse => ({
+  entries_created: 0,
+  extraction_errors: 0,
+  pages_crawled: 0,
+  total_pages: 0,
+  knowledge_entries: [],
+  pages: [],
+});
 
 export function useKnowledgeEntries(projectId: string) {
   return useQuery({
     queryKey: ["knowledge", projectId],
-    queryFn: () =>
-      apiGet<PaginatedResponse<KnowledgeEntry>>(
-        `/projects/${projectId}/knowledge/entries`
-      ),
+    queryFn: _emptyKnowledgePage,
     enabled: !!projectId,
   });
 }
 
 export function useCreateKnowledgeEntry(projectId: string) {
-  const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (data: KnowledgeEntryCreate) =>
-      apiPost<KnowledgeEntry>(`/projects/${projectId}/knowledge/entries`, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["knowledge", projectId] });
+    mutationFn: async (_data: KnowledgeEntryCreate) => {
+      void projectId;
+      throw new Error("Knowledge base is not available in this product.");
     },
   });
 }
 
 export function useUpdateKnowledgeEntry(projectId: string) {
-  const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({
-      entryId,
-      data,
-    }: {
+    mutationFn: async (_args: {
       entryId: string;
       data: KnowledgeEntryUpdate;
-    }) =>
-      apiPut<KnowledgeEntry>(
-        `/projects/${projectId}/knowledge/entries/${entryId}`,
-        data
-      ),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["knowledge", projectId] });
+    }) => {
+      void projectId;
+      throw new Error("Knowledge base is not available in this product.");
     },
   });
 }
 
 export function useDeleteKnowledgeEntry(projectId: string) {
-  const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (entryId: string) =>
-      apiDelete(`/projects/${projectId}/knowledge/entries/${entryId}`),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["knowledge", projectId] });
+    mutationFn: async (_entryId: string) => {
+      void projectId;
+      throw new Error("Knowledge base is not available in this product.");
     },
   });
 }
 
-// -- File Uploads --
-
 export function useUploadFile(projectId: string) {
-  const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (file: File) => {
-      const formData = new FormData();
-      formData.append("file", file);
-      return apiUpload<CustomFile>(
-        `/projects/${projectId}/knowledge/upload`,
-        formData
-      );
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["files", projectId] });
+    mutationFn: async (_file: File) => {
+      void projectId;
+      throw new Error("Knowledge base is not available in this product.");
     },
   });
 }
@@ -211,44 +198,35 @@ export function useUploadFile(projectId: string) {
 export function useProjectFiles(projectId: string) {
   return useQuery({
     queryKey: ["files", projectId],
-    queryFn: () =>
-      apiGet<CustomFile[]>(`/projects/${projectId}/knowledge/files`),
+    queryFn: (): Promise<CustomFile[]> => Promise.resolve([]),
     enabled: !!projectId,
   });
 }
 
 export function useDeleteProjectFile(projectId: string) {
-  const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (fileId: string) =>
-      apiDelete(`/projects/${projectId}/knowledge/files/${fileId}`),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["files", projectId] });
+    mutationFn: async (_fileId: string) => {
+      void projectId;
+      throw new Error("Knowledge base is not available in this product.");
     },
   });
 }
-
-// -- Website Crawling --
 
 export function useCrawlWebsite(projectId: string) {
-  const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (data: CrawlRequest) =>
-      apiPost<CrawlResponse>(`/projects/${projectId}/knowledge/crawl`, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["knowledge", projectId] });
+    mutationFn: async (_data: CrawlRequest): Promise<CrawlResponse> => {
+      void projectId;
+      void _data;
+      return _emptyCrawlResponse();
     },
   });
 }
-
-// -- Semantic Search --
 
 export function useSemanticSearch(projectId: string) {
   return useMutation({
-    mutationFn: (data: SemanticSearchRequest) =>
-      apiPost<SemanticSearchResult[]>(
-        `/projects/${projectId}/knowledge/search`,
-        data
-      ),
+    mutationFn: async (_data: SemanticSearchRequest): Promise<SemanticSearchResult[]> => {
+      void projectId;
+      return [];
+    },
   });
 }

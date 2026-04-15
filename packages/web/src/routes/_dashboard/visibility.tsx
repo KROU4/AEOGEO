@@ -69,13 +69,13 @@ export const Route = createFileRoute("/_dashboard/visibility")({
 function TrendIndicator({ value }: { value: number }) {
   if (value > 0)
     return (
-      <span className="flex items-center gap-1 text-sm font-medium text-green-600">
+      <span className="flex items-center gap-1 text-sm font-medium text-[#4ae176]">
         <TrendingUp className="w-3.5 h-3.5" />+{value.toFixed(1)}
       </span>
     );
   if (value < 0)
     return (
-      <span className="flex items-center gap-1 text-sm font-medium text-red-500">
+      <span className="flex items-center gap-1 text-sm font-medium text-red-400">
         <TrendingDown className="w-3.5 h-3.5" />
         {value.toFixed(1)}
       </span>
@@ -103,15 +103,15 @@ function CardSkeleton() {
 /* ---------- engine avatar colors ---------- */
 
 const engineColors: Record<string, { bg: string; text: string }> = {
-  ChatGPT: { bg: "bg-emerald-50", text: "text-emerald-700" },
-  Gemini: { bg: "bg-blue-50", text: "text-blue-700" },
-  Perplexity: { bg: "bg-violet-50", text: "text-violet-700" },
-  Claude: { bg: "bg-amber-50", text: "text-amber-700" },
-  Copilot: { bg: "bg-sky-50", text: "text-sky-700" },
+  ChatGPT: { bg: "bg-emerald-500/15", text: "text-emerald-400" },
+  Gemini: { bg: "bg-sky-500/15", text: "text-sky-400" },
+  Perplexity: { bg: "bg-violet-500/15", text: "text-violet-300" },
+  Claude: { bg: "bg-amber-500/15", text: "text-amber-400" },
+  Copilot: { bg: "bg-cyan-500/15", text: "text-cyan-400" },
 };
 
 function engineColor(name: string) {
-  return engineColors[name] ?? { bg: "bg-teal-50", text: "text-teal-700" };
+  return engineColors[name] ?? { bg: "bg-primary/15", text: "text-primary" };
 }
 
 /* ---------- page ---------- */
@@ -257,11 +257,11 @@ function VisibilityPage() {
                       stroke="currentColor"
                       strokeWidth="3"
                       strokeDasharray={`${(overallScore / 10) * 100}, 100`}
-                      className="text-teal-500"
+                      className="text-primary"
                       strokeLinecap="round"
                     />
                   </svg>
-                  <span className="absolute inset-0 flex items-center justify-center text-lg font-bold text-foreground">
+                  <span className="absolute inset-0 flex items-center justify-center font-avop-mono text-lg font-bold text-foreground">
                     {overallScore.toFixed(1)}
                   </span>
                 </div>
@@ -369,7 +369,7 @@ function VisibilityPage() {
                     type="monotone"
                     dataKey="total_score"
                     name={t("chart.score")}
-                    stroke="var(--color-teal-500, #14b8a6)"
+                    stroke="hsl(var(--primary))"
                     strokeWidth={2}
                     dot={{ r: 4 }}
                     activeDot={{ r: 6 }}
@@ -466,7 +466,7 @@ function VisibilityPage() {
                     type="monotone"
                     dataKey="score"
                     name={t("trafficCorrelation.score")}
-                    stroke="var(--color-teal-500, #14b8a6)"
+                    stroke="hsl(var(--primary))"
                     strokeWidth={2}
                     dot={{ r: 3 }}
                     connectNulls
@@ -600,7 +600,7 @@ function VisibilityPage() {
                 </p>
                 <div className="mt-4 h-3 w-full rounded-full bg-muted overflow-hidden">
                   <div
-                    className="h-full rounded-full bg-teal-500 transition-all"
+                    className="h-full rounded-full bg-primary transition-all"
                     style={{ width: `${Math.min(citation.data.rate, 100)}%` }}
                   />
                 </div>
@@ -633,7 +633,7 @@ function ScoreBar({ label, value }: { label: string; value: number }) {
       </span>
       <div className="flex-1 h-1.5 rounded-full bg-muted overflow-hidden">
         <div
-          className="h-full rounded-full bg-teal-500 transition-all"
+          className="h-full rounded-full bg-primary transition-all"
           style={{ width: `${pct}%` }}
         />
       </div>

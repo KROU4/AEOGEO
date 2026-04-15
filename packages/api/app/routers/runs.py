@@ -16,6 +16,7 @@ from sqlalchemy.orm import selectinload
 
 from app.dependencies import async_session, get_current_user, get_db
 from app.models.answer import Answer
+from app.models.engine import Engine, ProjectEngine
 from app.models.engine_run import EngineRun
 from app.models.project import Project
 from app.models.query import Query as QueryModel
@@ -198,8 +199,52 @@ async def get_latest_run(
     if run is None:
         raise HTTPException(status_code=404, detail="No runs for this project")
 
-    expected = max(run.answers_expected or 0, 1)
-    progress_pct = int(min(100, round(100 * (run.answers_completed / expected))))
+    # Per-engine status for the project's enabled engines (latest run each)
+    stages: dict[str, str] = {}
+    progress_samples: list[int] = []
+    eng_rows = await db.execute(
+        select(Engine.slug, Engine.id)
+        .join(ProjectEngine, ProjectEngine.engine_id == Engine.id)
+        .where(
+            ProjectEngine.project_id == project_id,
+            ProjectEngine.is_active.is_(True),
+        )
+        .order_by(Engine.slug.asc())
+    )
+    for slug, engine_id in eng_rows.all():
+        lr = await db.execute(
+            select(EngineRun)
+            .where(
+                EngineRun.project_id == project_id,
+                EngineRun.engine_id == engine_id,
+            )
+            .order_by(EngineRun.created_at.desc())
+            .limit(1),
+        )
+        er = lr.scalar_one_or_none()
+        if er is None:
+            stages[slug] = "pending"
+            continue
+        stages[slug] = er.status
+        exp = max(er.answers_expected or 0, 1)
+        progress_samples.append(
+            int(min(100, round(100 * (er.answers_completed / exp))))
+        )
+
+    if not stages:
+        stages = {
+            "engine": run.engine_status,
+            "parse": run.parse_status,
+            "score": run.score_status,
+        }
+        expected = max(run.answers_expected or 0, 1)
+        progress_pct = int(min(100, round(100 * (run.answers_completed / expected))))
+    else:
+        progress_pct = (
+            int(sum(progress_samples) / len(progress_samples))
+            if progress_samples
+            else 0
+        )
 
     updated = run.updated_at or run.completed_at or run.created_at
     if updated.tzinfo is None:
@@ -209,11 +254,7 @@ async def get_latest_run(
         run_id=run.id,
         status=run.status,
         completed_at=run.completed_at,
-        stages={
-            "engine": run.engine_status,
-            "parse": run.parse_status,
-            "score": run.score_status,
-        },
+        stages=stages,
         progress_pct=progress_pct,
         updated_at=updated,
     )

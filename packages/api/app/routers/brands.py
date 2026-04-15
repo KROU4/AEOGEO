@@ -43,7 +43,7 @@ from app.services.ai_client import (
 )
 from app.services.brand import BrandService
 from app.services.discovery import DiscoveryError, DiscoveryService
-from app.services.ingestion import IngestionService
+from app.services.homepage_crawl import crawl_website_pages
 from app.utils.locale import locale_instruction
 
 logger = logging.getLogger(__name__)
@@ -232,9 +232,8 @@ async def autofill_brand(
     # --- Step 1: Crawl homepage only ---
     from app.crawl_availability import CrawlStackUnavailableError
 
-    ingestion = IngestionService(db)
     try:
-        crawl_result = await ingestion.crawl_website(
+        crawl_result = await crawl_website_pages(
             brand_id=user.id,  # used only for logging context
             url=url,
             max_pages=1,

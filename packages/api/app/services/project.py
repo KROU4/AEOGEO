@@ -216,7 +216,6 @@ class ProjectService:
         from app.models.ai_usage_event import AIUsageEvent
         from app.models.answer import Answer
         from app.models.citation import Citation
-        from app.models.content import Content
         from app.models.engine import ProjectEngine
         from app.models.engine_run import EngineRun
         from app.models.keyword import Keyword
@@ -225,8 +224,6 @@ class ProjectService:
         from app.models.report import Report
         from app.models.scheduled_run import ScheduledRun
         from app.models.visibility_score import VisibilityScore
-        from app.models.widget import Widget
-
         # Subqueries for engine runs and answers belonging to this project
         run_ids = select(EngineRun.id).where(EngineRun.project_id == project_id)
         answer_ids = select(Answer.id).where(Answer.run_id.in_(run_ids))
@@ -261,7 +258,7 @@ class ProjectService:
         )
 
         # Delete direct project children
-        for model in (ProjectMember, Content, Report, Widget, ProjectEngine):
+        for model in (ProjectMember, Report, ProjectEngine):
             await self.db.execute(delete(model).where(model.project_id == project_id))
 
         # Remaining tables (QuerySet, Brand) have ondelete=CASCADE in DB.

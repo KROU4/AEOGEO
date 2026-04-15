@@ -18,7 +18,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.config import Settings
 from app.models.brand import Brand
 from app.models.competitor import Competitor
-from app.models.knowledge import KnowledgeEntry
 from app.models.product import Product
 from app.models.project import Project
 from app.schemas.competitor import (
@@ -87,9 +86,6 @@ Rules:
 - Return only valid JSON.
 """
 
-PRODUCT_ENTRY_TYPES = {"product", "faq", "fact", "claim"}
-
-
 class DiscoveryError(Exception):
     def __init__(self, status_code: int, code: str, message: str):
         super().__init__(message)
@@ -103,7 +99,7 @@ class BrandContext:
     brand: Brand
     existing_products: list[Product]
     existing_competitors: list[Competitor]
-    knowledge_entries: list[KnowledgeEntry]
+    knowledge_excerpts: list[str]
     content_locale: str = "en"
 
 
@@ -134,12 +130,12 @@ class DiscoveryService:
         self, project_id: UUID, max_suggestions: int
     ) -> ProductSuggestionResponse:
         context = await self._load_brand_context(project_id)
-        knowledge_entries = self._select_product_knowledge(context.knowledge_entries)
+        knowledge_entries = self._select_product_knowledge(context.knowledge_excerpts)
         if not knowledge_entries:
             raise DiscoveryError(
                 400,
                 "discovery.no_knowledge",
-                "No crawled knowledge is available yet. Crawl the website first.",
+                "Could not load website text. Add a valid brand website URL and try again.",
             )
 
         prompt = self._build_product_prompt(
@@ -269,24 +265,38 @@ class DiscoveryService:
                 )
             ).all()
         )
-        knowledge_entries = list(
-            (
-                await self.db.scalars(
-                    select(KnowledgeEntry)
-                    .where(KnowledgeEntry.brand_id == brand.id)
-                    .order_by(KnowledgeEntry.created_at.desc())
-                    .limit(120)
-                )
-            ).all()
-        )
+        excerpts = await self._fetch_homepage_excerpts(brand)
 
         return BrandContext(
             brand=brand,
             existing_products=products,
             existing_competitors=competitors,
-            knowledge_entries=knowledge_entries,
+            knowledge_excerpts=excerpts,
             content_locale=project.content_locale or "en",
         )
+
+    async def _fetch_homepage_excerpts(self, brand: Brand) -> list[str]:
+        """Fetch public homepage HTML as plain text snippets (no knowledge base)."""
+        raw = (brand.website or "").strip()
+        if not raw:
+            return []
+        url = raw if raw.startswith("http://") or raw.startswith("https://") else f"https://{raw}"
+        try:
+            async with httpx.AsyncClient(
+                timeout=25.0,
+                follow_redirects=True,
+                headers={"User-Agent": "Mozilla/5.0 (compatible; AEOGEO-Bot/1.0)"},
+            ) as client:
+                response = await client.get(url)
+        except Exception as exc:
+            logger.warning("Homepage fetch failed for %s: %s", url, exc)
+            return []
+        if response.status_code >= 400:
+            return []
+        text = response.text
+        if len(text) > 120_000:
+            text = text[:120_000]
+        return [text] if text.strip() else []
 
     async def _search_competitors(
         self,
@@ -353,7 +363,7 @@ class DiscoveryService:
     def _build_product_prompt(
         self,
         brand: Brand,
-        knowledge_entries: list[KnowledgeEntry],
+        knowledge_entries: list[str],
         existing_products: list[Product],
         max_suggestions: int,
     ) -> str:
@@ -364,7 +374,7 @@ class DiscoveryService:
             f"Existing products to exclude: {', '.join(item.name for item in existing_products) or 'None'}",
             f"Maximum suggestions: {max_suggestions}",
             "",
-            "Knowledge excerpts:",
+            "Website / knowledge excerpts:",
             self._format_knowledge_entries(knowledge_entries, max_chars=16_000),
             "",
             "Return the JSON object now.",
@@ -419,50 +429,41 @@ class DiscoveryService:
         return f"{brand_terms} competitors alternatives similar companies".strip()
 
     def _select_product_knowledge(
-        self, knowledge_entries: list[KnowledgeEntry]
-    ) -> list[KnowledgeEntry]:
-        prioritized = sorted(
-            knowledge_entries,
-            key=lambda entry: (
-                0 if (entry.type or "").lower() in PRODUCT_ENTRY_TYPES else 1,
-                -len(entry.content or ""),
-            ),
-        )
-        selected: list[KnowledgeEntry] = []
+        self, knowledge_entries: list[str]
+    ) -> list[str]:
+        prioritized = sorted(knowledge_entries, key=lambda t: -len(t or ""))
+        selected: list[str] = []
         seen_content: set[str] = set()
         total_chars = 0
-        for entry in prioritized:
-            content = self._compact_text(entry.content)
+        for raw in prioritized:
+            content = self._compact_text(raw)
             if not content:
                 continue
             key = content.lower()
             if key in seen_content:
                 continue
-            selected.append(entry)
+            selected.append(content)
             seen_content.add(key)
             total_chars += len(content)
-            if len(selected) >= 40 or total_chars >= 18_000:
+            if len(selected) >= 8 or total_chars >= 18_000:
                 break
         return selected
 
     def _format_knowledge_entries(
-        self, knowledge_entries: list[KnowledgeEntry], max_chars: int
+        self, knowledge_entries: list[str], max_chars: int
     ) -> str:
         chunks: list[str] = []
         total_chars = 0
-        for index, entry in enumerate(knowledge_entries, start=1):
-            content = self._truncate(self._compact_text(entry.content), 420)
+        for index, raw in enumerate(knowledge_entries, start=1):
+            content = self._truncate(self._compact_text(raw), 420)
             if not content:
                 continue
-            line = (
-                f"[{index}] type={entry.type} url={entry.source_url or ''} "
-                f"content={content}"
-            )
+            line = f"[{index}] content={content}"
             if total_chars + len(line) > max_chars:
                 break
             chunks.append(line)
             total_chars += len(line)
-        return "\n".join(chunks)
+        return "\n".join(chunks) if chunks else "(none)"
 
     def _format_search_results(
         self, search_results: list[dict[str, Any]], max_chars: int

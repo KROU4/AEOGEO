@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, type CSSProperties } from "react";
 import {
   Navigate,
   createFileRoute,
@@ -34,16 +34,12 @@ const segmentToNavKey: Record<string, string> = {
   overview: "nav.overview",
   visibility: "nav.visibility",
   reports: "nav.reports",
-  content: "nav.content",
-  widgets: "nav.widgets",
   projects: "nav.projects",
   settings: "nav.settings",
   citations: "nav.citations",
   competitors: "nav.competitors",
   platforms: "nav.platforms",
   assistant: "nav.assistant",
-  "ai-keys": "nav.adminKeys",
-  "ai-usage": "nav.adminUsage",
 };
 
 const UUID_SEGMENT_RE =
@@ -132,12 +128,18 @@ function DashboardLayout() {
   }
 
   return (
-    <SidebarProvider>
+    <SidebarProvider
+      style={
+        {
+          "--sidebar-width": "220px",
+        } as CSSProperties
+      }
+    >
       <ProjectAliasSync />
       <AppSidebar />
-      <SidebarInset>
+      <SidebarInset className="min-h-svh">
         <Topbar title={title} />
-        <main className="flex-1 p-6 max-w-[1400px] mx-auto w-full">
+        <main className="avop-dashboard-canvas flex-1 p-8 pb-24 w-full min-h-0">
           <Outlet />
         </main>
       </SidebarInset>

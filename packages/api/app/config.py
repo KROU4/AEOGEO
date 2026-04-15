@@ -1,7 +1,7 @@
 import base64
 from binascii import Error as BinasciiError
 
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
@@ -25,7 +25,7 @@ class Settings(BaseSettings):
     clerk_invitation_redirect_url: str = ""
     clerk_webhook_secret: str = ""
 
-    model_config = {"env_file": ".env"}
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
     @property
     def cors_origins_list(self) -> list[str]:

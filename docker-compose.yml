@@ -3,7 +3,6 @@
 # Hot reload:
 # - API: uvicorn --reload + монтирование app / alembic / geo-audit
 # - Web: Vite HMR + CHOKIDAR_USEPOLLING для bind-mount (Docker Desktop Windows/macOS)
-# - Widget: фоновый `vite build --watch`, чтобы dist/widget.js обновлялся без ребилда контейнера
 # - temporal-worker: watchfiles перезапускает процесс при изменении .py в app и geo-audit
 #
 # Важно: в контейнере API переменные DATABASE_URL / REDIS_URL задаются ниже (хосты db, redis),
@@ -144,13 +143,10 @@ services:
       # File watching on bind mounts (enable=false on native Linux if CPU usage is high)
       CHOKIDAR_USEPOLLING: ${DEV_WATCH_POLLING:-true}
       CHOKIDAR_INTERVAL: ${CHOKIDAR_INTERVAL:-1000}
-      SKIP_WIDGET_BUILD: ${SKIP_WIDGET_BUILD:-0}
     volumes:
       - ./packages/web:/app/packages/web
-      - ./packages/widget:/app/packages/widget
       - web_node_modules:/app/node_modules
       - web_pkg_modules:/app/packages/web/node_modules
-      - widget_pkg_modules:/app/packages/widget/node_modules
     depends_on:
       - api
     restart: unless-stopped
@@ -159,12 +155,7 @@ services:
       - -ec
       - |
           cd /app/packages/web
-          if [ ! -f ../widget/dist/widget.js ] || [ "$$SKIP_WIDGET_BUILD" != "1" ]; then
-            bun run build:widget
-          fi
-          (cd /app/packages/widget && bun run dev) &
-          cd /app/packages/web
-          exec bun run dev:live
+          exec bun run dev -- --host 0.0.0.0 --port 5173
 
   temporal-worker:
     profiles:
@@ -196,4 +187,3 @@ volumes:
   redisdata:
   web_node_modules:
   web_pkg_modules:
-  widget_pkg_modules:

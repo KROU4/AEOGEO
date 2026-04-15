@@ -1,4 +1,7 @@
 {
+  "brand": {
+    "subtitle": "Analytics Engine"
+  },
   "nav": {
     "overview": "Overview",
     "visibility": "AI Visibility",
@@ -17,6 +20,9 @@
   "navGroups": {
     "platform": "Platform",
     "manage": "Manage",
+    "analytics": "Analytics",
+    "intelligence": "Intelligence",
+    "settings": "Settings",
     "monitor": "Monitor",
     "publish": "Publish",
     "analyze": "Analyze",

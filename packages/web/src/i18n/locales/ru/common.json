@@ -1,4 +1,7 @@
 {
+  "brand": {
+    "subtitle": "Аналитический движок"
+  },
   "nav": {
     "overview": "Обзор",
     "visibility": "AI-видимость",
@@ -17,6 +20,9 @@
   "navGroups": {
     "platform": "Платформа",
     "manage": "Управление",
+    "analytics": "Аналитика",
+    "intelligence": "Интеллект",
+    "settings": "Настройки",
     "monitor": "Мониторинг",
     "publish": "Публикация",
     "analyze": "Аналитика",

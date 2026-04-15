@@ -9,10 +9,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.dependencies import get_current_user, get_db
 from app.models.answer import Answer
 from app.models.citation import Citation
-from app.models.content import Content
 from app.models.engine import Engine
 from app.models.engine_run import EngineRun
-from app.models.feedback import FeedbackEntry
 from app.models.mention import Mention
 from app.models.project import Project
 from app.models.user import User
@@ -321,54 +319,6 @@ async def recent_activity(
             description=f"Engine run {run.status}",
             timestamp=ts.isoformat() if ts else "",
         ))
-
-    # 2. Content status changes (latest content updates)
-    content_result = await db.execute(
-        select(Content)
-        .where(Content.project_id == project_id)
-        .order_by(Content.updated_at.desc())
-        .limit(5)
-    )
-    for c in content_result.scalars().all():
-        ts = c.published_at or c.updated_at or c.created_at
-        activities.append(ActivityItem(
-            id=str(c.id),
-            type="content_" + c.status,
-            description=f"Content '{c.title[:60]}' is {c.status}",
-            timestamp=ts.isoformat() if ts else "",
-        ))
-
-    # 3. Recent FeedbackEntries (from answers/content in this project)
-    # Get all answer IDs and content IDs for this project
-    run_ids = await _run_ids_for_project(project_id, db)
-    if run_ids:
-        answer_ids_result = await db.execute(
-            select(Answer.id).where(Answer.run_id.in_(run_ids))
-        )
-        answer_ids = [row[0] for row in answer_ids_result.all()]
-    else:
-        answer_ids = []
-
-    content_ids_result = await db.execute(
-        select(Content.id).where(Content.project_id == project_id)
-    )
-    content_ids = [row[0] for row in content_ids_result.all()]
-
-    entity_ids = answer_ids + content_ids
-    if entity_ids:
-        feedback_result = await db.execute(
-            select(FeedbackEntry)
-            .where(FeedbackEntry.entity_id.in_(entity_ids))
-            .order_by(FeedbackEntry.created_at.desc())
-            .limit(5)
-        )
-        for fb in feedback_result.scalars().all():
-            activities.append(ActivityItem(
-                id=str(fb.id),
-                type="feedback_" + fb.feedback,
-                description=f"User gave '{fb.feedback}' feedback on {fb.entity_type}",
-                timestamp=fb.created_at.isoformat() if fb.created_at else "",
-            ))
 
     # Sort all by timestamp descending, limit to 10
     activities.sort(key=lambda a: a.timestamp, reverse=True)

@@ -15,10 +15,8 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useCurrentUser } from "@/hooks/use-auth";
 import {
-  monitorNavItems,
-  publishNavItems,
-  analyzeNavItems,
-  adminNavItems,
+  analyticsNavItems,
+  intelligenceNavItems,
   systemNavItems,
 } from "@/lib/constants";
 
@@ -35,23 +33,26 @@ export function AppSidebar() {
     .slice(0, 2);
 
   return (
-    <Sidebar>
-      <SidebarHeader className="p-4">
-        <Link to="/overview" className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center">
-            <span className="text-primary-foreground font-bold text-xs">A</span>
-          </div>
-          <span className="text-base font-bold text-sidebar-foreground">
+    <Sidebar className="!border-r-0 px-2 py-6">
+      <SidebarHeader className="mb-8 px-2 pt-2">
+        <Link to="/overview" className="flex flex-col gap-1">
+          <span
+            className="text-xl font-bold leading-tight text-sidebar-foreground dark:text-white"
+            style={{ fontFamily: "var(--font-avop-display, var(--font-sans))" }}
+          >
             AEOGEO
+          </span>
+          <span className="text-[10px] font-medium uppercase tracking-widest text-neutral-500">
+            {t("brand.subtitle")}
           </span>
         </Link>
       </SidebarHeader>
 
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>{t("navGroups.monitor")}</SidebarGroupLabel>
+          <SidebarGroupLabel>{t("navGroups.analytics")}</SidebarGroupLabel>
           <SidebarMenu>
-            {monitorNavItems.map((item) => (
+            {analyticsNavItems.map((item) => (
               <SidebarMenuItem key={item.href}>
                 <SidebarMenuButton
                   asChild
@@ -69,9 +70,9 @@ export function AppSidebar() {
         </SidebarGroup>
 
         <SidebarGroup>
-          <SidebarGroupLabel>{t("navGroups.publish")}</SidebarGroupLabel>
+          <SidebarGroupLabel>{t("navGroups.intelligence")}</SidebarGroupLabel>
           <SidebarMenu>
-            {publishNavItems.map((item) => (
+            {intelligenceNavItems.map((item) => (
               <SidebarMenuItem key={item.href}>
                 <SidebarMenuButton
                   asChild
@@ -89,9 +90,9 @@ export function AppSidebar() {
         </SidebarGroup>
 
         <SidebarGroup>
-          <SidebarGroupLabel>{t("navGroups.analyze")}</SidebarGroupLabel>
+          <SidebarGroupLabel>{t("navGroups.settings")}</SidebarGroupLabel>
           <SidebarMenu>
-            {analyzeNavItems.map((item) => (
+            {systemNavItems.map((item) => (
               <SidebarMenuItem key={item.href}>
                 <SidebarMenuButton
                   asChild
@@ -99,27 +100,7 @@ export function AppSidebar() {
                   tooltip={t(item.labelKey)}
                 >
                   <Link to={item.href}>
-                    <item.icon />
-                    <span>{t(item.labelKey)}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
-          </SidebarMenu>
-        </SidebarGroup>
-
-        <SidebarGroup>
-          <SidebarGroupLabel>{t("navGroups.admin")}</SidebarGroupLabel>
-          <SidebarMenu>
-            {adminNavItems.map((item) => (
-              <SidebarMenuItem key={item.href}>
-                <SidebarMenuButton
-                  asChild
-                  isActive={location.pathname.startsWith(item.href)}
-                  tooltip={t(item.labelKey)}
-                >
-                  <Link to={item.href}>
-                    <item.icon />
+                    <Settings />
                     <span>{t(item.labelKey)}</span>
                   </Link>
                 </SidebarMenuButton>
@@ -129,23 +110,7 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter>
-        <SidebarMenu>
-          {systemNavItems.map((item) => (
-            <SidebarMenuItem key={item.href}>
-              <SidebarMenuButton
-                asChild
-                isActive={location.pathname.startsWith(item.href)}
-                tooltip={t(item.labelKey)}
-              >
-                <Link to={item.href}>
-                  <Settings />
-                  <span>{t(item.labelKey)}</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          ))}
-        </SidebarMenu>
+      <SidebarFooter className="mt-auto border-t border-sidebar-border pt-6 dark:border-white/5">
         <div className="flex items-center gap-3 px-2 py-2">
           <Avatar size="sm">
             <AvatarFallback>{initials}</AvatarFallback>

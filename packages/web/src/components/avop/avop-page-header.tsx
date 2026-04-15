@@ -16,7 +16,7 @@ export function AvopPageHeader({
     <div className={`space-y-1 ${className}`}>
       <h2
         className="text-2xl font-bold tracking-tight text-foreground md:text-3xl"
-        style={{ fontFamily: "var(--font-avop-heading, var(--font-sans))" }}
+        style={{ fontFamily: "var(--font-avop-display, var(--font-avop-heading, var(--font-sans)))" }}
       >
         {title}
       </h2>

@@ -475,16 +475,7 @@ export function ProjectsPage() {
         open={!!knowledgeTarget}
         onOpenChange={(open) => !open && setKnowledgeTarget(null)}
         project={knowledgeTarget}
-        onEditKnowledge={() => {
-          const id = knowledgeTarget?.id;
-          setKnowledgeTarget(null);
-          if (id) {
-            navigate({
-              to: "/projects/$projectId/knowledge",
-              params: { projectId: id },
-            });
-          }
-        }}
+        onEditKnowledge={() => setKnowledgeTarget(null)}
       />
     </div>
   );

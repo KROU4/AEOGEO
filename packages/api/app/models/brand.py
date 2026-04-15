@@ -30,8 +30,6 @@ class Brand(UUIDMixin, TimestampMixin, Base):
     project: Mapped["Project"] = relationship(back_populates="brand")  # noqa: F821
     products: Mapped[list["Product"]] = relationship(back_populates="brand")  # noqa: F821
     competitors: Mapped[list["Competitor"]] = relationship(back_populates="brand")  # noqa: F821
-    knowledge_entries: Mapped[list["KnowledgeEntry"]] = relationship(back_populates="brand")  # noqa: F821
-    custom_files: Mapped[list["CustomFile"]] = relationship(back_populates="brand")  # noqa: F821
 
     def __repr__(self) -> str:
         return f"<Brand {self.name!r}>"

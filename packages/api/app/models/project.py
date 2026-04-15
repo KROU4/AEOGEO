@@ -23,9 +23,7 @@ class Project(UUIDMixin, TimestampMixin, Base):
     # -- relationships --
     tenant: Mapped["Tenant"] = relationship(back_populates="projects")  # noqa: F821
     members: Mapped[list["ProjectMember"]] = relationship(back_populates="project")
-    content: Mapped[list["Content"]] = relationship(back_populates="project")  # noqa: F821
     reports: Mapped[list["Report"]] = relationship(back_populates="project")  # noqa: F821
-    widgets: Mapped[list["Widget"]] = relationship(back_populates="project")  # noqa: F821
     project_engines: Mapped[list["ProjectEngine"]] = relationship(  # noqa: F821
         back_populates="project"
     )
@@ -35,12 +33,6 @@ class Project(UUIDMixin, TimestampMixin, Base):
     query_sets: Mapped[list["QuerySet"]] = relationship(back_populates="project")  # noqa: F821
     keywords: Mapped[list["Keyword"]] = relationship(back_populates="project")  # noqa: F821
     recommendations: Mapped[list["Recommendation"]] = relationship(  # noqa: F821
-        back_populates="project"
-    )
-    analytics_integrations: Mapped[list["AnalyticsIntegration"]] = relationship(  # noqa: F821
-        back_populates="project"
-    )
-    traffic_snapshots: Mapped[list["TrafficSnapshot"]] = relationship(  # noqa: F821
         back_populates="project"
     )
 

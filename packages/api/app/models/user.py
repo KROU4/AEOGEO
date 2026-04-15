@@ -29,7 +29,6 @@ class User(UUIDMixin, TimestampMixin, Base):
 
     # -- relationships --
     tenant: Mapped["Tenant"] = relationship(back_populates="users")  # noqa: F821
-    authored_content: Mapped[list["Content"]] = relationship(back_populates="author")  # noqa: F821
     project_memberships: Mapped[list["ProjectMember"]] = relationship(back_populates="user")  # noqa: F821
 
     def __repr__(self) -> str:

@@ -1,9 +1,9 @@
 """Report generator service — auto-generates reports from pipeline data.
 
-Produces three report types:
+Produces report types:
 - visibility_audit: scores summary, per-engine breakdown, top gaps, competitor mentions
 - competitive_analysis: competitor mention rates, sentiment comparison, positioning
-- content_performance: published content items and their impact on scores
+- content_performance: legacy placeholder (CMS content removed from product scope)
 """
 
 from __future__ import annotations
@@ -16,7 +16,6 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.answer import Answer
-from app.models.content import Content
 from app.models.engine import Engine
 from app.models.engine_run import EngineRun
 from app.models.mention import Mention
@@ -340,60 +339,23 @@ class ReportGeneratorService:
         project_id: UUID,
         tenant_id: UUID,
     ) -> Report:
-        """Generate a content performance report.
-
-        Analyzes published content items and correlates them with visibility
-        score trends to measure impact.
-        """
+        """Placeholder — CMS/content performance module removed from product scope."""
         await self._verify_project(project_id, tenant_id)
+
+        scoring = ScoringService(self.db)
+        trends = await scoring.get_score_trends(project_id, limit=20)
 
         data: dict = {
             "report_type": "content_performance",
             "generated_at": datetime.utcnow().isoformat(),
+            "published_content": [],
+            "total_published": 0,
+            "score_trends": trends,
+            "content_impact": {
+                "message": "Content performance tracking is not part of this product.",
+            },
+            "content_type_breakdown": {},
         }
-
-        # Get published content items
-        content_result = await self.db.execute(
-            select(Content)
-            .where(
-                Content.project_id == project_id,
-                Content.status == "published",
-            )
-            .order_by(Content.published_at.desc())
-        )
-        content_items = list(content_result.scalars().all())
-
-        content_data = []
-        for item in content_items:
-            content_data.append({
-                "id": str(item.id),
-                "title": item.title,
-                "content_type": item.content_type,
-                "published_at": item.published_at.isoformat() if item.published_at else None,
-            })
-        data["published_content"] = content_data
-        data["total_published"] = len(content_data)
-
-        # Get score trends to correlate with content publication
-        scoring = ScoringService(self.db)
-        trends = await scoring.get_score_trends(project_id, limit=20)
-        data["score_trends"] = trends
-
-        # Compute content impact: compare avg scores before vs after content publication
-        if content_items and trends:
-            impact = self._compute_content_impact(content_items, trends)
-            data["content_impact"] = impact
-        else:
-            data["content_impact"] = {
-                "message": "Insufficient data to compute content impact."
-            }
-
-        # Content type breakdown
-        type_counts: dict[str, int] = {}
-        for item in content_items:
-            ct = item.content_type
-            type_counts[ct] = type_counts.get(ct, 0) + 1
-        data["content_type_breakdown"] = type_counts
 
         title = f"Content Performance Report — {datetime.utcnow().strftime('%b %d, %Y')}"
 
@@ -411,49 +373,3 @@ class ReportGeneratorService:
             "Generated content performance report %s for project %s", report.id, project_id
         )
         return report
-
-    @staticmethod
-    def _compute_content_impact(
-        content_items: list[Content],
-        trends: list[dict],
-    ) -> dict:
-        """Compare average visibility scores before and after the earliest content publication.
-
-        Returns a before/after comparison with delta.
-        """
-        # Find earliest published_at
-        published_dates = [
-            c.published_at for c in content_items if c.published_at is not None
-        ]
-        if not published_dates:
-            return {"message": "No content with publication dates."}
-
-        earliest = min(published_dates)
-
-        # Split trends into before and after
-        before_scores: list[float] = []
-        after_scores: list[float] = []
-
-        for trend in trends:
-            created_at = trend.get("created_at")
-            if created_at is None:
-                continue
-            trend_dt = datetime.fromisoformat(created_at)
-            avg_total = trend.get("avg_total", 0)
-            if trend_dt < earliest:
-                before_scores.append(avg_total)
-            else:
-                after_scores.append(avg_total)
-
-        avg_before = round(sum(before_scores) / len(before_scores), 2) if before_scores else 0
-        avg_after = round(sum(after_scores) / len(after_scores), 2) if after_scores else 0
-        delta = round(avg_after - avg_before, 2)
-
-        return {
-            "earliest_publication": earliest.isoformat(),
-            "runs_before": len(before_scores),
-            "runs_after": len(after_scores),
-            "avg_score_before": avg_before,
-            "avg_score_after": avg_after,
-            "score_delta": delta,
-        }

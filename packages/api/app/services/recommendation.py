@@ -14,7 +14,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.brand import Brand
 from app.models.engine_run import EngineRun
 from app.models.keyword import Keyword
-from app.models.knowledge import KnowledgeEntry
 from app.models.project import Project
 from app.models.recommendation import Recommendation
 from app.schemas.recommendation import (
@@ -172,23 +171,13 @@ class RecommendationService:
             ).all()
         )
 
-        # Load knowledge entries for context
-        knowledge_count = 0
-        if brand:
-            knowledge_result = await self.db.scalars(
-                select(KnowledgeEntry)
-                .where(KnowledgeEntry.brand_id == brand.id)
-                .limit(1)
-            )
-            knowledge_count = len(knowledge_result.all())
-
         # Build prompt
         prompt = self._build_prompt(
             brand=brand,
             summary=summary,
             by_query=by_query,
             keywords=keywords,
-            knowledge_count=knowledge_count,
+            knowledge_count=0,
             content_locale=project.content_locale or "en",
         )
 

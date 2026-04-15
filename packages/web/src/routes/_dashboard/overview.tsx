@@ -41,8 +41,6 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  BarChart,
-  Bar,
 } from "recharts";
 import { AvopPageHeader } from "@/components/avop";
 import { OverviewAssistantInsight } from "@/components/dashboard/overview-assistant-insight";
@@ -59,7 +57,6 @@ import {
   useScoresByEngine,
 } from "@/hooks/use-visibility";
 import { useProjects } from "@/hooks/use-projects";
-import { useTrafficData } from "@/hooks/use-analytics";
 import { useLocale } from "@/hooks/use-locale";
 import { formatDate } from "@/lib/format";
 import {
@@ -206,8 +203,6 @@ function OverviewPage() {
   });
   const scoreTrends = useScoreTrends(selectedProjectId ?? undefined);
   const scoresByEngine = useScoresByEngine(selectedProjectId ?? undefined);
-  const trafficData = useTrafficData(selectedProjectId ?? undefined);
-
   const projectDashboard = useProjectDashboard(selectedProjectId ?? undefined, period);
 
   const metricsLoading = visScore.isLoading || sentiment.isLoading;
@@ -608,153 +603,6 @@ function OverviewPage() {
         </Card>
       )}
 
-      {/* Website traffic */}
-      {hasProjects && (
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle>{t("traffic.title")}</CardTitle>
-                <CardDescription>{t("traffic.subtitle")}</CardDescription>
-              </div>
-              {trafficData.data && trafficData.data.daily.length > 0 && (
-                <span className="text-xs text-muted-foreground">
-                  {t("traffic.last30")}
-                </span>
-              )}
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {trafficData.isLoading && selectedProjectId ? (
-              <Skeleton className="h-48 w-full rounded-lg" />
-            ) : trafficData.data && trafficData.data.daily.length > 0 ? (
-              <>
-                {/* Summary cards */}
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="rounded-lg border p-4">
-                    <p className="text-xs text-muted-foreground">
-                      {t("traffic.sessions")}
-                    </p>
-                    <p className="text-2xl font-bold text-foreground mt-1">
-                      {trafficData.data.total_sessions.toLocaleString()}
-                    </p>
-                  </div>
-                  <div className="rounded-lg border p-4">
-                    <p className="text-xs text-muted-foreground">
-                      {t("traffic.pageviews")}
-                    </p>
-                    <p className="text-2xl font-bold text-foreground mt-1">
-                      {trafficData.data.total_pageviews.toLocaleString()}
-                    </p>
-                  </div>
-                  <div className="rounded-lg border p-4">
-                    <p className="text-xs text-muted-foreground">
-                      {t("traffic.users")}
-                    </p>
-                    <p className="text-2xl font-bold text-foreground mt-1">
-                      {trafficData.data.total_users.toLocaleString()}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Sessions chart */}
-                <ResponsiveContainer width="100%" height={200}>
-                  <LineChart data={trafficData.data.daily}>
-                    <CartesianGrid
-                      strokeDasharray="3 3"
-                      className="stroke-border"
-                    />
-                    <XAxis
-                      dataKey="date"
-                      tick={{ fontSize: 11 }}
-                      className="fill-muted-foreground"
-                      tickFormatter={(v) =>
-                        new Date(String(v)).toLocaleDateString(undefined, {
-                          month: "short",
-                          day: "numeric",
-                        })
-                      }
-                    />
-                    <YAxis
-                      tick={{ fontSize: 11 }}
-                      className="fill-muted-foreground"
-                    />
-                    <Tooltip
-                      contentStyle={{
-                        borderRadius: 8,
-                        border: "1px solid var(--border)",
-                        backgroundColor: "var(--popover)",
-                        color: "var(--popover-foreground)",
-                      }}
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="sessions"
-                      name={t("traffic.sessions")}
-                      stroke="var(--color-teal-500, #14b8a6)"
-                      strokeWidth={2}
-                      dot={false}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-
-                {/* Traffic sources breakdown */}
-                {Object.keys(trafficData.data.traffic_sources).length > 0 && (
-                  <div>
-                    <p className="text-sm font-medium text-foreground mb-3">
-                      {t("traffic.sources")}
-                    </p>
-                    <ResponsiveContainer width="100%" height={200}>
-                      <BarChart
-                        data={Object.entries(
-                          trafficData.data.traffic_sources,
-                        )
-                          .sort(([, a], [, b]) => b - a)
-                          .slice(0, 8)
-                          .map(([name, value]) => ({ name, value }))}
-                        layout="vertical"
-                      >
-                        <CartesianGrid
-                          strokeDasharray="3 3"
-                          className="stroke-border"
-                        />
-                        <XAxis type="number" tick={{ fontSize: 11 }} />
-                        <YAxis
-                          dataKey="name"
-                          type="category"
-                          tick={{ fontSize: 11 }}
-                          width={120}
-                        />
-                        <Tooltip
-                          contentStyle={{
-                            borderRadius: 8,
-                            border: "1px solid var(--border)",
-                            backgroundColor: "var(--popover)",
-                            color: "var(--popover-foreground)",
-                          }}
-                        />
-                        <Bar
-                          dataKey="value"
-                          name={t("traffic.sessions")}
-                          fill="var(--color-teal-500, #14b8a6)"
-                          radius={[0, 4, 4, 0]}
-                        />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                )}
-              </>
-            ) : (
-              <EmptyState
-                icon={BarChart3}
-                title={t("traffic.noData")}
-                description={t("traffic.noDataHint")}
-              />
-            )}
-          </CardContent>
-        </Card>
-      )}
-
       {/* Per-engine breakdown */}
       {(hasProjects || projectsLoading) && (
         <div>
@@ -852,10 +700,10 @@ function OverviewPage() {
               </Button>
             </Link>
           ) : null}
-          <Link to="/content">
+          <Link to="/assistant">
             <Button variant="secondary">
               <PenTool className="w-4 h-4" />
-              {t("quickActions.generateContent")}
+              {t("quickActions.openAssistant")}
             </Button>
           </Link>
           <Link to="/reports">

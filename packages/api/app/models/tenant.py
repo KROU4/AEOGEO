@@ -14,6 +14,7 @@ class Tenant(UUIDMixin, TimestampMixin, Base):
     name: Mapped[str] = mapped_column(String(255))
     slug: Mapped[str] = mapped_column(String(255), unique=True)
     is_active: Mapped[bool] = mapped_column(default=True)
+    plan: Mapped[str] = mapped_column(String(32), default="free", server_default="free")
 
     # -- relationships --
     users: Mapped[list["User"]] = relationship(back_populates="tenant")  # noqa: F821

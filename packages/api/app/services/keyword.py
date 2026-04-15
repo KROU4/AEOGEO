@@ -13,7 +13,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.brand import Brand
 from app.models.keyword import Keyword
-from app.models.knowledge import KnowledgeEntry
 from app.models.project import Project
 from app.schemas.keyword import (
     KeywordBulkCreate,
@@ -205,16 +204,7 @@ class KeywordService:
                 "Brand not found. Complete the brand setup first.",
             )
 
-        knowledge_entries = list(
-            (
-                await self.db.scalars(
-                    select(KnowledgeEntry)
-                    .where(KnowledgeEntry.brand_id == brand.id)
-                    .order_by(KnowledgeEntry.created_at.desc())
-                    .limit(80)
-                )
-            ).all()
-        )
+        knowledge_entries: list[str] = []
 
         # Build prompt
         prompt = self._build_generation_prompt(
@@ -272,7 +262,7 @@ class KeywordService:
     def _build_generation_prompt(
         self,
         brand: Brand,
-        knowledge_entries: list[KnowledgeEntry],
+        knowledge_entries: list[str],
         max_keywords: int,
         categories: list[str] | None,
         content_locale: str,
@@ -291,22 +281,24 @@ class KeywordService:
 
         sections.append("")
         sections.append("Knowledge excerpts:")
-        sections.append(self._format_knowledge(knowledge_entries, max_chars=12_000))
+        sections.append(self._format_knowledge_excerpts(knowledge_entries, max_chars=12_000))
         sections.append("")
         sections.append("Return the JSON object now.")
         return "\n".join(sections)
 
     @staticmethod
-    def _format_knowledge(entries: list[KnowledgeEntry], max_chars: int) -> str:
+    def _format_knowledge_excerpts(entries: list[str], max_chars: int) -> str:
+        if not entries:
+            return "(none — use brand fields only)"
         chunks: list[str] = []
         total = 0
-        for i, entry in enumerate(entries, 1):
-            content = re.sub(r"\s+", " ", entry.content or "").strip()
+        for i, raw in enumerate(entries, 1):
+            content = re.sub(r"\s+", " ", raw or "").strip()
             if not content:
                 continue
             if len(content) > 400:
                 content = content[:397] + "..."
-            line = f"[{i}] type={entry.type} content={content}"
+            line = f"[{i}] {content}"
             if total + len(line) > max_chars:
                 break
             chunks.append(line)

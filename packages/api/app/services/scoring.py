@@ -17,14 +17,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.models.answer import Answer
-from app.models.brand import Brand
 from app.models.citation import Citation
 from app.models.engine_run import EngineRun
-from app.models.knowledge import KnowledgeEntry
 from app.models.mention import Mention
 from app.models.visibility_score import VisibilityScore
-from app.utils.embeddings import generate_embedding
-
 logger = logging.getLogger(__name__)
 
 # Default scoring weights (equal 1/6 each)
@@ -192,73 +188,8 @@ class ScoringService:
             return 3.0
 
     async def _compute_accuracy_score(self, answer: Answer) -> float:
-        """Accuracy score: cosine similarity between answer embedding and top-3 knowledge entries.
-
-        Looks up the brand through the run's project, then queries pgvector
-        for the most similar knowledge entries.
-        """
-        # Load the run to get project_id -> brand
-        run_result = await self.db.execute(
-            select(EngineRun).where(EngineRun.id == answer.run_id)
-        )
-        run = run_result.scalar_one()
-
-        brand_result = await self.db.execute(
-            select(Brand).where(Brand.project_id == run.project_id)
-        )
-        brand = brand_result.scalar_one_or_none()
-
-        if brand is None:
-            return 5.0  # Default when no brand configured
-
-        # Check if any knowledge entries exist with embeddings
-        count_result = await self.db.execute(
-            select(func.count())
-            .select_from(KnowledgeEntry)
-            .where(
-                KnowledgeEntry.brand_id == brand.id,
-                KnowledgeEntry.embedding.isnot(None),
-            )
-        )
-        entry_count = count_result.scalar() or 0
-
-        if entry_count == 0:
-            return 5.0  # Default when no knowledge entries
-
-        # Generate embedding for the answer text
-        try:
-            answer_embedding = await generate_embedding(answer.raw_response)
-        except Exception:
-            logger.warning(
-                "Failed to generate embedding for answer %s, defaulting accuracy to 5.0",
-                answer.id,
-            )
-            return 5.0
-
-        # Find top-3 most similar knowledge entries via cosine distance
-        # pgvector cosine_distance returns distance (0 = identical, 2 = opposite)
-        # similarity = 1 - distance/2 (maps to 0..1 range)
-        similarity_expr = (
-            1 - KnowledgeEntry.embedding.cosine_distance(answer_embedding) / 2
-        )
-
-        top3_result = await self.db.execute(
-            select(similarity_expr.label("similarity"))
-            .where(
-                KnowledgeEntry.brand_id == brand.id,
-                KnowledgeEntry.embedding.isnot(None),
-            )
-            .order_by(KnowledgeEntry.embedding.cosine_distance(answer_embedding))
-            .limit(3)
-        )
-        similarities = [float(row.similarity) for row in top3_result]
-
-        if not similarities:
-            return 5.0
-
-        avg_similarity = sum(similarities) / len(similarities)
-        # Scale to 0-10
-        return min(max(avg_similarity * 10, 0.0), 10.0)
+        """Neutral accuracy score (knowledge-base similarity removed from product scope)."""
+        return 5.0
 
     @staticmethod
     def _compute_citation_score(citations: list[Citation]) -> float:

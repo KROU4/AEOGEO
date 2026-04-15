@@ -1,15 +1,20 @@
+# Продакшен: Vite → статика за nginx (порт 80). Для Railway обычно используют Dockerfile.railway.
+#
+# Сборка из корня репозитория:
+#   docker build -f packages/web/Dockerfile.prod \
+#     --build-arg VITE_API_URL=https://api.example.com \
+#     --build-arg VITE_CLERK_PUBLISHABLE_KEY=pk_live_... .
+
 FROM oven/bun:1 AS build
 WORKDIR /app
 
 COPY package.json bun.lock ./
 COPY packages/api/package.json ./packages/api/package.json
 COPY packages/web/package.json ./packages/web/package.json
-COPY packages/widget/package.json ./packages/widget/package.json
 
 RUN bun install --frozen-lockfile || bun install
 
 COPY packages/web ./packages/web
-COPY packages/widget ./packages/widget
 
 ARG VITE_API_URL=https://api.sand-source.com
 ARG VITE_CLERK_PUBLISHABLE_KEY

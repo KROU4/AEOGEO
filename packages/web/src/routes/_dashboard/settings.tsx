@@ -1,19 +1,19 @@
 import { useState, useEffect } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { useCurrentUser } from "@/hooks/use-auth";
 import { useLocale } from "@/hooks/use-locale";
 import { useTeamMembers } from "@/hooks/use-team";
 import { useProjects, useProject, useUpdateProject } from "@/hooks/use-projects";
+import { useBillingPlan } from "@/hooks/use-billing-plan";
 import {
-  useAnalyticsIntegrations,
-  useCreateAnalyticsIntegration,
-  useDeleteAnalyticsIntegration,
-  useTestAnalyticsConnection,
-  useSyncTraffic,
-  type AnalyticsIntegration,
-} from "@/hooks/use-analytics";
+  useTenantAiKeys,
+  useCreateTenantAiKey,
+  useRotateTenantAiKey,
+  useRevokeTenantAiKey,
+  useTestTenantAiKey,
+} from "@/hooks/use-tenant-ai-keys";
 import { InviteMemberDialog } from "@/components/settings/invite-member-dialog";
 import {
   Card,
@@ -47,7 +47,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Textarea } from "@/components/ui/textarea";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Progress } from "@/components/ui/progress";
 import {
   User,
   Users,
@@ -58,11 +65,10 @@ import {
   AlertTriangle,
   Globe,
   Sliders,
-  ExternalLink,
   Check,
   Loader2,
-  RefreshCw,
   Trash2,
+  CreditCard,
 } from "lucide-react";
 
 export const Route = createFileRoute("/_dashboard/settings")({
@@ -537,12 +543,71 @@ function TeamTab() {
   );
 }
 
+const AI_PROVIDERS = [
+  { id: "openai", label: "OpenAI" },
+  { id: "anthropic", label: "Anthropic" },
+  { id: "google", label: "Google AI" },
+  { id: "openrouter", label: "OpenRouter" },
+] as const;
+
 function ApiKeysTab() {
   const { t } = useTranslation("settings");
+  const { data: keys = [], isLoading } = useTenantAiKeys();
+  const createKey = useCreateTenantAiKey();
+  const rotateKey = useRotateTenantAiKey();
+  const revokeKey = useRevokeTenantAiKey();
+  const testKey = useTestTenantAiKey();
+
+  const [addOpen, setAddOpen] = useState(false);
+  const [rotateForId, setRotateForId] = useState<string | null>(null);
+  const [testingId, setTestingId] = useState<string | null>(null);
+  const [newLabel, setNewLabel] = useState("");
+  const [newProvider, setNewProvider] = useState<string>("openai");
+  const [newSecret, setNewSecret] = useState("");
+  const [rotateSecret, setRotateSecret] = useState("");
+
+  const resetAdd = () => {
+    setNewLabel("");
+    setNewProvider("openai");
+    setNewSecret("");
+  };
+
+  const handleAdd = () => {
+    if (!newLabel.trim() || !newSecret.trim()) return;
+    createKey.mutate(
+      {
+        provider: newProvider,
+        label: newLabel.trim(),
+        api_key: newSecret,
+      },
+      {
+        onSuccess: () => {
+          toast.success(t("apiKeys.toastAdded"));
+          setAddOpen(false);
+          resetAdd();
+        },
+        onError: () => toast.error(t("apiKeys.toastError")),
+      },
+    );
+  };
+
+  const handleRotate = () => {
+    if (!rotateForId || !rotateSecret.trim()) return;
+    rotateKey.mutate(
+      { keyId: rotateForId, newApiKey: rotateSecret.trim() },
+      {
+        onSuccess: () => {
+          toast.success(t("apiKeys.toastRotated"));
+          setRotateForId(null);
+          setRotateSecret("");
+        },
+        onError: () => toast.error(t("apiKeys.toastError")),
+      },
+    );
+  };
 
   return (
     <div className="space-y-6">
-      {/* Warning banner */}
       <div className="flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950 p-4">
         <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
         <div>
@@ -555,43 +620,193 @@ function ApiKeysTab() {
         </div>
       </div>
 
-      {/* AI Keys management link */}
       <Card>
-        <CardHeader>
-          <CardTitle>{t("apiKeys.aiKeysTitle")}</CardTitle>
-          <CardDescription>{t("apiKeys.aiKeysDesc")}</CardDescription>
+        <CardHeader className="flex flex-row items-start justify-between gap-4">
+          <div>
+            <CardTitle>{t("apiKeys.aiKeysTitle")}</CardTitle>
+            <CardDescription>{t("apiKeys.aiKeysDesc")}</CardDescription>
+          </div>
+          <Button onClick={() => setAddOpen(true)}>
+            <Plus className="w-4 h-4" />
+            {t("apiKeys.addKey")}
+          </Button>
         </CardHeader>
         <CardContent>
-          <Link to="/admin/ai-keys">
-            <Button variant="outline">
-              <Key className="w-4 h-4" />
-              {t("apiKeys.manageAiKeys")}
-              <ExternalLink className="w-3.5 h-3.5 ml-1" />
-            </Button>
-          </Link>
+          {isLoading ? (
+            <p className="text-sm text-muted-foreground py-6">{t("apiKeys.loading")}</p>
+          ) : keys.length === 0 ? (
+            <p className="text-sm text-muted-foreground py-4">{t("apiKeys.noneYet")}</p>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>{t("apiKeys.colLabel")}</TableHead>
+                  <TableHead>{t("apiKeys.colProvider")}</TableHead>
+                  <TableHead>{t("apiKeys.colHint")}</TableHead>
+                  <TableHead className="text-right">{t("apiKeys.colActions")}</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {keys.map((k) => (
+                  <TableRow key={k.id}>
+                    <TableCell className="font-medium">{k.label}</TableCell>
+                    <TableCell>{k.provider}</TableCell>
+                    <TableCell className="font-mono text-xs text-muted-foreground">
+                      {k.key_hint}
+                    </TableCell>
+                    <TableCell className="text-right space-x-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={testKey.isPending && testingId === k.id}
+                        onClick={() => {
+                          setTestingId(k.id);
+                          testKey.mutate(k.id, {
+                            onSettled: () => setTestingId(null),
+                            onSuccess: (res) => {
+                              if (res.success) toast.success(t("apiKeys.testOk"));
+                              else toast.error(res.error ?? t("apiKeys.testFail"));
+                            },
+                          });
+                        }}
+                      >
+                        {testKey.isPending && testingId === k.id ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        ) : (
+                          t("apiKeys.test")
+                        )}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setRotateForId(k.id);
+                          setRotateSecret("");
+                        }}
+                      >
+                        {t("apiKeys.rotate")}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        disabled={revokeKey.isPending}
+                        onClick={() =>
+                          revokeKey.mutate(k.id, {
+                            onSuccess: () => toast.success(t("apiKeys.toastRevoked")),
+                          })
+                        }
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
 
-      {/* API key generation */}
-      <Card>
-        <CardContent>
-          <div className="flex flex-col items-center justify-center py-12 text-center">
-            <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-4">
-              <Key className="w-6 h-6 text-muted-foreground" />
+      <Dialog open={addOpen} onOpenChange={(o) => { setAddOpen(o); if (!o) resetAdd(); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("apiKeys.addDialogTitle")}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label>{t("apiKeys.colProvider")}</Label>
+              <Select value={newProvider} onValueChange={setNewProvider}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {AI_PROVIDERS.map((p) => (
+                    <SelectItem key={p.id} value={p.id}>
+                      {p.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
-            <h3 className="text-base font-semibold text-foreground mb-1">
-              {t("apiKeys.emptyTitle")}
-            </h3>
-            <p className="text-sm text-muted-foreground max-w-[320px] mb-4">
-              {t("apiKeys.emptyText")}
-            </p>
-            <Button>
-              <Plus className="w-4 h-4" />
-              {t("apiKeys.generate")}
-            </Button>
+            <div className="space-y-2">
+              <Label htmlFor="key-label">{t("apiKeys.colLabel")}</Label>
+              <Input
+                id="key-label"
+                value={newLabel}
+                onChange={(e) => setNewLabel(e.target.value)}
+                placeholder={t("apiKeys.labelPlaceholder")}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="key-secret">{t("apiKeys.secretLabel")}</Label>
+              <Input
+                id="key-secret"
+                type="password"
+                autoComplete="off"
+                value={newSecret}
+                onChange={(e) => setNewSecret(e.target.value)}
+                placeholder={t("apiKeys.secretPlaceholder")}
+              />
+            </div>
           </div>
-        </CardContent>
-      </Card>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAddOpen(false)}>
+              {t("apiKeys.cancel")}
+            </Button>
+            <Button
+              onClick={handleAdd}
+              disabled={
+                !newLabel.trim() || !newSecret.trim() || createKey.isPending
+              }
+            >
+              {createKey.isPending && (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              )}
+              {t("apiKeys.saveKey")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={!!rotateForId}
+        onOpenChange={(o) => {
+          if (!o) {
+            setRotateForId(null);
+            setRotateSecret("");
+          }
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("apiKeys.rotateDialogTitle")}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2 py-2">
+            <Label htmlFor="rotate-secret">{t("apiKeys.secretLabel")}</Label>
+            <Input
+              id="rotate-secret"
+              type="password"
+              autoComplete="off"
+              value={rotateSecret}
+              onChange={(e) => setRotateSecret(e.target.value)}
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRotateForId(null)}>
+              {t("apiKeys.cancel")}
+            </Button>
+            <Button
+              onClick={handleRotate}
+              disabled={!rotateSecret.trim() || rotateKey.isPending}
+            >
+              {rotateKey.isPending && (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              )}
+              {t("apiKeys.saveKey")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
@@ -680,289 +895,132 @@ function NotificationsTab() {
   );
 }
 
-function AnalyticsProviderCard({
-  provider,
-  projectId,
-  existing,
-}: {
-  provider: "google_analytics" | "yandex_metrica";
-  projectId: string;
-  existing: AnalyticsIntegration | undefined;
-}) {
+function BillingTab() {
   const { t } = useTranslation("settings");
-  const prefix = provider === "google_analytics" ? "integrations.ga" : "integrations.ym";
-  const isGA = provider === "google_analytics";
+  const { data, isLoading, isError } = useBillingPlan();
+  const q = data?.quota;
 
-  const [externalId, setExternalId] = useState(existing?.external_id ?? "");
-  const [credentials, setCredentials] = useState("");
-
-  const createMutation = useCreateAnalyticsIntegration(projectId);
-  const deleteMutation = useDeleteAnalyticsIntegration(projectId);
-  const testMutation = useTestAnalyticsConnection(projectId);
-  const syncMutation = useSyncTraffic(projectId);
-
-  useEffect(() => {
-    setExternalId(existing?.external_id ?? "");
-    setCredentials("");
-  }, [existing]);
-
-  const handleSave = () => {
-    if (!externalId || !credentials) return;
-    createMutation.mutate(
-      { provider, external_id: externalId, credentials },
-      {
-        onSuccess: () => {
-          toast.success(t("integrations.saved"));
-          setCredentials("");
-        },
-      },
+  if (isLoading) {
+    return (
+      <p className="text-sm text-muted-foreground py-6">{t("billing.loading")}</p>
     );
-  };
+  }
+  if (isError || !data || !q) {
+    return (
+      <p className="text-sm text-destructive py-6">{t("billing.loadError")}</p>
+    );
+  }
 
-  const handleDisconnect = () => {
-    if (!existing) return;
-    deleteMutation.mutate(existing.id, {
-      onSuccess: () => {
-        toast.success(t("integrations.deleted"));
-        setExternalId("");
-      },
-    });
-  };
-
-  const handleTest = () => {
-    if (!existing) return;
-    testMutation.mutate(existing.id, {
-      onSuccess: (data) => {
-        if (data.success) {
-          toast.success(t("integrations.testResult.success"));
-        } else {
-          toast.error(t("integrations.testResult.failure"));
-        }
-      },
-    });
-  };
-
-  const isConnected = !!existing;
-
-  return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center shrink-0">
-              <span className="text-xs font-bold text-muted-foreground">
-                {isGA ? "GA" : "YM"}
-              </span>
-            </div>
-            <div>
-              <CardTitle className="text-base">{t(`${prefix}.title`)}</CardTitle>
-              <CardDescription>{t(`${prefix}.description`)}</CardDescription>
-            </div>
-          </div>
-          <Badge
-            variant="outline"
-            className={
-              isConnected
-                ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                : "bg-muted text-muted-foreground"
-            }
-          >
-            {isConnected
-              ? t("integrations.status.connected")
-              : t("integrations.status.disconnected")}
-          </Badge>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {/* External ID */}
-        <div className="space-y-1.5">
-          <Label>{t(isGA ? `${prefix}.propertyId` : `${prefix}.counterId`)}</Label>
-          <Input
-            value={externalId}
-            onChange={(e) => setExternalId(e.target.value)}
-            placeholder={t(
-              isGA ? `${prefix}.propertyIdPlaceholder` : `${prefix}.counterIdPlaceholder`,
-            )}
-            disabled={isConnected}
-          />
-          <p className="text-xs text-muted-foreground">
-            {t(isGA ? `${prefix}.propertyIdHint` : `${prefix}.counterIdHint`)}
-          </p>
-        </div>
-
-        {/* Credentials */}
-        {!isConnected && (
-          <div className="space-y-1.5">
-            <Label>{t(isGA ? `${prefix}.credentials` : `${prefix}.oauthToken`)}</Label>
-            {isGA ? (
-              <Textarea
-                value={credentials}
-                onChange={(e) => setCredentials(e.target.value)}
-                placeholder={t(`${prefix}.credentialsPlaceholder`)}
-                rows={4}
-                className="font-mono text-xs"
-              />
-            ) : (
-              <Input
-                type="password"
-                value={credentials}
-                onChange={(e) => setCredentials(e.target.value)}
-                placeholder={t(`${prefix}.oauthTokenPlaceholder`)}
-              />
-            )}
-            <p className="text-xs text-muted-foreground">
-              {t(isGA ? `${prefix}.credentialsHint` : `${prefix}.oauthTokenHint`)}
-            </p>
-          </div>
-        )}
-
-        {/* Last synced */}
-        {isConnected && existing?.last_synced_at && (
-          <p className="text-xs text-muted-foreground">
-            {t("integrations.status.lastSynced", {
-              time: new Date(existing.last_synced_at).toLocaleString(),
-            })}
-          </p>
-        )}
-
-        {/* Actions */}
-        <div className="flex gap-2 flex-wrap">
-          {isConnected ? (
-            <>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={handleTest}
-                disabled={testMutation.isPending}
-              >
-                {testMutation.isPending && (
-                  <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
-                )}
-                {t("integrations.actions.testConnection")}
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => syncMutation.mutate()}
-                disabled={syncMutation.isPending}
-              >
-                {syncMutation.isPending ? (
-                  <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
-                ) : (
-                  <RefreshCw className="w-3.5 h-3.5 mr-1.5" />
-                )}
-                {syncMutation.isPending
-                  ? t("integrations.actions.syncing")
-                  : t("integrations.actions.syncNow")}
-              </Button>
-              <Button
-                size="sm"
-                variant="destructive"
-                onClick={handleDisconnect}
-                disabled={deleteMutation.isPending}
-              >
-                <Trash2 className="w-3.5 h-3.5 mr-1.5" />
-                {t("integrations.actions.disconnect")}
-              </Button>
-            </>
-          ) : (
-            <Button
-              size="sm"
-              onClick={handleSave}
-              disabled={!externalId || !credentials || createMutation.isPending}
-            >
-              {createMutation.isPending && (
-                <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
-              )}
-              {t("integrations.actions.save")}
-            </Button>
-          )}
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-function IntegrationsTab() {
-  const { t } = useTranslation("settings");
-  const { data: projectsData } = useProjects();
-  const projects = projectsData?.items ?? [];
-  const [selectedProjectId, setSelectedProjectId] = useState<string>("");
-
-  const { data: integrations } = useAnalyticsIntegrations(
-    selectedProjectId || undefined,
-  );
-
-  useEffect(() => {
-    const first = projects[0];
-    if (first && !selectedProjectId) {
-      setSelectedProjectId(first.id);
-    }
-  }, [projects, selectedProjectId]);
-
-  const gaIntegration = integrations?.find(
-    (i) => i.provider === "google_analytics",
-  );
-  const ymIntegration = integrations?.find(
-    (i) => i.provider === "yandex_metrica",
-  );
+  const tokenPct =
+    q.tokens_pct != null ? Math.min(100, Math.round(q.tokens_pct)) : 0;
+  const costPct =
+    q.cost_pct != null ? Math.min(100, Math.round(q.cost_pct)) : 0;
 
   return (
     <div className="space-y-6">
       <div>
         <h3 className="text-lg font-semibold text-foreground">
-          {t("integrations.title")}
+          {t("billing.title")}
         </h3>
         <p className="text-sm text-muted-foreground mt-0.5">
-          {t("integrations.subtitle")}
+          {t("billing.subtitle")}
         </p>
       </div>
 
-      {projects.length === 0 ? (
-        <p className="text-sm text-muted-foreground">
-          {t("integrations.noProjects")}
-        </p>
-      ) : (
-        <>
-          {/* Project selector */}
-          <div className="space-y-1.5">
-            <Label>{t("integrations.selectProject")}</Label>
-            <Select
-              value={selectedProjectId}
-              onValueChange={setSelectedProjectId}
-            >
-              <SelectTrigger className="w-full max-w-sm">
-                <SelectValue
-                  placeholder={t("integrations.selectProjectPlaceholder")}
-                />
-              </SelectTrigger>
-              <SelectContent>
-                {projects.map((p) => (
-                  <SelectItem key={p.id} value={p.id}>
-                    {p.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle className="text-base">{t("billing.planLabel")}</CardTitle>
+          <Badge variant="secondary" className="capitalize">
+            {data.plan}
+          </Badge>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="space-y-2">
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">{t("billing.tokenBudget")}</span>
+              <span className="font-medium tabular-nums">
+                {q.tokens_limit != null
+                  ? t("billing.xOfY", {
+                      current: q.tokens_used.toLocaleString(),
+                      max: q.tokens_limit.toLocaleString(),
+                    })
+                  : t("billing.unlimited")}
+              </span>
+            </div>
+            {q.tokens_limit != null && (
+              <Progress value={tokenPct} className="h-2" />
+            )}
           </div>
 
-          {selectedProjectId && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <AnalyticsProviderCard
-                provider="google_analytics"
-                projectId={selectedProjectId}
-                existing={gaIntegration}
-              />
-              <AnalyticsProviderCard
-                provider="yandex_metrica"
-                projectId={selectedProjectId}
-                existing={ymIntegration}
-              />
+          <div className="space-y-2">
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">{t("billing.costBudget")}</span>
+              <span className="font-medium tabular-nums">
+                {q.cost_limit != null
+                  ? t("billing.xOfY", {
+                      current: q.cost_used.toFixed(2),
+                      max: q.cost_limit.toFixed(2),
+                    })
+                  : t("billing.unlimited")}
+              </span>
+            </div>
+            {q.cost_limit != null && q.cost_limit > 0 && (
+              <Progress value={costPct} className="h-2" />
+            )}
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-border">
+            <div>
+              <p className="text-xs text-muted-foreground">{t("billing.requestsToday")}</p>
+              <p className="text-lg font-semibold tabular-nums">
+                {q.requests_today}
+                {q.requests_day_limit != null && (
+                  <span className="text-sm font-normal text-muted-foreground">
+                    {" "}
+                    / {q.requests_day_limit}
+                  </span>
+                )}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">
+                {t("billing.requestsThisMonth")}
+              </p>
+              <p className="text-lg font-semibold tabular-nums">
+                {q.requests_this_month}
+              </p>
+            </div>
+          </div>
+
+          {q.limit_reached && (
+            <div className="rounded-lg border border-destructive/40 bg-destructive/5 p-3 text-sm text-destructive">
+              {t("billing.limitReached")}
             </div>
           )}
-        </>
-      )}
+          {q.warning_active && !q.limit_reached && (
+            <div className="rounded-lg border border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950 p-3 text-sm text-amber-900 dark:text-amber-200">
+              {t("billing.warningMessage")}
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
+  );
+}
+
+function IntegrationsTab() {
+  const { t } = useTranslation("settings");
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>{t("integrations.title")}</CardTitle>
+        <CardDescription>{t("integrations.subtitle")}</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <p className="text-sm text-muted-foreground">{t("integrations.avopStub")}</p>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -1003,6 +1061,10 @@ function SettingsPage() {
               <Key className="w-4 h-4" />
               {t("tabs.apiKeys")}
             </TabsTrigger>
+            <TabsTrigger value="billing" className="justify-start gap-2">
+              <CreditCard className="w-4 h-4" />
+              {t("tabs.billing")}
+            </TabsTrigger>
             <TabsTrigger
               value="notifications"
               className="justify-start gap-2"
@@ -1032,6 +1094,9 @@ function SettingsPage() {
             </TabsContent>
             <TabsContent value="api-keys">
               <ApiKeysTab />
+            </TabsContent>
+            <TabsContent value="billing">
+              <BillingTab />
             </TabsContent>
             <TabsContent value="notifications">
               <NotificationsTab />

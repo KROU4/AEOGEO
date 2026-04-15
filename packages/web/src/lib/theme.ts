@@ -2,7 +2,7 @@ export type Theme = "light" | "dark" | "system";
 const THEME_KEY = "aeogeo_theme";
 
 export function getTheme(): Theme {
-  return (localStorage.getItem(THEME_KEY) as Theme) || "system";
+  return (localStorage.getItem(THEME_KEY) as Theme) || "dark";
 }
 
 export function setTheme(theme: Theme): void {
