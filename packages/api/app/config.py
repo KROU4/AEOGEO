@@ -9,6 +9,8 @@ class Settings(BaseSettings):
     redis_url: str = "redis://localhost:6379"
     secret_key: str = "change-me"
     cors_origins: str = "http://localhost:5173"
+    # Optional: single regex (e.g. https://.*\\.up\\.railway\\.app) when the web URL changes per deploy.
+    cors_origin_regex: str = ""
     debug: bool = False
     access_token_expire_minutes: int = 30
     refresh_token_expire_days: int = 7
@@ -27,7 +29,11 @@ class Settings(BaseSettings):
 
     @property
     def cors_origins_list(self) -> list[str]:
-        return [origin.strip() for origin in self.cors_origins.split(",")]
+        return [
+            origin.strip().rstrip("/")
+            for origin in self.cors_origins.split(",")
+            if origin.strip()
+        ]
 
     @property
     def clerk_enabled(self) -> bool:
