@@ -1,19 +1,11 @@
 import { useState, useEffect } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
 import { useCurrentUser } from "@/hooks/use-auth";
 import { useLocale } from "@/hooks/use-locale";
 import { useTeamMembers } from "@/hooks/use-team";
 import { useProjects, useProject, useUpdateProject } from "@/hooks/use-projects";
 import { useBillingPlan } from "@/hooks/use-billing-plan";
-import {
-  useTenantAiKeys,
-  useCreateTenantAiKey,
-  useRotateTenantAiKey,
-  useRevokeTenantAiKey,
-  useTestTenantAiKey,
-} from "@/hooks/use-tenant-ai-keys";
 import { InviteMemberDialog } from "@/components/settings/invite-member-dialog";
 import {
   Card,
@@ -47,27 +39,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
 import {
   User,
   Users,
-  Key,
   Bell,
   Puzzle,
   Plus,
-  AlertTriangle,
   Globe,
   Sliders,
   Check,
-  Loader2,
-  Trash2,
   CreditCard,
 } from "lucide-react";
 
@@ -543,273 +524,6 @@ function TeamTab() {
   );
 }
 
-const AI_PROVIDERS = [
-  { id: "openai", label: "OpenAI" },
-  { id: "anthropic", label: "Anthropic" },
-  { id: "google", label: "Google AI" },
-  { id: "openrouter", label: "OpenRouter" },
-] as const;
-
-function ApiKeysTab() {
-  const { t } = useTranslation("settings");
-  const { data: keys = [], isLoading } = useTenantAiKeys();
-  const createKey = useCreateTenantAiKey();
-  const rotateKey = useRotateTenantAiKey();
-  const revokeKey = useRevokeTenantAiKey();
-  const testKey = useTestTenantAiKey();
-
-  const [addOpen, setAddOpen] = useState(false);
-  const [rotateForId, setRotateForId] = useState<string | null>(null);
-  const [testingId, setTestingId] = useState<string | null>(null);
-  const [newLabel, setNewLabel] = useState("");
-  const [newProvider, setNewProvider] = useState<string>("openai");
-  const [newSecret, setNewSecret] = useState("");
-  const [rotateSecret, setRotateSecret] = useState("");
-
-  const resetAdd = () => {
-    setNewLabel("");
-    setNewProvider("openai");
-    setNewSecret("");
-  };
-
-  const handleAdd = () => {
-    if (!newLabel.trim() || !newSecret.trim()) return;
-    createKey.mutate(
-      {
-        provider: newProvider,
-        label: newLabel.trim(),
-        api_key: newSecret,
-      },
-      {
-        onSuccess: () => {
-          toast.success(t("apiKeys.toastAdded"));
-          setAddOpen(false);
-          resetAdd();
-        },
-        onError: () => toast.error(t("apiKeys.toastError")),
-      },
-    );
-  };
-
-  const handleRotate = () => {
-    if (!rotateForId || !rotateSecret.trim()) return;
-    rotateKey.mutate(
-      { keyId: rotateForId, newApiKey: rotateSecret.trim() },
-      {
-        onSuccess: () => {
-          toast.success(t("apiKeys.toastRotated"));
-          setRotateForId(null);
-          setRotateSecret("");
-        },
-        onError: () => toast.error(t("apiKeys.toastError")),
-      },
-    );
-  };
-
-  return (
-    <div className="space-y-6">
-      <div className="flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950 p-4">
-        <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-        <div>
-          <p className="text-sm font-medium text-amber-800 dark:text-amber-300">
-            {t("apiKeys.warningTitle")}
-          </p>
-          <p className="text-sm text-amber-700 dark:text-amber-400 mt-0.5">
-            {t("apiKeys.warningText")}
-          </p>
-        </div>
-      </div>
-
-      <Card>
-        <CardHeader className="flex flex-row items-start justify-between gap-4">
-          <div>
-            <CardTitle>{t("apiKeys.aiKeysTitle")}</CardTitle>
-            <CardDescription>{t("apiKeys.aiKeysDesc")}</CardDescription>
-          </div>
-          <Button onClick={() => setAddOpen(true)}>
-            <Plus className="w-4 h-4" />
-            {t("apiKeys.addKey")}
-          </Button>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <p className="text-sm text-muted-foreground py-6">{t("apiKeys.loading")}</p>
-          ) : keys.length === 0 ? (
-            <p className="text-sm text-muted-foreground py-4">{t("apiKeys.noneYet")}</p>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{t("apiKeys.colLabel")}</TableHead>
-                  <TableHead>{t("apiKeys.colProvider")}</TableHead>
-                  <TableHead>{t("apiKeys.colHint")}</TableHead>
-                  <TableHead className="text-right">{t("apiKeys.colActions")}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {keys.map((k) => (
-                  <TableRow key={k.id}>
-                    <TableCell className="font-medium">{k.label}</TableCell>
-                    <TableCell>{k.provider}</TableCell>
-                    <TableCell className="font-mono text-xs text-muted-foreground">
-                      {k.key_hint}
-                    </TableCell>
-                    <TableCell className="text-right space-x-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        disabled={testKey.isPending && testingId === k.id}
-                        onClick={() => {
-                          setTestingId(k.id);
-                          testKey.mutate(k.id, {
-                            onSettled: () => setTestingId(null),
-                            onSuccess: (res) => {
-                              if (res.success) toast.success(t("apiKeys.testOk"));
-                              else toast.error(res.error ?? t("apiKeys.testFail"));
-                            },
-                          });
-                        }}
-                      >
-                        {testKey.isPending && testingId === k.id ? (
-                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                        ) : (
-                          t("apiKeys.test")
-                        )}
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => {
-                          setRotateForId(k.id);
-                          setRotateSecret("");
-                        }}
-                      >
-                        {t("apiKeys.rotate")}
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        disabled={revokeKey.isPending}
-                        onClick={() =>
-                          revokeKey.mutate(k.id, {
-                            onSuccess: () => toast.success(t("apiKeys.toastRevoked")),
-                          })
-                        }
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
-
-      <Dialog open={addOpen} onOpenChange={(o) => { setAddOpen(o); if (!o) resetAdd(); }}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{t("apiKeys.addDialogTitle")}</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-2">
-            <div className="space-y-2">
-              <Label>{t("apiKeys.colProvider")}</Label>
-              <Select value={newProvider} onValueChange={setNewProvider}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {AI_PROVIDERS.map((p) => (
-                    <SelectItem key={p.id} value={p.id}>
-                      {p.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="key-label">{t("apiKeys.colLabel")}</Label>
-              <Input
-                id="key-label"
-                value={newLabel}
-                onChange={(e) => setNewLabel(e.target.value)}
-                placeholder={t("apiKeys.labelPlaceholder")}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="key-secret">{t("apiKeys.secretLabel")}</Label>
-              <Input
-                id="key-secret"
-                type="password"
-                autoComplete="off"
-                value={newSecret}
-                onChange={(e) => setNewSecret(e.target.value)}
-                placeholder={t("apiKeys.secretPlaceholder")}
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setAddOpen(false)}>
-              {t("apiKeys.cancel")}
-            </Button>
-            <Button
-              onClick={handleAdd}
-              disabled={
-                !newLabel.trim() || !newSecret.trim() || createKey.isPending
-              }
-            >
-              {createKey.isPending && (
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              )}
-              {t("apiKeys.saveKey")}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog
-        open={!!rotateForId}
-        onOpenChange={(o) => {
-          if (!o) {
-            setRotateForId(null);
-            setRotateSecret("");
-          }
-        }}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{t("apiKeys.rotateDialogTitle")}</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-2 py-2">
-            <Label htmlFor="rotate-secret">{t("apiKeys.secretLabel")}</Label>
-            <Input
-              id="rotate-secret"
-              type="password"
-              autoComplete="off"
-              value={rotateSecret}
-              onChange={(e) => setRotateSecret(e.target.value)}
-            />
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setRotateForId(null)}>
-              {t("apiKeys.cancel")}
-            </Button>
-            <Button
-              onClick={handleRotate}
-              disabled={!rotateSecret.trim() || rotateKey.isPending}
-            >
-              {rotateKey.isPending && (
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              )}
-              {t("apiKeys.saveKey")}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
-  );
-}
 
 function NotificationsTab() {
   const { t } = useTranslation("settings");
@@ -1057,10 +771,6 @@ function SettingsPage() {
               <Users className="w-4 h-4" />
               {t("tabs.team")}
             </TabsTrigger>
-            <TabsTrigger value="api-keys" className="justify-start gap-2">
-              <Key className="w-4 h-4" />
-              {t("tabs.apiKeys")}
-            </TabsTrigger>
             <TabsTrigger value="billing" className="justify-start gap-2">
               <CreditCard className="w-4 h-4" />
               {t("tabs.billing")}
@@ -1091,9 +801,6 @@ function SettingsPage() {
             </TabsContent>
             <TabsContent value="team">
               <TeamTab />
-            </TabsContent>
-            <TabsContent value="api-keys">
-              <ApiKeysTab />
             </TabsContent>
             <TabsContent value="billing">
               <BillingTab />

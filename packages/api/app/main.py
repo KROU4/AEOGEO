@@ -25,6 +25,7 @@ from app.routers import (
     runs,
     schedules,
     scores,
+    site_audit,
     tenant_ai_keys,
     usage,
 )
@@ -66,6 +67,8 @@ app.include_router(project_answers.router, prefix="/api/v1")
 app.include_router(public.router, prefix="/api/v1")
 # Public quick GEO audit (rate-limited by IP hash)
 app.include_router(audit.router, prefix="/api/v1")
+# Site GEO audit per project
+app.include_router(site_audit.router, prefix="/api/v1")
 
 
 @app.get("/api/v1/health")

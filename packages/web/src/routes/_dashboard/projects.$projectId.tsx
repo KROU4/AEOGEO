@@ -32,6 +32,7 @@ import {
   Play,
   BarChart3,
   Trash2,
+  ScanSearch,
 } from "lucide-react";
 import { useProject, useDeleteProject } from "@/hooks/use-projects";
 import { useQuerySets } from "@/hooks/use-queries";
@@ -64,7 +65,9 @@ function ProjectDetailPage() {
     ? "runs"
     : lastPath.endsWith("/queries")
       ? "queries"
-      : "overview";
+      : lastPath.endsWith("/site-audit")
+        ? "site-audit"
+        : "overview";
 
   const querySets = querySetsData?.items ?? [];
   const runs = runsData?.items ?? [];
@@ -263,6 +266,15 @@ function ProjectDetailPage() {
               {tr("title")}
             </Link>
           </TabsTrigger>
+          <TabsTrigger value="site-audit" asChild>
+            <Link
+              to="/projects/$projectId/site-audit"
+              params={{ projectId }}
+            >
+              <ScanSearch className="w-3 h-3 mr-1.5" />
+              Site Audit
+            </Link>
+          </TabsTrigger>
         </TabsList>
       </Tabs>
 
@@ -278,6 +290,7 @@ function ProjectDetailPage() {
       ) : (
         <Outlet />
       )}
+
     </div>
   );
 }

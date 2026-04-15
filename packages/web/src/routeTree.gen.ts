@@ -33,6 +33,7 @@ import { Route as SharedReportsShareTokenRouteImport } from "./routes/shared.rep
 import { Route as DashboardReportsReportIdRouteImport } from "./routes/_dashboard/reports.$reportId"
 import { Route as DashboardProjectsNewRouteImport } from "./routes/_dashboard/projects_.new"
 import { Route as DashboardProjectsProjectIdRouteImport } from "./routes/_dashboard/projects.$projectId"
+import { Route as DashboardProjectsProjectIdSiteAuditRouteImport } from "./routes/_dashboard/projects.$projectId.site-audit"
 import { Route as DashboardProjectsProjectIdRunsRouteImport } from "./routes/_dashboard/projects.$projectId.runs"
 import { Route as DashboardProjectsProjectIdQueriesRouteImport } from "./routes/_dashboard/projects.$projectId.queries"
 import { Route as DashboardProjectsProjectIdAnswersRouteImport } from "./routes/_dashboard/projects.$projectId.answers"
@@ -156,6 +157,12 @@ const DashboardProjectsProjectIdRoute =
     path: "/$projectId",
     getParentRoute: () => DashboardProjectsRoute,
   } as any)
+const DashboardProjectsProjectIdSiteAuditRoute =
+  DashboardProjectsProjectIdSiteAuditRouteImport.update({
+    id: "/site-audit",
+    path: "/site-audit",
+    getParentRoute: () => DashboardProjectsProjectIdRoute,
+  } as any)
 const DashboardProjectsProjectIdRunsRoute =
   DashboardProjectsProjectIdRunsRouteImport.update({
     id: "/runs",
@@ -200,6 +207,7 @@ export interface FileRoutesByFullPath {
   "/projects/$projectId/answers": typeof DashboardProjectsProjectIdAnswersRoute
   "/projects/$projectId/queries": typeof DashboardProjectsProjectIdQueriesRoute
   "/projects/$projectId/runs": typeof DashboardProjectsProjectIdRunsRoute
+  "/projects/$projectId/site-audit": typeof DashboardProjectsProjectIdSiteAuditRoute
 }
 export interface FileRoutesByTo {
   "/": typeof IndexRoute
@@ -226,6 +234,7 @@ export interface FileRoutesByTo {
   "/projects/$projectId/answers": typeof DashboardProjectsProjectIdAnswersRoute
   "/projects/$projectId/queries": typeof DashboardProjectsProjectIdQueriesRoute
   "/projects/$projectId/runs": typeof DashboardProjectsProjectIdRunsRoute
+  "/projects/$projectId/site-audit": typeof DashboardProjectsProjectIdSiteAuditRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -256,6 +265,7 @@ export interface FileRoutesById {
   "/_dashboard/projects/$projectId/answers": typeof DashboardProjectsProjectIdAnswersRoute
   "/_dashboard/projects/$projectId/queries": typeof DashboardProjectsProjectIdQueriesRoute
   "/_dashboard/projects/$projectId/runs": typeof DashboardProjectsProjectIdRunsRoute
+  "/_dashboard/projects/$projectId/site-audit": typeof DashboardProjectsProjectIdSiteAuditRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -284,6 +294,7 @@ export interface FileRouteTypes {
     | "/projects/$projectId/answers"
     | "/projects/$projectId/queries"
     | "/projects/$projectId/runs"
+    | "/projects/$projectId/site-audit"
   fileRoutesByTo: FileRoutesByTo
   to:
     | "/"
@@ -310,6 +321,7 @@ export interface FileRouteTypes {
     | "/projects/$projectId/answers"
     | "/projects/$projectId/queries"
     | "/projects/$projectId/runs"
+    | "/projects/$projectId/site-audit"
   id:
     | "__root__"
     | "/"
@@ -339,6 +351,7 @@ export interface FileRouteTypes {
     | "/_dashboard/projects/$projectId/answers"
     | "/_dashboard/projects/$projectId/queries"
     | "/_dashboard/projects/$projectId/runs"
+    | "/_dashboard/projects/$projectId/site-audit"
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -519,6 +532,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof DashboardProjectsProjectIdRouteImport
       parentRoute: typeof DashboardProjectsRoute
     }
+    "/_dashboard/projects/$projectId/site-audit": {
+      id: "/_dashboard/projects/$projectId/site-audit"
+      path: "/site-audit"
+      fullPath: "/projects/$projectId/site-audit"
+      preLoaderRoute: typeof DashboardProjectsProjectIdSiteAuditRouteImport
+      parentRoute: typeof DashboardProjectsProjectIdRoute
+    }
     "/_dashboard/projects/$projectId/runs": {
       id: "/_dashboard/projects/$projectId/runs"
       path: "/runs"
@@ -567,6 +587,7 @@ interface DashboardProjectsProjectIdRouteChildren {
   DashboardProjectsProjectIdAnswersRoute: typeof DashboardProjectsProjectIdAnswersRoute
   DashboardProjectsProjectIdQueriesRoute: typeof DashboardProjectsProjectIdQueriesRoute
   DashboardProjectsProjectIdRunsRoute: typeof DashboardProjectsProjectIdRunsRoute
+  DashboardProjectsProjectIdSiteAuditRoute: typeof DashboardProjectsProjectIdSiteAuditRoute
 }
 
 const DashboardProjectsProjectIdRouteChildren: DashboardProjectsProjectIdRouteChildren =
@@ -576,6 +597,8 @@ const DashboardProjectsProjectIdRouteChildren: DashboardProjectsProjectIdRouteCh
     DashboardProjectsProjectIdQueriesRoute:
       DashboardProjectsProjectIdQueriesRoute,
     DashboardProjectsProjectIdRunsRoute: DashboardProjectsProjectIdRunsRoute,
+    DashboardProjectsProjectIdSiteAuditRoute:
+      DashboardProjectsProjectIdSiteAuditRoute,
   }
 
 const DashboardProjectsProjectIdRouteWithChildren =

@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import Any
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class QuickAuditResult(BaseModel):
@@ -117,6 +117,8 @@ class PlatformScores(BaseModel):
 
 
 class FullSiteAuditResult(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
     url: str
     overall_geo_score: float = Field(ge=0, le=100)
     citability_score: float = Field(ge=0, le=100)

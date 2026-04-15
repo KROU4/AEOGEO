@@ -28,6 +28,7 @@ from app.workflows.run_engine import (
 from app.workflows.parse_answers import ParseAnswersWorkflow, parse_run_answers_activity
 from app.workflows.score_run import ScoreRunWorkflow
 from app.workflows.scheduled_run import ScheduledRunWorkflow, create_engine_run_activity
+from app.workflows.site_audit import SiteAuditWorkflow, run_site_audit_activity
 
 logger = logging.getLogger(__name__)
 
@@ -59,6 +60,7 @@ async def main() -> None:
             ParseAnswersWorkflow,
             ScoreRunWorkflow,
             ScheduledRunWorkflow,
+            SiteAuditWorkflow,
         ],
         activities=[
             parse_answers_activity,
@@ -68,6 +70,7 @@ async def main() -> None:
             load_run_queries_activity,
             execute_single_query_activity,
             create_engine_run_activity,
+            run_site_audit_activity,
         ],
     )
 
