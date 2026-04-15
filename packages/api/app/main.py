@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 
-from app.middleware.cors import setup_cors
+# CORS — раскомментируй import + setup_cors(app) ниже для продакшена / кросс-доменного фронта.
+# from app.middleware.cors import setup_cors
 from app.routers import (
     admin_keys,
     admin_usage,
@@ -35,7 +36,7 @@ app = FastAPI(
     version="0.1.0",
 )
 
-setup_cors(app)
+# setup_cors(app)
 
 app.include_router(auth.router, prefix="/api/v1")
 app.include_router(dashboard.router, prefix="/api/v1")
