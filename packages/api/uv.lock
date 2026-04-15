@@ -10,7 +10,6 @@ dependencies = [
     { name = "aeogeo-geo-audit" },
     { name = "alembic" },
     { name = "asyncpg" },
-    { name = "crawl4ai" },
     { name = "cryptography" },
     { name = "email-validator" },
     { name = "fastapi" },
@@ -18,7 +17,6 @@ dependencies = [
     { name = "numpy" },
     { name = "passlib", extra = ["bcrypt"] },
     { name = "pgvector" },
-    { name = "playwright" },
     { name = "pydantic" },
     { name = "pydantic-settings" },
     { name = "pymupdf" },
@@ -31,8 +29,13 @@ dependencies = [
     { name = "sqlalchemy", extra = ["asyncio"] },
     { name = "svix" },
     { name = "temporalio" },
-    { name = "tiktoken" },
     { name = "uvicorn", extra = ["standard"] },
+]
+
+[package.optional-dependencies]
+crawl = [
+    { name = "crawl4ai" },
+    { name = "playwright" },
 ]
 
 [package.dev-dependencies]
@@ -49,7 +52,7 @@ requires-dist = [
     { name = "aeogeo-geo-audit", editable = "../geo-audit" },
     { name = "alembic" },
     { name = "asyncpg" },
-    { name = "crawl4ai" },
+    { name = "crawl4ai", marker = "extra == 'crawl'" },
     { name = "cryptography" },
     { name = "email-validator" },
     { name = "fastapi" },
@@ -57,7 +60,7 @@ requires-dist = [
     { name = "numpy" },
     { name = "passlib", extras = ["bcrypt"] },
     { name = "pgvector" },
-    { name = "playwright" },
+    { name = "playwright", marker = "extra == 'crawl'" },
     { name = "pydantic", specifier = ">=2.0" },
     { name = "pydantic-settings" },
     { name = "pymupdf" },
@@ -70,9 +73,9 @@ requires-dist = [
     { name = "sqlalchemy", extras = ["asyncio"] },
     { name = "svix" },
     { name = "temporalio" },
-    { name = "tiktoken" },
     { name = "uvicorn", extras = ["standard"] },
 ]
+provides-extras = ["crawl"]
 
 [package.metadata.requires-dev]
 dev = [

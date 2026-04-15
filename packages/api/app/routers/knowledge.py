@@ -168,6 +168,7 @@ async def crawl_website(
     user: User = Depends(get_current_user),
 ) -> CrawlResponse:
     """Crawl a website and extract knowledge entries for the project's brand."""
+    from app.crawl_availability import CrawlStackUnavailableError
     from app.services.ai_client import AIClient
     from app.services.brand import BrandService
     from app.services.ingestion import IngestionService
@@ -198,6 +199,11 @@ async def crawl_website(
             max_pages=body.max_pages,
             max_depth=2,
         )
+    except CrawlStackUnavailableError as e:
+        raise HTTPException(
+            status_code=503,
+            detail={"code": "crawl.not_installed", "message": str(e)},
+        ) from e
     except Exception as e:
         logger.error("Crawl failed for project %s: %s", project_id, e)
         raise HTTPException(status_code=502, detail=f"Crawl failed: {e}")
@@ -280,11 +286,20 @@ async def crawl_website_stream(
     user: User = Depends(get_current_user),
 ) -> StreamingResponse:
     """Crawl a website and stream progress via SSE."""
-    from crawl4ai import AsyncWebCrawler, BrowserConfig, CrawlerRunConfig
-
+    from app.crawl_availability import CrawlStackUnavailableError, require_crawl_stack
     from app.services.ai_client import AIClient
     from app.services.brand import BrandService
     from app.services.ingestion import IngestionService
+
+    try:
+        require_crawl_stack()
+    except CrawlStackUnavailableError as e:
+        raise HTTPException(
+            status_code=503,
+            detail={"code": "crawl.not_installed", "message": str(e)},
+        ) from e
+
+    from crawl4ai import AsyncWebCrawler, BrowserConfig, CrawlerRunConfig
 
     # Resolve brand before entering generator
     brand_service = BrandService(db)

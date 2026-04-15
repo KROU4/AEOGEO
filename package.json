@@ -4,6 +4,7 @@
   "workspaces": ["packages/*"],
   "scripts": {
     "dev": "docker compose up --build",
+    "dev:full": "docker compose --profile temporal up --build",
     "dev:api": "cd packages/api && uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000",
     "dev:widget": "cd packages/widget && bun run dev",
     "dev:web": "cd packages/web && bun run dev",

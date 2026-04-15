@@ -18,18 +18,21 @@ dependencies = [
     "cryptography",
     "redis[hiredis]",
     "httpx",
-    "tiktoken",
     "pgvector",
-    "crawl4ai",
     "pymupdf",
     "reportlab",
     "python-docx",
     "temporalio",
     "numpy",
-    "playwright",
     "python-multipart",
     "svix",
     "aeogeo-geo-audit",
+]
+
+[project.optional-dependencies]
+crawl = [
+    "crawl4ai",
+    "playwright",
 ]
 
 [tool.uv.sources]

@@ -19,7 +19,9 @@ from dataclasses import dataclass, field
 from uuid import UUID
 
 from temporalio import activity
+from temporalio.exceptions import ApplicationError
 
+from app.crawl_availability import CrawlStackUnavailableError
 from app.dependencies import async_session
 
 
@@ -172,18 +174,21 @@ async def crawl_website_activity(input: CrawlInput) -> CrawlOutput:
         from app.services.ingestion import IngestionService
 
         service = IngestionService(db)
-        result = await service.crawl_website(
-            brand_id=UUID(input.brand_id),
-            url=input.url,
-            max_depth=input.max_depth,
-            max_pages=input.max_pages,
-        )
+        try:
+            result = await service.crawl_website(
+                brand_id=UUID(input.brand_id),
+                url=input.url,
+                max_depth=input.max_depth,
+                max_pages=input.max_pages,
+            )
+        except CrawlStackUnavailableError as e:
+            raise ApplicationError(str(e), non_retryable=True) from e
 
     return CrawlOutput(
-        pages=result.pages,
-        total_pages=result.total_pages,
-        successful_pages=result.successful_pages,
-        failed_pages=result.failed_pages,
+        pages=result["pages"],
+        total_pages=result["total_pages"],
+        successful_pages=result["successful_pages"],
+        failed_pages=result["failed_pages"],
     )
 
 

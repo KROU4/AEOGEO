@@ -181,6 +181,9 @@ class IngestionService:
             A dict with keys ``pages``, ``total_pages``,
             ``successful_pages``, ``failed_pages``.
         """
+        from app.crawl_availability import require_crawl_stack
+
+        require_crawl_stack()
         from crawl4ai import AsyncWebCrawler, BrowserConfig, CrawlerRunConfig
 
         pages: list[dict] = []

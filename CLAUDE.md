@@ -19,7 +19,12 @@ Core loop: measure AI visibility → generate/publish AI-readable content → mo
 
 **Production** is still validated on the VPS per deploy scripts below.
 
-**Local stack (optional):** `docker compose up --build` from the repo root — Postgres (pgvector), Redis, Temporal (+ UI), API, web, temporal-worker. Copy `compose.env.example` → `.env` for ports; ensure `packages/api/.env` exists. Compose sets `DATABASE_URL` / `REDIS_URL` to Docker service names (`db`, `redis`), overriding `localhost` from `.env`. See `docs/RAILWAY.md` for cloud deploy on Railway.
+**Local stack (optional):** From the repo root, copy `compose.env.example` → `.env` for ports; ensure `packages/api/.env` exists. Compose sets `DATABASE_URL` / `REDIS_URL` to Docker service names (`db`, `redis`), overriding `localhost` from `.env`. See `docs/RAILWAY.md` for cloud deploy on Railway.
+
+- **Default:** `docker compose up --build` — **db, redis, api, web** only (fast UI work; no Temporal).
+- **Full pipeline:** `docker compose --profile temporal up --build` — adds Temporal, Temporal UI, temporal-worker.
+- **Faster API image build:** compose defaults to `INSTALL_CRAWL=0` (no Crawl4AI/Chromium). Website crawl / knowledge crawl need `INSTALL_CRAWL=1` or `uv sync --extra crawl` locally. Production API images should build with `INSTALL_CRAWL=1` (Dockerfile default) when crawl is required.
+- **Dev shortcuts (see `compose.env.example`):** `SKIP_ALEMBIC=1` skips migrations on api restart; `SKIP_WIDGET_BUILD=1` skips widget build if `packages/widget/dist/widget.js` exists.
 
 ## Common commands
 
@@ -32,6 +37,7 @@ cd packages/web && bun run build         # vite build (also builds widget first)
 cd packages/web && bun run generate:types # Generate TS types from OpenAPI spec
 
 # Backend
+cd packages/api && uv sync --extra crawl  # optional: Crawl4AI + Playwright (website / knowledge crawl)
 cd packages/api && uv run ruff check .   # Lint
 cd packages/api && uv run ruff format .  # Format
 cd packages/api && uv run mypy app/      # Type checking (strict mode)
@@ -58,6 +64,8 @@ rsync -avz --exclude '.venv' --exclude '__pycache__' -e "ssh -i ~/.ssh/YOUR_SSH_
 rsync -avz -e "ssh -i ~/.ssh/YOUR_SSH_KEY" docker-compose.prod.yml root@YOUR_SERVER_IP:/opt/aeogeo/
 ssh -i ~/.ssh/YOUR_SSH_KEY root@YOUR_SERVER_IP "cd /opt/aeogeo && docker compose -f docker-compose.prod.yml up -d --build api temporal-worker"
 ```
+
+When building the API image from [packages/api/Dockerfile](packages/api/Dockerfile), use `--build-arg INSTALL_CRAWL=1` (or rely on the Dockerfile default `INSTALL_CRAWL=1`) so website crawling and ingestion workflows have Crawl4AI + Chromium.
 
 - **Frontend**: https://sand-source.com (127.0.0.1:8030)
 - **API**: https://api.sand-source.com (127.0.0.1:8020)

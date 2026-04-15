@@ -230,6 +230,8 @@ async def autofill_brand(
         url = domain
 
     # --- Step 1: Crawl homepage only ---
+    from app.crawl_availability import CrawlStackUnavailableError
+
     ingestion = IngestionService(db)
     try:
         crawl_result = await ingestion.crawl_website(
@@ -238,6 +240,11 @@ async def autofill_brand(
             max_pages=1,
             max_depth=0,
         )
+    except CrawlStackUnavailableError as e:
+        raise HTTPException(
+            status_code=503,
+            detail={"code": "crawl.not_installed", "message": str(e)},
+        ) from e
     except Exception as e:
         logger.error("Autofill crawl failed for %s: %s", url, e)
         raise HTTPException(

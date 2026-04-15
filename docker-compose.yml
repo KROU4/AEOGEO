@@ -11,11 +11,16 @@
 #
 # Порты и префиксы: скопируйте compose.env.example → .env в корне репозитория.
 #
+# Профиль `temporal`: `docker compose --profile temporal up` — Temporal + UI + worker.
+# Без профиля поднимаются только db, redis, api, web (быстрее для UI-разработки).
+#
 name: aeogeo
 
 x-api-build: &api-build
   context: .
   dockerfile: packages/api/Dockerfile
+  args:
+    INSTALL_CRAWL: ${INSTALL_CRAWL:-0}
 
 # Имена переменных без DATABASE_URL/REDIS_URL из корневого .env — иначе подстановка
 # ${DATABASE_URL:-...} подхватит localhost с хоста и сломает сеть между контейнерами.
@@ -65,6 +70,8 @@ services:
     restart: unless-stopped
 
   temporal:
+    profiles:
+      - temporal
     image: temporalio/auto-setup:1.24
     ports:
       - "${TEMPORAL_GRPC_PORT:-7233}:7233"
@@ -84,6 +91,8 @@ services:
     restart: unless-stopped
 
   temporal-ui:
+    profiles:
+      - temporal
     # Теги без префикса v; старые вроде :2.28 могут отсутствовать на Docker Hub
     image: ${TEMPORAL_UI_IMAGE:-temporalio/ui:2.48.2}
     ports:
@@ -100,6 +109,7 @@ services:
       - "${API_PORT:-8000}:8000"
     environment:
       <<: *api-environment
+      SKIP_ALEMBIC: ${SKIP_ALEMBIC:-0}
     env_file:
       - ./packages/api/.env
     volumes:
@@ -113,10 +123,15 @@ services:
       redis:
         condition: service_healthy
     restart: unless-stopped
-    command: >-
-      sh -lc "uv run alembic upgrade head &&
-      uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-      --reload-dir /work/packages/api/app --reload-dir /work/packages/geo-audit"
+    command:
+      - sh
+      - -ec
+      - |
+          if [ "$$SKIP_ALEMBIC" != "1" ]; then
+            uv run alembic upgrade head
+          fi
+          exec uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000 \
+            --reload-dir /work/packages/api/app --reload-dir /work/packages/geo-audit
 
   web:
     build:
@@ -129,6 +144,7 @@ services:
       # File watching on bind mounts (enable=false on native Linux if CPU usage is high)
       CHOKIDAR_USEPOLLING: ${DEV_WATCH_POLLING:-true}
       CHOKIDAR_INTERVAL: ${CHOKIDAR_INTERVAL:-1000}
+      SKIP_WIDGET_BUILD: ${SKIP_WIDGET_BUILD:-0}
     volumes:
       - ./packages/web:/app/packages/web
       - ./packages/widget:/app/packages/widget
@@ -138,12 +154,21 @@ services:
     depends_on:
       - api
     restart: unless-stopped
-    command: >-
-      sh -lc "cd /app/packages/web && bun run build:widget &&
-      (cd /app/packages/widget && bun run dev) &
-      cd /app/packages/web && exec bun run dev:live"
+    command:
+      - sh
+      - -ec
+      - |
+          cd /app/packages/web
+          if [ ! -f ../widget/dist/widget.js ] || [ "$$SKIP_WIDGET_BUILD" != "1" ]; then
+            bun run build:widget
+          fi
+          (cd /app/packages/widget && bun run dev) &
+          cd /app/packages/web
+          exec bun run dev:live
 
   temporal-worker:
+    profiles:
+      - temporal
     build: *api-build
     environment:
       <<: *api-environment

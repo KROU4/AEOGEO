@@ -1,4 +1,6 @@
 # Build from repository root: docker build -f packages/api/Dockerfile .
+# INSTALL_CRAWL=1 (default): optional crawl extra + Chromium for Crawl4AI (slow build, full prod).
+# INSTALL_CRAWL=0: skip crawl/playwright — fast image for API-only / dev without website crawl.
 FROM python:3.12-slim AS base
 
 WORKDIR /work/packages/api
@@ -9,10 +11,14 @@ RUN pip install --no-cache-dir uv
 COPY packages/api/pyproject.toml packages/api/uv.lock ./
 COPY packages/geo-audit ../geo-audit
 
-RUN uv sync --no-dev
-
-# Install Chromium for Crawl4AI website crawling
-RUN uv run playwright install --with-deps chromium
+ARG INSTALL_CRAWL=1
+RUN set -eux; \
+    if [ "$INSTALL_CRAWL" = "1" ]; then \
+      uv sync --no-dev --extra crawl; \
+      uv run playwright install --with-deps chromium; \
+    else \
+      uv sync --no-dev; \
+    fi
 
 COPY packages/api/app ./app
 COPY packages/api/alembic ./alembic
