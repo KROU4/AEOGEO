@@ -1,0 +1,19 @@
+# Не копируйте это в railway.toml как единый файл для всего проекта.
+# У монорепо один railway.toml в корне применяется ко ВСЕМ сервисам с этим репо —
+# из‑за этого фронт мог тянуть Dockerfile API, а pre-deploy — запускаться на фронте.
+#
+# Настраивайте каждый сервис в UI Railway:
+#
+# --- Сервис API (AEOGEO) ---
+#   Root Directory: (пусто)
+#   Dockerfile: packages/api/Dockerfile
+#   Pre-deploy command (одна строка): uv run alembic upgrade head
+#   Variables: DATABASE_URL (+asyncpg), REDIS_URL, ...
+#
+# --- Сервис Web (фронт) ---
+#   Root Directory: (пусто)
+#   Dockerfile: packages/web/Dockerfile.railway
+#   Build variables: VITE_API_URL, VITE_CLERK_PUBLISHABLE_KEY
+#   Pre-deploy: не задавать
+#
+# Подробнее: docs/RAILWAY.md
