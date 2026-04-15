@@ -43,6 +43,11 @@ function widgetBundlePlugin(): Plugin {
 }
 
 export default defineConfig({
+  build: {
+    // Speed up CI/Docker (Railway): tsc is skipped in `bun run build`; avoid slow sourcemaps there.
+    sourcemap: process.env.SOURCEMAP === "true",
+    reportCompressedSize: false,
+  },
   plugins: [
     TanStackRouterVite({ quoteStyle: "double" }),
     react(),

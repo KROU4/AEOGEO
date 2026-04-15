@@ -33,7 +33,8 @@ Core loop: measure AI visibility → generate/publish AI-readable content → mo
 cd packages/web && bun run lint          # ESLint
 cd packages/web && bun run typecheck     # tsc --noEmit
 cd packages/web && bun run test          # vitest run
-cd packages/web && bun run build         # vite build (also builds widget first)
+cd packages/web && bun run build         # vite + widget (no `tsc` in path — fast for Docker/Railway)
+cd packages/web && bun run build:strict  # same + `tsc -b` first (slow; optional CI gate)
 cd packages/web && bun run generate:types # Generate TS types from OpenAPI spec
 
 # Backend

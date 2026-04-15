@@ -3,6 +3,8 @@ import { resolve } from "path";
 
 export default defineConfig({
   build: {
+    sourcemap: process.env.SOURCEMAP === "true",
+    reportCompressedSize: false,
     watch: {
       chokidar: {
         usePolling: process.env.CHOKIDAR_USEPOLLING === "true",

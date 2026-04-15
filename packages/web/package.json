@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "bun run build:widget && vite",
     "dev:live": "vite",
-    "build": "bun run build:widget && tsc -b && vite build",
+    "build": "bun run build:widget && vite build",
+    "build:strict": "bun run build:widget && tsc -b && vite build",
     "build:widget": "cd ../widget && bun run build",
     "preview": "vite preview",
     "lint": "eslint .",
