@@ -56,6 +56,13 @@ export default defineConfig({
   },
   server: {
     port: 5173,
+    /** Listen on all interfaces (Docker) */
+    host: true,
+    /** Bind-mounts on Docker Desktop often miss fs events without polling */
+    watch: {
+      usePolling: process.env.CHOKIDAR_USEPOLLING === "true",
+      interval: Number(process.env.CHOKIDAR_INTERVAL ?? 1000),
+    },
     proxy: {
       "/api": {
         target: "http://localhost:8000",

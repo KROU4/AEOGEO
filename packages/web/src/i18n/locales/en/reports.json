@@ -11,6 +11,7 @@
   "emptyState": "No reports yet. Generate your first one to get started.",
   "emptyTitle": "No reports yet",
   "emptyDescription": "Generate your first report to get insights into your AI visibility, competitive positioning, and content performance.",
+  "downloadPdf": "Download PDF",
   "deleteReport": "Delete",
   "deleteConfirmTitle": "Delete \"{{name}}\"?",
   "deleteConfirmDescription": "This will permanently delete the report and its shared links. This action cannot be undone.",

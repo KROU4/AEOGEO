@@ -8,7 +8,11 @@
     "projects": "Projects",
     "settings": "Settings",
     "adminKeys": "AI Keys",
-    "adminUsage": "AI Usage"
+    "adminUsage": "AI Usage",
+    "citations": "Citations",
+    "competitors": "Competitors",
+    "platforms": "Platforms",
+    "assistant": "AI Assistant"
   },
   "navGroups": {
     "platform": "Platform",
@@ -55,6 +59,12 @@
     "member": "Member"
   },
   "topbar": {
+    "periodLabel": "Period",
+    "period": {
+      "7d": "7 days",
+      "30d": "30 days",
+      "90d": "90 days"
+    },
     "themeLabel": "Theme: {{theme}}",
     "toggleTheme": "Toggle theme",
     "notifications": "Notifications",

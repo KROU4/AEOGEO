@@ -1,9 +1,12 @@
+import { useEffect } from "react";
 import {
   Navigate,
   createFileRoute,
   Outlet,
   useLocation,
   useMatches,
+  useNavigate,
+  useSearch,
 } from "@tanstack/react-router";
 import { useAuth } from "@clerk/react";
 import { useTranslation } from "react-i18next";
@@ -16,8 +19,14 @@ import { Topbar } from "@/components/layout/topbar";
 import { useCurrentUser } from "@/hooks/use-auth";
 import { useProject } from "@/hooks/use-projects";
 import { ApiError } from "@/lib/api-client";
+import {
+  parseDashboardSearch,
+  persistProjectAliasFromSearch,
+} from "@/lib/dashboard-search";
 
 export const Route = createFileRoute("/_dashboard")({
+  validateSearch: (search: Record<string, unknown>) =>
+    parseDashboardSearch(search),
   component: DashboardLayout,
 });
 
@@ -29,6 +38,10 @@ const segmentToNavKey: Record<string, string> = {
   widgets: "nav.widgets",
   projects: "nav.projects",
   settings: "nav.settings",
+  citations: "nav.citations",
+  competitors: "nav.competitors",
+  platforms: "nav.platforms",
+  assistant: "nav.assistant",
   "ai-keys": "nav.adminKeys",
   "ai-usage": "nav.adminUsage",
 };
@@ -50,6 +63,31 @@ function getProjectIdFromMatches(
     }
   }
   return "";
+}
+
+/** `?p=<uuid>` matches plan contract; we persist and remove it so path-based project id stays canonical. */
+function ProjectAliasSync() {
+  const search = useSearch({ strict: false }) as {
+    period?: string;
+    p?: string;
+  };
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (!search.p) return;
+    persistProjectAliasFromSearch(search.p);
+    void navigate({
+      to: location.pathname,
+      search: (prev) => ({
+        ...prev,
+        p: undefined,
+      }),
+      replace: true,
+    });
+  }, [search.p, location.pathname, navigate]);
+
+  return null;
 }
 
 function DashboardLayout() {
@@ -95,6 +133,7 @@ function DashboardLayout() {
 
   return (
     <SidebarProvider>
+      <ProjectAliasSync />
       <AppSidebar />
       <SidebarInset>
         <Topbar title={title} />

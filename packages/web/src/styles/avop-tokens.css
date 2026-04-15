@@ -1,0 +1,46 @@
+/*
+ * AVOP / Stitch "Cypher Obsidian" — extracted for Pixel Perfect work.
+ * Source: design/stitch-avop/MANIFEST.json + screens/01-landing.html color tokens.
+ * Applied when <html data-brand="avop"> (see lib/theme.ts).
+ */
+
+html[data-brand="avop"] {
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-avop-heading: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  /* Stitch landing hex (reference — use via arbitrary values or future utilities) */
+  --avop-stitch-bg: #0d0e0f;
+  --avop-stitch-surface: #121315;
+  --avop-stitch-primary: #4cd7f6;
+  --avop-stitch-tertiary: #4ae176;
+  --avop-stitch-on-surface: #e3e2e3;
+}
+
+html[data-brand="avop"].dark {
+  --background: 220 8% 7%;
+  --foreground: 240 5% 90%;
+  --card: 220 8% 10%;
+  --card-foreground: 240 5% 90%;
+  --popover: 220 8% 10%;
+  --popover-foreground: 240 5% 90%;
+  --primary: 189 90% 63%;
+  --primary-foreground: 196 100% 11%;
+  --secondary: 240 6% 18%;
+  --secondary-foreground: 240 5% 90%;
+  --muted: 220 6% 14%;
+  --muted-foreground: 200 12% 72%;
+  --accent: 189 35% 16%;
+  --accent-foreground: 189 90% 63%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 220 6% 16%;
+  --input: 220 6% 16%;
+  --ring: 189 90% 63%;
+  --sidebar: hsl(220 8% 8%);
+  --sidebar-foreground: hsl(240 5% 90%);
+  --sidebar-primary: hsl(189 90% 63%);
+  --sidebar-primary-foreground: hsl(196 100% 11%);
+  --sidebar-accent: hsl(189 35% 16%);
+  --sidebar-accent-foreground: hsl(189 90% 63%);
+  --sidebar-border: hsl(220 6% 16%);
+  --sidebar-ring: hsl(189 90% 63%);
+}

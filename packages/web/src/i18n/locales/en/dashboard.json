@@ -81,5 +81,28 @@
     "competitorMoved": "{{name}} moved ahead on {{count}} tracked queries",
     "weeklyReport": "Weekly report generated automatically",
     "weeklyReportReady": "{{period}} report is ready for review"
+  },
+  "assistantInsight": {
+    "title": "AI insight",
+    "loading": "Generating summary…",
+    "empty": "Complete at least one analysis run to see an executive summary here.",
+    "error": "Could not load the insight.",
+    "errorLimit": "Usage limit reached. Try again later.",
+    "errorNoKey": "No AI API key configured for your workspace.",
+    "retry": "Retry"
+  },
+  "periodKpi": {
+    "title": "Period metrics",
+    "period": "Window: {{period}}",
+    "overall": "Score",
+    "sov": "Share of voice",
+    "rank": "Avg. rank",
+    "citations": "Citation rate"
+  },
+  "windowSparklines": {
+    "title": "Score & SoV across recent runs",
+    "subtitle": "Up to 7 completed runs in the selected window ({{period}})",
+    "seriesScore": "Score (0–100)",
+    "seriesSov": "Share of voice %"
   }
 }

@@ -25,4 +25,7 @@ export function applyTheme(theme: Theme): void {
 // Initialize on load
 export function initTheme(): void {
   applyTheme(getTheme());
+  if (!document.documentElement.dataset.brand) {
+    document.documentElement.dataset.brand = "avop";
+  }
 }

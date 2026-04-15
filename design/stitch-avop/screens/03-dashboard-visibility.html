@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AVOP | Visibility Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=Bricolage+Grotesque:wght@700;800&amp;family=JetBrains+Mono:wght@500&amp;family=Space+Grotesk:wght@500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-container": "#454555",
+                        "on-tertiary-fixed": "#002109",
+                        "secondary-fixed": "#e2e0f4",
+                        "surface-variant": "#343536",
+                        "on-primary-container": "#00424f",
+                        "tertiary-fixed-dim": "#4ae176",
+                        "on-primary-fixed-variant": "#004e5c",
+                        "tertiary-fixed": "#6bff8f",
+                        "surface-dim": "#121315",
+                        "secondary-fixed-dim": "#c6c5d7",
+                        "background": "#121315",
+                        "surface-container": "#1f2021",
+                        "primary-fixed-dim": "#4cd7f6",
+                        "tertiary": "#4ae176",
+                        "surface-container-lowest": "#0d0e0f",
+                        "on-error": "#690005",
+                        "outline-variant": "#3d494c",
+                        "on-tertiary-container": "#00461b",
+                        "on-primary-fixed": "#001f26",
+                        "on-secondary": "#2f2f3e",
+                        "error-container": "#93000a",
+                        "surface-container-high": "#292a2b",
+                        "primary": "#4cd7f6",
+                        "primary-fixed": "#acedff",
+                        "surface-tint": "#4cd7f6",
+                        "on-error-container": "#ffdad6",
+                        "on-secondary-container": "#b4b3c6",
+                        "primary-container": "#06b6d4",
+                        "on-surface-variant": "#bcc9cd",
+                        "tertiary-container": "#14bf59",
+                        "on-tertiary-fixed-variant": "#005321",
+                        "secondary": "#c6c5d7",
+                        "surface-bright": "#38393a",
+                        "inverse-on-surface": "#303032",
+                        "outline": "#869397",
+                        "on-background": "#e3e2e3",
+                        "on-primary": "#003640",
+                        "error": "#ffb4ab",
+                        "on-secondary-fixed": "#1a1a28",
+                        "surface": "#121315",
+                        "on-surface": "#e3e2e3",
+                        "inverse-surface": "#e3e2e3",
+                        "on-secondary-fixed-variant": "#454555",
+                        "on-tertiary": "#003915",
+                        "inverse-primary": "#00687a",
+                        "surface-container-highest": "#343536",
+                        "surface-container-low": "#1b1c1d"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "headline": ["Space Grotesk"],
+                        "body": ["Plus Jakarta Sans"],
+                        "label": ["Plus Jakarta Sans"],
+                        "mono": ["JetBrains Mono"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+        .bg-mesh {
+            background-image: radial-gradient(at 0% 0%, rgba(6, 182, 212, 0.05) 0px, transparent 50%),
+                              radial-gradient(at 100% 100%, rgba(74, 225, 118, 0.03) 0px, transparent 50%);
+        }
+        .glass-panel {
+            background: rgba(31, 32, 33, 0.7);
+            backdrop-filter: blur(12px);
+        }
+    </style>
+</head>
+<body class="bg-surface-container-lowest text-on-surface font-body selection:bg-primary selection:text-on-primary">
+<!-- SideNavBar (Authority: JSON & Design System) -->
+<aside class="fixed left-0 h-full w-[220px] bg-[#0D0E0F] flex flex-col py-6 px-4 gap-2 z-50">
+<div class="mb-10 px-2">
+<span class="text-xl font-['Bricolage_Grotesque'] font-bold text-white">AVOP Internal</span>
+<p class="text-[10px] text-neutral-500 uppercase tracking-widest mt-1">Analytics Engine</p>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 text-cyan-400 bg-neutral-900/50 border-l-2 border-cyan-500 font-['Plus_Jakarta_Sans'] font-medium text-sm transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined text-[20px]">dashboard</span> Dashboard
+            </a>
+<a class="flex items-center gap-3 px-3 py-2 text-neutral-500 font-['Plus_Jakarta_Sans'] font-medium text-sm hover:bg-neutral-800/50 hover:text-neutral-200 transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined text-[20px]">monitoring</span> Analytics
+            </a>
+<a class="flex items-center gap-3 px-3 py-2 text-neutral-500 font-['Plus_Jakarta_Sans'] font-medium text-sm hover:bg-neutral-800/50 hover:text-neutral-200 transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined text-[20px]">construction</span> Tools
+            </a>
+<a class="flex items-center gap-3 px-3 py-2 text-neutral-500 font-['Plus_Jakarta_Sans'] font-medium text-sm hover:bg-neutral-800/50 hover:text-neutral-200 transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined text-[20px]">folder_managed</span> Projects
+            </a>
+<a class="flex items-center gap-3 px-3 py-2 text-neutral-500 font-['Plus_Jakarta_Sans'] font-medium text-sm hover:bg-neutral-800/50 hover:text-neutral-200 transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined text-[20px]">description</span> Reports
+            </a>
+<a class="flex items-center gap-3 px-3 py-2 text-neutral-500 font-['Plus_Jakarta_Sans'] font-medium text-sm hover:bg-neutral-800/50 hover:text-neutral-200 transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined text-[20px]">settings</span> Settings
+            </a>
+</nav>
+<div class="mt-auto border-t border-white/5 pt-6 flex flex-col gap-1">
+<button class="w-full bg-primary-container text-on-primary-container text-xs font-bold py-3 rounded-lg mb-4 hover:opacity-90 transition-opacity">
+                New Analysis
+            </button>
+<a class="flex items-center gap-3 px-3 py-2 text-neutral-500 text-xs hover:text-neutral-200" href="#">
+<span class="material-symbols-outlined text-[18px]">help</span> Support
+            </a>
+<a class="flex items-center gap-3 px-3 py-2 text-neutral-500 text-xs hover:text-neutral-200" href="#">
+<span class="material-symbols-outlined text-[18px]">menu_book</span> Documentation
+            </a>
+</div>
+</aside>
+<!-- TopAppBar (Authority: JSON) -->
+<header class="sticky top-0 h-[52px] z-40 bg-[#0D0E0F]/80 backdrop-blur-md flex justify-between items-center px-6 w-full ml-[220px] border-b border-white/5 pr-[240px]">
+<div class="flex items-center gap-4">
+<span class="text-lg font-['Bricolage_Grotesque'] font-bold text-white uppercase tracking-tight">Visibility</span>
+<div class="h-4 w-px bg-white/10 mx-2"></div>
+<div class="flex items-center gap-2 text-neutral-400 font-['Plus_Jakarta_Sans'] font-semibold text-xs cursor-pointer hover:text-white transition-colors">
+<span class="material-symbols-outlined text-[18px]">calendar_today</span>
+<span>Oct 12 - Nov 12, 2024</span>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="relative group">
+<span class="material-symbols-outlined text-neutral-400 group-hover:text-cyan-400 cursor-pointer transition-colors">notifications</span>
+<span class="absolute -top-1 -right-1 w-2 h-2 bg-primary rounded-full"></span>
+</div>
+<button class="bg-primary-container/10 border border-primary/20 text-primary text-xs font-bold px-4 py-1.5 rounded-lg hover:bg-primary-container/20 transition-all">
+                Run Analysis
+            </button>
+<img alt="User Profile" class="w-8 h-8 rounded-full border border-white/10" data-alt="Close up portrait of a professional man with sharp features and thoughtful expression against a dark minimal background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDNVl0yfc74O-Pmjf6yMgtIDM7kg9xiXHEHH3nwk_DEsB6oKBNuI2-8fZxeDN_LlP2uOXTBCFehQ94qqe3bYGu6lA5IRgQ3brJCZZWREInNvlBbEtrPzenJbTdWwnVGYdLcsPsqITAxsasY9SOeqYmzdXnUD3AMHlQgZPZL6zVRyBbYbhVI4kw8_OMgnGBDSIyxy5G-uXi_VTgawCthLOOMElgPRVLeFH8xrXuBP7dyjI16XEMhI0MwaRn_nsmEXbc8Th2BahRD6NE"/>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="ml-[220px] p-8 pb-32 bg-mesh min-h-screen">
+<!-- AVOP AI Assistant Widget (Top) -->
+<section class="mb-10 p-6 rounded-xl bg-surface-container-low border border-white/5 relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-[120px] text-primary" style="font-variation-settings: 'FILL' 1;">psychology</span>
+</div>
+<div class="flex items-start gap-5 relative z-10">
+<div class="w-12 h-12 rounded-lg bg-primary-container/20 flex items-center justify-center border border-primary/30">
+<span class="material-symbols-outlined text-primary animate-pulse" style="font-variation-settings: 'FILL' 1;">neurology</span>
+</div>
+<div class="flex-1">
+<h2 class="text-xs font-bold text-primary uppercase tracking-[0.2em] mb-2">Executive Summary</h2>
+<p class="text-xl font-['Plus_Jakarta_Sans'] font-medium text-on-surface leading-relaxed max-w-4xl">
+                        Your Perplexity Share of Voice grew <span class="text-tertiary">+8.4%</span> this period, primarily driven by long-tail technical queries in the <span class="underline decoration-primary/40 underline-offset-4 cursor-help">Cloud Architecture</span> category. High citation rates on ChatGPT suggest strong brand authority in enterprise search contexts.
+                    </p>
+</div>
+</div>
+</section>
+<!-- 4 Metric Cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+<div class="bg-surface-container-low p-6 rounded-lg border-l border-primary/30">
+<div class="flex justify-between items-start mb-4">
+<span class="text-[10px] text-neutral-500 uppercase tracking-widest font-bold">Visibility Score</span>
+<span class="material-symbols-outlined text-primary/50 text-sm">visibility</span>
+</div>
+<div class="font-mono text-3xl text-white mb-2">84.2<span class="text-neutral-600 text-lg">/100</span></div>
+<div class="flex items-center gap-1.5 text-xs font-bold text-tertiary">
+<span class="material-symbols-outlined text-[14px]">trending_up</span> +3.2%
+                </div>
+</div>
+<div class="bg-surface-container-low p-6 rounded-lg border-l border-neutral-700">
+<div class="flex justify-between items-start mb-4">
+<span class="text-[10px] text-neutral-500 uppercase tracking-widest font-bold">Share of Voice</span>
+<span class="material-symbols-outlined text-primary/50 text-sm">record_voice_over</span>
+</div>
+<div class="font-mono text-3xl text-white mb-2">12.5%</div>
+<div class="flex items-center gap-1.5 text-xs font-bold text-tertiary">
+<span class="material-symbols-outlined text-[14px]">trending_up</span> +8.4%
+                </div>
+</div>
+<div class="bg-surface-container-low p-6 rounded-lg border-l border-neutral-700">
+<div class="flex justify-between items-start mb-4">
+<span class="text-[10px] text-neutral-500 uppercase tracking-widest font-bold">Avg Rank</span>
+<span class="material-symbols-outlined text-primary/50 text-sm">format_list_numbered</span>
+</div>
+<div class="font-mono text-3xl text-white mb-2">2.4</div>
+<div class="flex items-center gap-1.5 text-xs font-bold text-error">
+<span class="material-symbols-outlined text-[14px]">trending_down</span> -0.2
+                </div>
+</div>
+<div class="bg-surface-container-low p-6 rounded-lg border-l border-neutral-700">
+<div class="flex justify-between items-start mb-4">
+<span class="text-[10px] text-neutral-500 uppercase tracking-widest font-bold">Citation Rate</span>
+<span class="material-symbols-outlined text-primary/50 text-sm">history_edu</span>
+</div>
+<div class="font-mono text-3xl text-white mb-2">68.1%</div>
+<div class="flex items-center gap-1.5 text-xs font-bold text-tertiary">
+<span class="material-symbols-outlined text-[14px]">trending_up</span> +12.0%
+                </div>
+</div>
+</div>
+<!-- Bento Grid Layer 1: SoV (60%) & Platform Ranking (40%) -->
+<div class="grid grid-cols-12 gap-6 mb-10">
+<!-- Share of Voice Donut (60%) -->
+<div class="col-span-12 lg:col-span-7 bg-surface-container-low rounded-xl p-8 overflow-hidden relative">
+<div class="flex justify-between items-end mb-10">
+<div>
+<h3 class="text-xl font-bold font-['Bricolage_Grotesque'] text-white">Share of Voice</h3>
+<p class="text-xs text-neutral-500 mt-1 uppercase tracking-wider">Distribution across top 500 keywords</p>
+</div>
+<button class="text-[10px] text-neutral-400 font-bold uppercase tracking-widest border border-white/5 px-3 py-1.5 rounded hover:bg-white/5">Export Details</button>
+</div>
+<div class="flex items-center gap-16">
+<!-- Pure CSS Donut -->
+<div class="relative w-48 h-48 flex items-center justify-center">
+<svg class="w-full h-full -rotate-90" viewbox="0 0 100 100">
+<!-- Background track -->
+<circle class="text-white/5 stroke-current" cx="50" cy="50" fill="transparent" r="40" stroke-width="8"></circle>
+<!-- Cyan segment -->
+<circle class="text-primary stroke-current" cx="50" cy="50" fill="transparent" r="40" stroke-dasharray="251.2" stroke-dashoffset="188.4" stroke-linecap="butt" stroke-width="8"></circle>
+<!-- Gray segments (Competitors) -->
+<circle class="text-neutral-500 stroke-current" cx="50" cy="50" fill="transparent" r="40" stroke-dasharray="251.2" stroke-dashoffset="220" stroke-linecap="butt" stroke-width="8"></circle>
+</svg>
+<div class="absolute flex flex-col items-center">
+<span class="font-mono text-2xl font-bold text-white">12.5%</span>
+<span class="text-[10px] text-neutral-500 uppercase">You</span>
+</div>
+</div>
+<div class="flex-1 space-y-4">
+<div class="flex items-center justify-between group">
+<div class="flex items-center gap-3">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+<span class="text-sm font-semibold text-neutral-200">You (AVOP)</span>
+</div>
+<span class="font-mono text-sm text-white">12.5%</span>
+</div>
+<div class="flex items-center justify-between group opacity-60">
+<div class="flex items-center gap-3">
+<span class="w-2 h-2 rounded-full bg-neutral-500"></span>
+<span class="text-sm font-semibold text-neutral-400">Competitor Alpha</span>
+</div>
+<span class="font-mono text-sm text-neutral-400">9.2%</span>
+</div>
+<div class="flex items-center justify-between group opacity-60">
+<div class="flex items-center gap-3">
+<span class="w-2 h-2 rounded-full bg-neutral-600"></span>
+<span class="text-sm font-semibold text-neutral-400">Competitor Beta</span>
+</div>
+<span class="font-mono text-sm text-neutral-400">7.1%</span>
+</div>
+<div class="flex items-center justify-between group opacity-60">
+<div class="flex items-center gap-3">
+<span class="w-2 h-2 rounded-full bg-neutral-700"></span>
+<span class="text-sm font-semibold text-neutral-400">Market Others</span>
+</div>
+<span class="font-mono text-sm text-neutral-400">71.2%</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Platform Ranking (40%) -->
+<div class="col-span-12 lg:col-span-5 bg-surface-container-low rounded-xl p-8 border border-white/5">
+<h3 class="text-xl font-bold font-['Bricolage_Grotesque'] text-white mb-6">Platform Performance</h3>
+<div class="overflow-x-auto">
+<table class="w-full text-left">
+<thead class="border-b border-white/5">
+<tr>
+<th class="py-3 text-[10px] text-neutral-500 uppercase tracking-widest font-bold">Platform</th>
+<th class="py-3 text-[10px] text-neutral-500 uppercase tracking-widest font-bold">Rank</th>
+<th class="py-3 text-[10px] text-neutral-500 uppercase tracking-widest font-bold text-right">Score</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-white/5">
+<tr class="group hover:bg-white/5 transition-colors">
+<td class="py-4 flex items-center gap-2">
+<span class="w-6 h-6 rounded bg-neutral-800 flex items-center justify-center text-[10px] font-bold">C</span>
+<span class="text-sm font-semibold text-neutral-200">ChatGPT</span>
+</td>
+<td class="py-4">
+<span class="font-mono text-sm text-white">#1</span>
+</td>
+<td class="py-4 text-right">
+<span class="px-2 py-1 rounded bg-tertiary/10 text-tertiary text-[10px] font-bold">98/100</span>
+</td>
+</tr>
+<tr class="group hover:bg-white/5 transition-colors">
+<td class="py-4 flex items-center gap-2">
+<span class="w-6 h-6 rounded bg-neutral-800 flex items-center justify-center text-[10px] font-bold">P</span>
+<span class="text-sm font-semibold text-neutral-200">Perplexity</span>
+</td>
+<td class="py-4">
+<span class="font-mono text-sm text-white">#3</span>
+</td>
+<td class="py-4 text-right">
+<span class="px-2 py-1 rounded bg-primary/10 text-primary text-[10px] font-bold">84/100</span>
+</td>
+</tr>
+<tr class="group hover:bg-white/5 transition-colors">
+<td class="py-4 flex items-center gap-2">
+<span class="w-6 h-6 rounded bg-neutral-800 flex items-center justify-center text-[10px] font-bold">G</span>
+<span class="text-sm font-semibold text-neutral-200">Google Gemini</span>
+</td>
+<td class="py-4">
+<span class="font-mono text-sm text-white">#12</span>
+</td>
+<td class="py-4 text-right">
+<span class="px-2 py-1 rounded bg-secondary-container/30 text-on-secondary-container text-[10px] font-bold">42/100</span>
+</td>
+</tr>
+<tr class="group hover:bg-white/5 transition-colors">
+<td class="py-4 flex items-center gap-2">
+<span class="w-6 h-6 rounded bg-neutral-800 flex items-center justify-center text-[10px] font-bold">C</span>
+<span class="text-sm font-semibold text-neutral-200">Claude 3.5</span>
+</td>
+<td class="py-4">
+<span class="font-mono text-sm text-white">#2</span>
+</td>
+<td class="py-4 text-right">
+<span class="px-2 py-1 rounded bg-tertiary/10 text-tertiary text-[10px] font-bold">91/100</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<!-- Bento Grid Layer 2: Trends Chart (65%) & Visibility Breakdown (35%) -->
+<div class="grid grid-cols-12 gap-6">
+<!-- Trends Chart (65%) -->
+<div class="col-span-12 lg:col-span-8 bg-surface-container-low rounded-xl p-8 relative h-[400px] flex flex-col">
+<div class="flex justify-between items-center mb-8">
+<div>
+<h3 class="text-xl font-bold font-['Bricolage_Grotesque'] text-white">Growth Velocity</h3>
+<p class="text-xs text-neutral-500 mt-1">SoV vs. Visibility Score (30-day window)</p>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2">
+<span class="w-3 h-px bg-primary"></span>
+<span class="text-[10px] text-neutral-400 uppercase tracking-widest font-bold">Visibility</span>
+</div>
+<div class="flex items-center gap-2 opacity-50">
+<span class="w-3 h-px bg-neutral-500"></span>
+<span class="text-[10px] text-neutral-400 uppercase tracking-widest font-bold">SoV</span>
+</div>
+</div>
+</div>
+<div class="flex-1 relative mt-4">
+<!-- CSS Area Chart Mockup -->
+<div class="absolute inset-0 flex items-end justify-between px-2">
+<div class="w-full h-full relative overflow-hidden">
+<!-- Background Grid -->
+<div class="absolute inset-0 grid grid-rows-4 w-full h-full">
+<div class="border-t border-white/5"></div>
+<div class="border-t border-white/5"></div>
+<div class="border-t border-white/5"></div>
+<div class="border-t border-white/5"></div>
+</div>
+<!-- Fake Graph Area -->
+<svg class="absolute inset-0 w-full h-full" preserveaspectratio="none" viewbox="0 0 100 100">
+<path class="opacity-20" d="M0,80 Q20,60 40,70 T80,40 T100,20 L100,100 L0,100 Z" fill="url(#grad1)"></path>
+<path d="M0,80 Q20,60 40,70 T80,40 T100,20" fill="none" stroke="#4cd7f6" stroke-width="1.5"></path>
+<defs>
+<lineargradient id="grad1" x1="0%" x2="0%" y1="0%" y2="100%">
+<stop offset="0%" style="stop-color:#4cd7f6;stop-opacity:1"></stop>
+<stop offset="100%" style="stop-color:#4cd7f6;stop-opacity:0"></stop>
+</lineargradient>
+</defs>
+</svg>
+<!-- Highlight points -->
+<div class="absolute bottom-[80%] left-[100%] -translate-x-full w-2 h-2 rounded-full bg-primary border-2 border-surface-container-low shadow-[0_0_10px_rgba(76,215,246,0.5)]"></div>
+</div>
+</div>
+<!-- X-Axis Labels -->
+<div class="absolute -bottom-6 w-full flex justify-between px-2">
+<span class="text-[10px] font-mono text-neutral-600">OCT 12</span>
+<span class="text-[10px] font-mono text-neutral-600">OCT 22</span>
+<span class="text-[10px] font-mono text-neutral-600">NOV 01</span>
+<span class="text-[10px] font-mono text-neutral-600">NOV 12</span>
+</div>
+</div>
+</div>
+<!-- Visibility Breakdown (35%) -->
+<div class="col-span-12 lg:col-span-4 bg-surface-container-low rounded-xl p-8 flex flex-col">
+<h3 class="text-xl font-bold font-['Bricolage_Grotesque'] text-white mb-2">Category Split</h3>
+<p class="text-xs text-neutral-500 mb-8 uppercase tracking-widest font-bold">Top Performing Segments</p>
+<div class="space-y-6 flex-1">
+<div>
+<div class="flex justify-between text-[11px] font-bold text-neutral-400 mb-2 uppercase tracking-wide">
+<span>Cloud Infrastructure</span>
+<span class="text-white">42%</span>
+</div>
+<div class="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[42%]"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-[11px] font-bold text-neutral-400 mb-2 uppercase tracking-wide">
+<span>DevOps Tools</span>
+<span class="text-white">28%</span>
+</div>
+<div class="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[28%]"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-[11px] font-bold text-neutral-400 mb-2 uppercase tracking-wide">
+<span>AI Services</span>
+<span class="text-white">18%</span>
+</div>
+<div class="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
+<div class="h-full bg-neutral-600 w-[18%]"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-[11px] font-bold text-neutral-400 mb-2 uppercase tracking-wide">
+<span>Security</span>
+<span class="text-white">12%</span>
+</div>
+<div class="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
+<div class="h-full bg-neutral-700 w-[12%]"></div>
+</div>
+</div>
+</div>
+<div class="mt-8 pt-6 border-t border-white/5">
+<p class="text-[10px] text-neutral-500 italic">"Focus on Security keywords to capture emerging Q4 interest."</p>
+</div>
+</div>
+</div>
+</main>
+<!-- Sticky Run Status Bar (Bottom) -->
+<footer class="fixed bottom-0 left-[220px] right-0 h-16 glass-panel border-t border-white/10 px-8 flex items-center justify-between z-40">
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-3">
+<div class="relative w-3 h-3">
+<div class="absolute inset-0 bg-tertiary rounded-full animate-ping opacity-25"></div>
+<div class="absolute inset-0 bg-tertiary rounded-full"></div>
+</div>
+<span class="text-[11px] font-bold text-white uppercase tracking-widest">Engine Active</span>
+</div>
+<div class="h-4 w-px bg-white/10"></div>
+<div class="flex items-center gap-2">
+<span class="text-[11px] text-neutral-400 font-medium">Last processed: <span class="text-neutral-200">2 mins ago</span></span>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex -space-x-2">
+<div class="w-6 h-6 rounded-full border border-[#0D0E0F] bg-neutral-800 flex items-center justify-center text-[8px] text-white">JS</div>
+<div class="w-6 h-6 rounded-full border border-[#0D0E0F] bg-neutral-700 flex items-center justify-center text-[8px] text-white">MK</div>
+<div class="w-6 h-6 rounded-full border border-[#0D0E0F] bg-primary flex items-center justify-center text-[8px] text-on-primary font-bold">+3</div>
+</div>
+<button class="bg-white/5 hover:bg-white/10 text-white text-[10px] font-bold uppercase tracking-widest px-4 py-2 rounded transition-colors">
+                Share View
+            </button>
+</div>
+</footer>
+</body></html>

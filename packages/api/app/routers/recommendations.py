@@ -12,6 +12,7 @@ from app.models.user import User
 from app.schemas.recommendation import (
     RecommendationGenerateRequest,
     RecommendationGenerateResponse,
+    RecommendationPatchRequest,
     RecommendationResponse,
 )
 from app.services.ai_client import (
@@ -70,6 +71,26 @@ async def list_recommendations(
         return await service.list_recommendations(project_id, user.tenant_id)
     except RecommendationServiceError as exc:
         raise HTTPException(status_code=exc.status_code, detail=exc.message) from exc
+
+
+@router.patch("/{rec_id}", response_model=RecommendationResponse)
+async def patch_recommendation(
+    project_id: UUID,
+    rec_id: UUID,
+    body: RecommendationPatchRequest,
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(get_current_user),
+) -> RecommendationResponse:
+    service = RecommendationService(db)
+    try:
+        return await service.patch_recommendation_status(
+            project_id, rec_id, user.tenant_id, body.status,
+        )
+    except RecommendationServiceError as exc:
+        raise HTTPException(
+            status_code=exc.status_code,
+            detail={"code": exc.code, "message": exc.message},
+        ) from exc
 
 
 @router.post("/generate", response_model=RecommendationGenerateResponse)

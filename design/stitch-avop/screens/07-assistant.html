@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=Bricolage+Grotesque:wght@700;800&amp;family=JetBrains+Mono:wght@400;500&amp;family=Space+Grotesk:wght@500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "secondary-container": "#454555",
+                    "on-tertiary-fixed": "#002109",
+                    "secondary-fixed": "#e2e0f4",
+                    "surface-variant": "#343536",
+                    "on-primary-container": "#00424f",
+                    "tertiary-fixed-dim": "#4ae176",
+                    "on-primary-fixed-variant": "#004e5c",
+                    "tertiary-fixed": "#6bff8f",
+                    "surface-dim": "#121315",
+                    "secondary-fixed-dim": "#c6c5d7",
+                    "background": "#121315",
+                    "surface-container": "#1f2021",
+                    "primary-fixed-dim": "#4cd7f6",
+                    "tertiary": "#4ae176",
+                    "surface-container-lowest": "#0d0e0f",
+                    "on-error": "#690005",
+                    "outline-variant": "#3d494c",
+                    "on-tertiary-container": "#00461b",
+                    "on-primary-fixed": "#001f26",
+                    "on-secondary": "#2f2f3e",
+                    "error-container": "#93000a",
+                    "surface-container-high": "#292a2b",
+                    "primary": "#4cd7f6",
+                    "primary-fixed": "#acedff",
+                    "surface-tint": "#4cd7f6",
+                    "on-error-container": "#ffdad6",
+                    "on-secondary-container": "#b4b3c6",
+                    "primary-container": "#06b6d4",
+                    "on-surface-variant": "#bcc9cd",
+                    "tertiary-container": "#14bf59",
+                    "on-tertiary-fixed-variant": "#005321",
+                    "secondary": "#c6c5d7",
+                    "surface-bright": "#38393a",
+                    "inverse-on-surface": "#303032",
+                    "outline": "#869397",
+                    "on-background": "#e3e2e3",
+                    "on-primary": "#003640",
+                    "error": "#ffb4ab",
+                    "on-secondary-fixed": "#1a1a28",
+                    "surface": "#121315",
+                    "on-surface": "#e3e2e3",
+                    "inverse-surface": "#e3e2e3",
+                    "on-secondary-fixed-variant": "#454555",
+                    "on-tertiary": "#003915",
+                    "inverse-primary": "#00687a",
+                    "surface-container-highest": "#343536",
+                    "surface-container-low": "#1b1c1d"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "fontFamily": {
+                    "headline": ["Space Grotesk"],
+                    "body": ["Plus Jakarta Sans"],
+                    "label": ["Plus Jakarta Sans"],
+                    "mono": ["JetBrains Mono"]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #0D0E0F;
+            color: #e3e2e3;
+        }
+        .editorial-gradient {
+            background: linear-gradient(135deg, #4CD7F6 0%, #06B6D4 100%);
+        }
+        .glass-panel {
+            background: rgba(31, 32, 33, 0.7);
+            backdrop-filter: blur(12px);
+        }
+    </style>
+</head>
+<body class="font-body selection:bg-primary/30">
+<!-- TopAppBar Content Shell -->
+<header class="sticky top-0 h-[52px] z-40 bg-[#0D0E0F]/80 backdrop-blur-md border-b border-white/5 flex justify-between items-center px-6 w-full">
+<div class="flex items-center gap-4">
+<span class="text-lg font-['Bricolage_Grotesque'] font-bold text-white">AVOP</span>
+<div class="h-4 w-[1px] bg-outline-variant/30"></div>
+<span class="font-['Plus_Jakarta_Sans'] font-semibold text-base text-cyan-500">AI Intelligence Report</span>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2 px-3 py-1 bg-surface-container-low rounded-lg border border-white/5">
+<span class="material-symbols-outlined text-sm text-neutral-400">calendar_today</span>
+<span class="font-mono text-xs text-neutral-300">Oct 24, 2024</span>
+</div>
+<button class="material-symbols-outlined text-neutral-400 hover:bg-white/5 p-1 rounded transition-colors">notifications</button>
+<button class="bg-primary-container text-on-primary-container px-4 py-1 rounded-sm text-sm font-semibold editorial-gradient">Run Analysis</button>
+</div>
+</header>
+<main class="max-w-[860px] mx-auto px-6 py-16 space-y-20">
+<!-- AI Intelligence Report Section -->
+<section class="space-y-8">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">insights</span>
+<h2 class="font-headline font-bold text-sm tracking-[0.2em] uppercase text-neutral-500">Executive Summary</h2>
+</div>
+<div class="border-l-2 border-primary pl-8 space-y-6">
+<p class="text-xl md:text-2xl font-body leading-relaxed text-on-background/90">
+                    The current data ecosystem indicates a significant 14.2% shift in high-frequency trading patterns within the APAC region. This volatility is not incidental; it correlates directly with the recent adjustments in decentralized liquidity pools. Our predictive modeling suggests a 78% probability of a sustained trend through Q4.
+                </p>
+<p class="text-lg md:text-xl font-body leading-relaxed text-neutral-400">
+                    Operational efficiency across internal nodes has stabilized at 98.4%, yet external API latency in North American clusters shows a marginal increase of 45ms. Immediate recalibration of the load-balancing protocols is advised to maintain the current throughput velocity.
+                </p>
+<p class="text-lg md:text-xl font-body leading-relaxed text-neutral-400 italic">
+                    Strategic focus should pivot towards the "Emerald" initiative's data-cleansing phase, as current metadata noise is beginning to impede the high-precision forecasting engines.
+                </p>
+</div>
+</section>
+<!-- Prioritized Action Plan Section -->
+<section class="space-y-10">
+<div class="flex justify-between items-end">
+<div class="space-y-2">
+<h2 class="text-3xl font-headline font-bold text-white tracking-tight">Prioritized Action Plan</h2>
+<p class="text-sm text-neutral-500 font-medium">Critical interventions identified by the AVOP Analytics Engine</p>
+</div>
+<div class="flex gap-2">
+<span class="text-xs font-mono px-2 py-1 bg-surface-container text-primary rounded-sm">3 Active</span>
+<span class="text-xs font-mono px-2 py-1 bg-surface-container text-neutral-500 rounded-sm">1 Resolved</span>
+</div>
+</div>
+<div class="grid gap-4">
+<!-- Action Card 1 -->
+<div class="group relative bg-surface-container-low p-6 rounded-lg transition-all duration-300 hover:bg-surface-container hover:translate-x-1">
+<div class="flex items-start justify-between">
+<div class="flex gap-6">
+<span class="font-mono text-primary text-2xl font-bold opacity-40">01</span>
+<div class="space-y-3">
+<div class="flex items-center gap-3">
+<h3 class="text-lg font-bold text-white font-headline">Recalibrate APAC Load Balancer</h3>
+<span class="bg-tertiary/10 text-tertiary text-[10px] font-bold px-2 py-0.5 rounded-sm tracking-wider uppercase">High Impact</span>
+<span class="bg-white/5 text-neutral-400 text-[10px] font-bold px-2 py-0.5 rounded-sm tracking-wider uppercase border border-white/5">Internal</span>
+</div>
+<p class="text-sm text-neutral-400 leading-relaxed max-w-xl">Adjust gateway thresholds to mitigate the detected 45ms latency spike in the North American cluster. Ensure redundancy protocols are active.</p>
+</div>
+</div>
+<button class="flex items-center gap-2 px-3 py-1.5 rounded-sm border border-outline-variant/30 text-xs font-bold hover:bg-primary hover:text-on-primary transition-colors">
+<span class="material-symbols-outlined text-sm">check_circle</span>
+                            Mark as Done
+                        </button>
+</div>
+</div>
+<!-- Action Card 2 -->
+<div class="group relative bg-surface-container-low p-6 rounded-lg transition-all duration-300 hover:bg-surface-container hover:translate-x-1">
+<div class="flex items-start justify-between">
+<div class="flex gap-6">
+<span class="font-mono text-primary text-2xl font-bold opacity-40">02</span>
+<div class="space-y-3">
+<div class="flex items-center gap-3">
+<h3 class="text-lg font-bold text-white font-headline">Initiate "Emerald" Data Scrubbing</h3>
+<span class="bg-primary/10 text-primary text-[10px] font-bold px-2 py-0.5 rounded-sm tracking-wider uppercase">Medium Impact</span>
+<span class="bg-white/5 text-neutral-400 text-[10px] font-bold px-2 py-0.5 rounded-sm tracking-wider uppercase border border-white/5">External</span>
+</div>
+<p class="text-sm text-neutral-400 leading-relaxed max-w-xl">Cleanse historical training sets of metadata noise to improve forecasting precision for the upcoming fiscal review.</p>
+</div>
+</div>
+<button class="flex items-center gap-2 px-3 py-1.5 rounded-sm border border-outline-variant/30 text-xs font-bold hover:bg-primary hover:text-on-primary transition-colors">
+<span class="material-symbols-outlined text-sm">check_circle</span>
+                            Mark as Done
+                        </button>
+</div>
+</div>
+<!-- Action Card 3 -->
+<div class="group relative bg-surface-container-low p-6 rounded-lg transition-all duration-300 hover:bg-surface-container hover:translate-x-1">
+<div class="flex items-start justify-between">
+<div class="flex gap-6">
+<span class="font-mono text-primary text-2xl font-bold opacity-40">03</span>
+<div class="space-y-3">
+<div class="flex items-center gap-3">
+<h3 class="text-lg font-bold text-white font-headline">Update Compliance Schemas</h3>
+<span class="bg-neutral-500/10 text-neutral-500 text-[10px] font-bold px-2 py-0.5 rounded-sm tracking-wider uppercase">Maintenance</span>
+<span class="bg-white/5 text-neutral-400 text-[10px] font-bold px-2 py-0.5 rounded-sm tracking-wider uppercase border border-white/5">Internal</span>
+</div>
+<p class="text-sm text-neutral-400 leading-relaxed max-w-xl">Synchronize internal reporting formats with the latest regulatory guidelines for cross-border financial data handling.</p>
+</div>
+</div>
+<button class="flex items-center gap-2 px-3 py-1.5 rounded-sm border border-outline-variant/30 text-xs font-bold hover:bg-primary hover:text-on-primary transition-colors">
+<span class="material-symbols-outlined text-sm">check_circle</span>
+                            Mark as Done
+                        </button>
+</div>
+</div>
+</div>
+</section>
+<!-- Minimal Chat Interface Section -->
+<section class="sticky bottom-12 z-30">
+<div class="glass-panel p-2 rounded-xl border border-white/5 shadow-2xl shadow-primary/5">
+<!-- Response Area (Streaming Placeholder) -->
+<div class="px-6 py-4 space-y-4 max-h-[200px] overflow-y-auto mb-2 custom-scrollbar">
+<div class="flex gap-4 animate-pulse">
+<span class="material-symbols-outlined text-primary text-sm" style="font-variation-settings: 'FILL' 1;">generating_tokens</span>
+<p class="font-mono text-xs text-neutral-400 tracking-tight leading-relaxed">
+                            Analyzing recent query... Mapping cross-references to APAC liquidity pools... Synthesizing report...
+                        </p>
+</div>
+</div>
+<!-- Input Area -->
+<div class="relative">
+<input class="w-full bg-surface-container-lowest border-none focus:ring-0 px-6 py-4 rounded-lg font-body text-white placeholder-neutral-500 pr-16 shadow-inner" placeholder="Ask AVOP anything..." type="text"/>
+<div class="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-3">
+<button class="material-symbols-outlined text-neutral-500 hover:text-primary transition-colors p-1">attach_file</button>
+<button class="bg-primary text-on-primary h-10 w-10 rounded-lg flex items-center justify-center editorial-gradient">
+<span class="material-symbols-outlined">north</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Quick Suggestion Chips -->
+<div class="flex justify-center gap-3 mt-6">
+<button class="text-[10px] font-bold uppercase tracking-widest text-neutral-500 hover:text-primary transition-colors">Detailed APAC Breakdown</button>
+<span class="text-neutral-700">•</span>
+<button class="text-[10px] font-bold uppercase tracking-widest text-neutral-500 hover:text-primary transition-colors">Efficiency Logs</button>
+<span class="text-neutral-700">•</span>
+<button class="text-[10px] font-bold uppercase tracking-widest text-neutral-500 hover:text-primary transition-colors">Compliance Status</button>
+</div>
+</section>
+</main>
+<!-- Footer Shell -->
+<footer class="w-full py-16 bg-[#0D0E0F] border-t border-white/5">
+<div class="grid grid-cols-4 gap-8 px-12 max-w-7xl mx-auto">
+<div class="col-span-1 space-y-4">
+<span class="text-xl font-['Bricolage_Grotesque'] font-bold text-white">AVOP</span>
+<p class="font-['Plus_Jakarta_Sans'] text-xs uppercase tracking-wider text-neutral-600">
+                    © 2024 AVOP Analytics. All rights reserved.
+                </p>
+</div>
+<div class="col-span-1 flex flex-col gap-3">
+<h4 class="text-[10px] font-bold text-neutral-400 uppercase tracking-[0.2em]">Product</h4>
+<a class="font-['Plus_Jakarta_Sans'] text-xs uppercase tracking-wider text-neutral-600 hover:text-white transition-opacity" href="#">Intelligence</a>
+<a class="font-['Plus_Jakarta_Sans'] text-xs uppercase tracking-wider text-neutral-600 hover:text-white transition-opacity" href="#">Forecasting</a>
+</div>
+<div class="col-span-1 flex flex-col gap-3">
+<h4 class="text-[10px] font-bold text-neutral-400 uppercase tracking-[0.2em]">Legal</h4>
+<a class="font-['Plus_Jakarta_Sans'] text-xs uppercase tracking-wider text-neutral-600 hover:text-white transition-opacity" href="#">Privacy</a>
+<a class="font-['Plus_Jakarta_Sans'] text-xs uppercase tracking-wider text-neutral-600 hover:text-white transition-opacity" href="#">Security</a>
+</div>
+<div class="col-span-1 flex flex-col gap-3">
+<h4 class="text-[10px] font-bold text-neutral-400 uppercase tracking-[0.2em]">Contact</h4>
+<a class="font-['Plus_Jakarta_Sans'] text-xs uppercase tracking-wider text-neutral-600 hover:text-white transition-opacity" href="#">Documentation</a>
+<a class="font-['Plus_Jakarta_Sans'] text-xs uppercase tracking-wider text-neutral-600 hover:text-white transition-opacity" href="#">Support</a>
+</div>
+</div>
+</footer>
+</body></html>

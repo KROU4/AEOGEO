@@ -8,6 +8,26 @@
   "createProject": "Create Project",
   "noData": "No visibility data yet",
   "noDataHint": "Run your first engine query to start tracking visibility scores.",
+  "sov": {
+    "title": "Share of voice",
+    "subtitle": "Your mention share vs other tracked brands",
+    "yourShare": "Your brand share of mentions",
+    "you": "You",
+    "empty": "Not enough mention data to compute share of voice yet.",
+    "tracked": "{{count}} brands tracked",
+    "barsLabel": "Share by brand",
+    "share": "Share"
+  },
+  "platforms": {
+    "title": "Platform ranking",
+    "subtitle": "Per-engine visibility, share of voice, and average rank",
+    "empty": "No engine runs recorded for this project yet.",
+    "engine": "Platform",
+    "sov": "SoV %",
+    "visibility": "Visibility %",
+    "avgRank": "Avg. rank",
+    "runs": "Runs"
+  },
   "overallScore": "Overall Visibility Score",
   "outOf10": "/10",
   "trend": "vs previous run",
@@ -20,6 +40,23 @@
     "last90days": "Last 90 days",
     "allEngines": "All Engines",
     "allProjects": "All Projects"
+  },
+  "weeklyTrend": {
+    "title": "SoV & visibility (weekly)",
+    "subtitle": "Twelve-week buckets from completed runs in each ISO week",
+    "sov": "Share of voice %",
+    "visibility": "Visibility index (0–100)",
+    "empty": "Not enough weekly activity to chart yet."
+  },
+  "runStatus": {
+    "title": "Latest run",
+    "loading": "Loading run status…",
+    "noRuns": "No engine runs yet. Start a run to populate visibility data.",
+    "openRuns": "Runs & schedules",
+    "updated": "Updated {{when}}",
+    "stageEngine": "Engine",
+    "stageParse": "Parse",
+    "stageScore": "Score"
   },
   "chart": {
     "title": "Visibility Over Time",

@@ -2,7 +2,7 @@
 
 import uuid
 
-from sqlalchemy import ForeignKey, Index, String, Text
+from sqlalchemy import ForeignKey, Index, Integer, String, Text
 from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -22,6 +22,12 @@ class Recommendation(UUIDMixin, TimestampMixin, Base):
     title: Mapped[str] = mapped_column(String(512))
     description: Mapped[str] = mapped_column(Text)
     affected_keywords: Mapped[dict | None] = mapped_column(JSON, default=None)
+    status: Mapped[str] = mapped_column(String(16), default="pending")
+    impact_estimate: Mapped[str | None] = mapped_column(Text, default=None)
+    instructions: Mapped[str | None] = mapped_column(Text, default=None)
+    source: Mapped[str | None] = mapped_column(String(256), default=None)
+    sort_rank: Mapped[int | None] = mapped_column(Integer, default=None)
+    scope: Mapped[str | None] = mapped_column(String(16), default=None)
 
     run_id: Mapped[uuid.UUID | None] = mapped_column(
         ForeignKey("engine_runs.id", ondelete="SET NULL"), default=None

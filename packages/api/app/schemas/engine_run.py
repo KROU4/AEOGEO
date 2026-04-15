@@ -61,3 +61,14 @@ class EngineRunProgress(BaseModel):
     engine: RunStageProgress
     parse: RunStageProgress
     score: RunStageProgress
+
+
+class LatestRunStatusResponse(BaseModel):
+    """Latest engine run snapshot for status bar / onboarding polling."""
+
+    run_id: UUID
+    status: str
+    completed_at: datetime | None = None
+    stages: dict[str, str]
+    progress_pct: int
+    updated_at: datetime

@@ -1,6 +1,7 @@
 """Pydantic models for quick GEO audit responses."""
 
 from typing import Any
+from uuid import UUID
 
 from pydantic import BaseModel, Field
 
@@ -8,6 +9,10 @@ from pydantic import BaseModel, Field
 class QuickAuditResult(BaseModel):
     """Result of a public quick GEO audit (landing / lead gen)."""
 
+    audit_id: UUID | None = Field(
+        default=None,
+        description="Persisted public audit row id (set by API after save).",
+    )
     overall_geo_score: float = Field(ge=0, le=100)
     citability_score: float = Field(ge=0, le=100)
     ai_crawler_access: dict[str, bool] = Field(

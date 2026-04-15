@@ -28,6 +28,16 @@ async function getAuthHeaders(): Promise<HeadersInit> {
   return headers;
 }
 
+/** Authorization only (e.g. binary downloads — avoid JSON Content-Type on GET). */
+async function getAuthHeadersBinary(): Promise<HeadersInit> {
+  const headers: HeadersInit = {};
+  const token = await getAccessToken();
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+  return headers;
+}
+
 function buildUrl(path: string): string {
   return `${BASE_URL}${API_PREFIX}${path}`;
 }
@@ -78,12 +88,63 @@ export async function apiGet<T>(path: string): Promise<T> {
   return handleResponse<T>(response);
 }
 
+export async function apiGetBlob(path: string): Promise<Blob> {
+  const response = await fetch(buildUrl(path), {
+    method: "GET",
+    headers: await getAuthHeadersBinary(),
+  });
+  if (response.status === 401) {
+    window.location.href =
+      "/login?redirect_url=" + encodeURIComponent(window.location.pathname);
+    throw new ApiError(401, "auth.invalid_token");
+  }
+  if (!response.ok) {
+    let code = "unknown";
+    try {
+      const body = await response.json();
+      if (body?.detail?.code) {
+        code = body.detail.code;
+      } else if (typeof body?.detail === "string") {
+        code = body.detail;
+      }
+    } catch {
+      // response body not JSON
+    }
+    throw new ApiError(response.status, code);
+  }
+  return response.blob();
+}
+
 export async function apiGetPublic<T>(path: string): Promise<T> {
   const response = await fetch(buildUrl(path), {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
     },
+  });
+  return handleResponse<T>(response, { redirectOnUnauthorized: false });
+}
+
+/** Public POST (no auth header) — e.g. lead-gen quick audit. */
+export async function apiPostPublic<T>(path: string, body?: unknown): Promise<T> {
+  const response = await fetch(buildUrl(path), {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  return handleResponse<T>(response, { redirectOnUnauthorized: false });
+}
+
+/** Public PATCH (no auth header). */
+export async function apiPatchPublic<T>(path: string, body?: unknown): Promise<T> {
+  const response = await fetch(buildUrl(path), {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: body ? JSON.stringify(body) : undefined,
   });
   return handleResponse<T>(response, { redirectOnUnauthorized: false });
 }
@@ -128,6 +189,40 @@ export interface SSEEvent {
   data: unknown;
 }
 
+async function consumeSseResponse(
+  response: Response,
+  onEvent: (event: SSEEvent) => void,
+): Promise<void> {
+  const reader = response.body!.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    buffer += decoder.decode(value, { stream: true });
+    const parts = buffer.split("\n\n");
+    buffer = parts.pop() || "";
+
+    for (const part of parts) {
+      let eventName = "";
+      let eventData = "";
+      for (const line of part.split("\n")) {
+        if (line.startsWith("event: ")) eventName = line.slice(7);
+        else if (line.startsWith("data: ")) eventData = line.slice(6);
+      }
+      if (!eventData) continue;
+      const ev = eventName || "message";
+      try {
+        onEvent({ event: ev, data: JSON.parse(eventData) });
+      } catch {
+        onEvent({ event: ev, data: eventData });
+      }
+    }
+  }
+}
+
 export async function apiSSE(
   path: string,
   body: unknown,
@@ -151,34 +246,32 @@ export async function apiSSE(
     throw new ApiError(response.status, "sse_stream_failed");
   }
 
-  const reader = response.body!.getReader();
-  const decoder = new TextDecoder();
-  let buffer = "";
+  await consumeSseResponse(response, onEvent);
+}
 
-  for (;;) {
-    const { done, value } = await reader.read();
-    if (done) break;
+/** GET + SSE (e.g. assistant report stream). */
+export async function apiSSEGet(
+  path: string,
+  onEvent: (event: SSEEvent) => void,
+  signal?: AbortSignal,
+): Promise<void> {
+  const headers = await getAuthHeadersBinary();
+  const response = await fetch(buildUrl(path), {
+    method: "GET",
+    headers,
+    signal,
+  });
 
-    buffer += decoder.decode(value, { stream: true });
-    const parts = buffer.split("\n\n");
-    buffer = parts.pop() || "";
-
-    for (const part of parts) {
-      let eventName = "";
-      let eventData = "";
-      for (const line of part.split("\n")) {
-        if (line.startsWith("event: ")) eventName = line.slice(7);
-        else if (line.startsWith("data: ")) eventData = line.slice(6);
-      }
-      if (eventName && eventData) {
-        try {
-          onEvent({ event: eventName, data: JSON.parse(eventData) });
-        } catch {
-          onEvent({ event: eventName, data: eventData });
-        }
-      }
-    }
+  if (response.status === 401) {
+    window.location.href =
+      "/login?redirect_url=" + encodeURIComponent(window.location.pathname);
+    throw new ApiError(401, "auth.invalid_token");
   }
+  if (!response.ok) {
+    throw new ApiError(response.status, "sse_stream_failed");
+  }
+
+  await consumeSseResponse(response, onEvent);
 }
 
 export async function apiUpload<T>(path: string, formData: FormData): Promise<T> {

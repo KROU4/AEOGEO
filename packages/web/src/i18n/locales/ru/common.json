@@ -8,7 +8,11 @@
     "projects": "Проекты",
     "settings": "Настройки",
     "adminKeys": "Ключи AI",
-    "adminUsage": "Использование AI"
+    "adminUsage": "Использование AI",
+    "citations": "Цитирования",
+    "competitors": "Конкуренты",
+    "platforms": "Платформы",
+    "assistant": "AI-ассистент"
   },
   "navGroups": {
     "platform": "Платформа",
@@ -55,6 +59,12 @@
     "member": "Участник"
   },
   "topbar": {
+    "periodLabel": "Период",
+    "period": {
+      "7d": "7 дней",
+      "30d": "30 дней",
+      "90d": "90 дней"
+    },
     "themeLabel": "Тема: {{theme}}",
     "toggleTheme": "Переключить тему",
     "notifications": "Уведомления",

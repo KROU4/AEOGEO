@@ -20,8 +20,12 @@ import { Route as DashboardVisibilityRouteImport } from "./routes/_dashboard/vis
 import { Route as DashboardSettingsRouteImport } from "./routes/_dashboard/settings"
 import { Route as DashboardReportsRouteImport } from "./routes/_dashboard/reports"
 import { Route as DashboardProjectsRouteImport } from "./routes/_dashboard/projects"
+import { Route as DashboardPlatformsRouteImport } from "./routes/_dashboard/platforms"
 import { Route as DashboardOverviewRouteImport } from "./routes/_dashboard/overview"
 import { Route as DashboardContentRouteImport } from "./routes/_dashboard/content"
+import { Route as DashboardCompetitorsRouteImport } from "./routes/_dashboard/competitors"
+import { Route as DashboardCitationsRouteImport } from "./routes/_dashboard/citations"
+import { Route as DashboardAssistantRouteImport } from "./routes/_dashboard/assistant"
 import { Route as AuthResetPasswordRouteImport } from "./routes/_auth/reset-password"
 import { Route as AuthRegisterRouteImport } from "./routes/_auth/register"
 import { Route as AuthLoginRouteImport } from "./routes/_auth/login"
@@ -92,6 +96,11 @@ const DashboardProjectsRoute = DashboardProjectsRouteImport.update({
   path: "/projects",
   getParentRoute: () => DashboardRoute,
 } as any)
+const DashboardPlatformsRoute = DashboardPlatformsRouteImport.update({
+  id: "/platforms",
+  path: "/platforms",
+  getParentRoute: () => DashboardRoute,
+} as any)
 const DashboardOverviewRoute = DashboardOverviewRouteImport.update({
   id: "/overview",
   path: "/overview",
@@ -100,6 +109,21 @@ const DashboardOverviewRoute = DashboardOverviewRouteImport.update({
 const DashboardContentRoute = DashboardContentRouteImport.update({
   id: "/content",
   path: "/content",
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardCompetitorsRoute = DashboardCompetitorsRouteImport.update({
+  id: "/competitors",
+  path: "/competitors",
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardCitationsRoute = DashboardCitationsRouteImport.update({
+  id: "/citations",
+  path: "/citations",
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardAssistantRoute = DashboardAssistantRouteImport.update({
+  id: "/assistant",
+  path: "/assistant",
   getParentRoute: () => DashboardRoute,
 } as any)
 const AuthResetPasswordRoute = AuthResetPasswordRouteImport.update({
@@ -203,8 +227,12 @@ export interface FileRoutesByFullPath {
   "/login": typeof AuthLoginRoute
   "/register": typeof AuthRegisterRoute
   "/reset-password": typeof AuthResetPasswordRoute
+  "/assistant": typeof DashboardAssistantRoute
+  "/citations": typeof DashboardCitationsRoute
+  "/competitors": typeof DashboardCompetitorsRoute
   "/content": typeof DashboardContentRoute
   "/overview": typeof DashboardOverviewRoute
+  "/platforms": typeof DashboardPlatformsRoute
   "/projects": typeof DashboardProjectsRouteWithChildren
   "/reports": typeof DashboardReportsRouteWithChildren
   "/settings": typeof DashboardSettingsRoute
@@ -232,8 +260,12 @@ export interface FileRoutesByTo {
   "/login": typeof AuthLoginRoute
   "/register": typeof AuthRegisterRoute
   "/reset-password": typeof AuthResetPasswordRoute
+  "/assistant": typeof DashboardAssistantRoute
+  "/citations": typeof DashboardCitationsRoute
+  "/competitors": typeof DashboardCompetitorsRoute
   "/content": typeof DashboardContentRoute
   "/overview": typeof DashboardOverviewRoute
+  "/platforms": typeof DashboardPlatformsRoute
   "/projects": typeof DashboardProjectsRouteWithChildren
   "/reports": typeof DashboardReportsRouteWithChildren
   "/settings": typeof DashboardSettingsRoute
@@ -265,8 +297,12 @@ export interface FileRoutesById {
   "/_auth/login": typeof AuthLoginRoute
   "/_auth/register": typeof AuthRegisterRoute
   "/_auth/reset-password": typeof AuthResetPasswordRoute
+  "/_dashboard/assistant": typeof DashboardAssistantRoute
+  "/_dashboard/citations": typeof DashboardCitationsRoute
+  "/_dashboard/competitors": typeof DashboardCompetitorsRoute
   "/_dashboard/content": typeof DashboardContentRoute
   "/_dashboard/overview": typeof DashboardOverviewRoute
+  "/_dashboard/platforms": typeof DashboardPlatformsRoute
   "/_dashboard/projects": typeof DashboardProjectsRouteWithChildren
   "/_dashboard/reports": typeof DashboardReportsRouteWithChildren
   "/_dashboard/settings": typeof DashboardSettingsRoute
@@ -296,8 +332,12 @@ export interface FileRouteTypes {
     | "/login"
     | "/register"
     | "/reset-password"
+    | "/assistant"
+    | "/citations"
+    | "/competitors"
     | "/content"
     | "/overview"
+    | "/platforms"
     | "/projects"
     | "/reports"
     | "/settings"
@@ -325,8 +365,12 @@ export interface FileRouteTypes {
     | "/login"
     | "/register"
     | "/reset-password"
+    | "/assistant"
+    | "/citations"
+    | "/competitors"
     | "/content"
     | "/overview"
+    | "/platforms"
     | "/projects"
     | "/reports"
     | "/settings"
@@ -357,8 +401,12 @@ export interface FileRouteTypes {
     | "/_auth/login"
     | "/_auth/register"
     | "/_auth/reset-password"
+    | "/_dashboard/assistant"
+    | "/_dashboard/citations"
+    | "/_dashboard/competitors"
     | "/_dashboard/content"
     | "/_dashboard/overview"
+    | "/_dashboard/platforms"
     | "/_dashboard/projects"
     | "/_dashboard/reports"
     | "/_dashboard/settings"
@@ -467,6 +515,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof DashboardProjectsRouteImport
       parentRoute: typeof DashboardRoute
     }
+    "/_dashboard/platforms": {
+      id: "/_dashboard/platforms"
+      path: "/platforms"
+      fullPath: "/platforms"
+      preLoaderRoute: typeof DashboardPlatformsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     "/_dashboard/overview": {
       id: "/_dashboard/overview"
       path: "/overview"
@@ -479,6 +534,27 @@ declare module "@tanstack/react-router" {
       path: "/content"
       fullPath: "/content"
       preLoaderRoute: typeof DashboardContentRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    "/_dashboard/competitors": {
+      id: "/_dashboard/competitors"
+      path: "/competitors"
+      fullPath: "/competitors"
+      preLoaderRoute: typeof DashboardCompetitorsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    "/_dashboard/citations": {
+      id: "/_dashboard/citations"
+      path: "/citations"
+      fullPath: "/citations"
+      preLoaderRoute: typeof DashboardCitationsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    "/_dashboard/assistant": {
+      id: "/_dashboard/assistant"
+      path: "/assistant"
+      fullPath: "/assistant"
+      preLoaderRoute: typeof DashboardAssistantRouteImport
       parentRoute: typeof DashboardRoute
     }
     "/_auth/reset-password": {
@@ -679,8 +755,12 @@ const DashboardAdminAiUsageRouteWithChildren =
   )
 
 interface DashboardRouteChildren {
+  DashboardAssistantRoute: typeof DashboardAssistantRoute
+  DashboardCitationsRoute: typeof DashboardCitationsRoute
+  DashboardCompetitorsRoute: typeof DashboardCompetitorsRoute
   DashboardContentRoute: typeof DashboardContentRoute
   DashboardOverviewRoute: typeof DashboardOverviewRoute
+  DashboardPlatformsRoute: typeof DashboardPlatformsRoute
   DashboardProjectsRoute: typeof DashboardProjectsRouteWithChildren
   DashboardReportsRoute: typeof DashboardReportsRouteWithChildren
   DashboardSettingsRoute: typeof DashboardSettingsRoute
@@ -693,8 +773,12 @@ interface DashboardRouteChildren {
 }
 
 const DashboardRouteChildren: DashboardRouteChildren = {
+  DashboardAssistantRoute: DashboardAssistantRoute,
+  DashboardCitationsRoute: DashboardCitationsRoute,
+  DashboardCompetitorsRoute: DashboardCompetitorsRoute,
   DashboardContentRoute: DashboardContentRoute,
   DashboardOverviewRoute: DashboardOverviewRoute,
+  DashboardPlatformsRoute: DashboardPlatformsRoute,
   DashboardProjectsRoute: DashboardProjectsRouteWithChildren,
   DashboardReportsRoute: DashboardReportsRouteWithChildren,
   DashboardSettingsRoute: DashboardSettingsRoute,

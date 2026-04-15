@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, createFileRoute, useNavigate, useParams } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
-import { ArrowLeft, Share2, Trash2 } from "lucide-react";
+import { ArrowLeft, Download, Loader2, Share2, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -14,7 +14,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { useReport, useDeleteReport } from "@/hooks/use-reports";
+import {
+  useReport,
+  useDeleteReport,
+  useDownloadReportPdf,
+} from "@/hooks/use-reports";
 import { ReportDetailView } from "@/components/reports/report-detail";
 import { ReportShareDialog } from "@/components/reports/report-share-dialog";
 
@@ -29,6 +33,7 @@ function ReportDetailPage() {
   const navigate = useNavigate();
   const { data: report, isLoading, error } = useReport(reportId);
   const deleteReport = useDeleteReport();
+  const downloadPdf = useDownloadReportPdf();
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
@@ -43,6 +48,23 @@ function ReportDetailPage() {
         </Button>
         {report ? (
           <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              disabled={downloadPdf.isPending}
+              onClick={() =>
+                downloadPdf.mutate({
+                  projectId: report.project_id,
+                  reportId: report.id,
+                })
+              }
+            >
+              {downloadPdf.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Download className="h-4 w-4" />
+              )}
+              {t("downloadPdf")}
+            </Button>
             <Button onClick={() => setShareDialogOpen(true)}>
               <Share2 className="h-4 w-4" />
               {tc("actions.share")}

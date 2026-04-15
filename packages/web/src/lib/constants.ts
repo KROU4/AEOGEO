@@ -8,6 +8,10 @@ import {
   Settings,
   KeyRound,
   BarChart3,
+  Link2,
+  Trophy,
+  Layers,
+  MessageSquare,
   type LucideIcon,
 } from "lucide-react";
 
@@ -40,6 +44,10 @@ export const publishNavItems: NavItem[] = [
 
 export const analyzeNavItems: NavItem[] = [
   { labelKey: "nav.reports", href: "/reports", icon: FileText },
+  { labelKey: "nav.citations", href: "/citations", icon: Link2 },
+  { labelKey: "nav.competitors", href: "/competitors", icon: Trophy },
+  { labelKey: "nav.platforms", href: "/platforms", icon: Layers },
+  { labelKey: "nav.assistant", href: "/assistant", icon: MessageSquare },
 ];
 
 export const adminNavItems: NavItem[] = [

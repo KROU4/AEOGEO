@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { apiGet, apiPost } from "@/lib/api-client";
+import { ApiError, apiGet, apiPost } from "@/lib/api-client";
+import type { LatestRunStatus } from "@/types/latest-run";
 import type {
   EngineRun,
   RunCreate,
@@ -19,6 +20,25 @@ export function useRuns(projectId: string) {
   });
 }
 
+/** Most recent run (any status) — status bar / polling while active. */
+export function useLatestRun(projectId: string | undefined) {
+  return useQuery({
+    queryKey: ["runs", projectId, "latest"],
+    queryFn: () =>
+      apiGet<LatestRunStatus>(`/projects/${projectId}/runs/latest`),
+    enabled: !!projectId,
+    retry: (failureCount, error) => {
+      if (error instanceof ApiError && error.status === 404) return false;
+      return failureCount < 2;
+    },
+    refetchInterval: (query) => {
+      const s = query.state.data?.status;
+      if (s === "pending" || s === "running") return 4000;
+      return false;
+    },
+  });
+}
+
 export function useRun(projectId: string, runId: string) {
   return useQuery({
     queryKey: ["runs", projectId, runId],
@@ -35,6 +55,8 @@ export function useCreateRun(projectId: string) {
       apiPost<EngineRun>(`/projects/${projectId}/runs`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["runs", projectId] });
+      queryClient.invalidateQueries({ queryKey: ["runs", projectId, "latest"] });
+      queryClient.invalidateQueries({ queryKey: ["project-trends", projectId] });
     },
   });
 }
@@ -47,6 +69,8 @@ export function useRetryRun(projectId: string) {
       apiPost<EngineRun>(`/projects/${projectId}/runs/${runId}/retry`, {}),
     onSuccess: (_, runId) => {
       queryClient.invalidateQueries({ queryKey: ["runs", projectId] });
+      queryClient.invalidateQueries({ queryKey: ["runs", projectId, "latest"] });
+      queryClient.invalidateQueries({ queryKey: ["project-trends", projectId] });
       queryClient.invalidateQueries({ queryKey: ["runs", projectId, runId] });
       queryClient.invalidateQueries({
         queryKey: ["runs", projectId, runId, "progress"],
@@ -66,6 +90,8 @@ export function useCancelRun(projectId: string) {
       apiPost<EngineRun>(`/projects/${projectId}/runs/${runId}/cancel`, {}),
     onSuccess: (_, runId) => {
       queryClient.invalidateQueries({ queryKey: ["runs", projectId] });
+      queryClient.invalidateQueries({ queryKey: ["runs", projectId, "latest"] });
+      queryClient.invalidateQueries({ queryKey: ["project-trends", projectId] });
       queryClient.invalidateQueries({
         queryKey: ["runs", projectId, runId, "progress"],
       });

@@ -1,0 +1,20 @@
+{
+  "name": "assets/34335f51b0ff42ff9a6094ce3993540e",
+  "displayName": "Cypher Obsidian",
+  "version": "1",
+  "note": "Exported from Stitch list_design_systems (user-stitch MCP), project 9601147732002780888",
+  "theme": {
+    "colorMode": "DARK",
+    "customColor": "#06B6D4",
+    "headlineFont": "SPACE_GROTESK",
+    "bodyFont": "PLUS_JAKARTA_SANS",
+    "labelFont": "PLUS_JAKARTA_SANS",
+    "roundness": "ROUND_FOUR",
+    "colorVariant": "FIDELITY",
+    "overridePrimaryColor": "#06B6D4",
+    "overrideSecondaryColor": "#5A5A6A",
+    "overrideTertiaryColor": "#22C55E",
+    "overrideNeutralColor": "#08090A",
+    "spacingScale": 1
+  }
+}

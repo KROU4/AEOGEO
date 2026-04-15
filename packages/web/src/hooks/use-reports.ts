@@ -1,5 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ApiError, apiDelete, apiGet, apiGetPublic, apiPost } from "@/lib/api-client";
+import {
+  ApiError,
+  apiDelete,
+  apiGet,
+  apiGetBlob,
+  apiGetPublic,
+  apiPost,
+} from "@/lib/api-client";
+import { triggerBlobDownload } from "@/lib/report";
 import type {
   PublicReport,
   Report,
@@ -20,6 +28,17 @@ export function useReport(id: string) {
     queryKey: ["reports", id],
     queryFn: () => apiGet<Report>(`/reports/${id}`),
     enabled: !!id,
+  });
+}
+
+export function useDownloadReportPdf() {
+  return useMutation({
+    mutationFn: async (input: { projectId: string; reportId: string }) => {
+      const blob = await apiGetBlob(
+        `/projects/${input.projectId}/reports/${input.reportId}/download`,
+      );
+      triggerBlobDownload(blob, `report-${input.reportId}.pdf`);
+    },
   });
 }
 

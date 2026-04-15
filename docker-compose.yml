@@ -1,5 +1,11 @@
 # Local dev: `docker compose up --build`
 #
+# Hot reload:
+# - API: uvicorn --reload + монтирование app / alembic / geo-audit
+# - Web: Vite HMR + CHOKIDAR_USEPOLLING для bind-mount (Docker Desktop Windows/macOS)
+# - Widget: фоновый `vite build --watch`, чтобы dist/widget.js обновлялся без ребилда контейнера
+# - temporal-worker: watchfiles перезапускает процесс при изменении .py в app и geo-audit
+#
 # Важно: в контейнере API переменные DATABASE_URL / REDIS_URL задаются ниже (хосты db, redis),
 # они перекрывают packages/api/.env, если там указан localhost.
 #
@@ -11,13 +17,15 @@ x-api-build: &api-build
   context: .
   dockerfile: packages/api/Dockerfile
 
+# Имена переменных без DATABASE_URL/REDIS_URL из корневого .env — иначе подстановка
+# ${DATABASE_URL:-...} подхватит localhost с хоста и сломает сеть между контейнерами.
 x-api-environment: &api-environment
-  DATABASE_URL: ${DATABASE_URL:-postgresql+asyncpg://aeogeo:localdev@db:5432/aeogeo}
-  REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
-  TEMPORAL_HOST: ${TEMPORAL_HOST:-temporal:7233}
+  DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-aeogeo}:${POSTGRES_PASSWORD:-localdev}@db:5432/${POSTGRES_DB:-aeogeo}
+  REDIS_URL: redis://redis:6379/0
+  TEMPORAL_HOST: temporal:7233
   TEMPORAL_NAMESPACE: ${TEMPORAL_NAMESPACE:-default}
   TEMPORAL_TASK_QUEUE: ${TEMPORAL_TASK_QUEUE:-aeogeo-pipeline}
-  CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173}
+  CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:${WEB_PORT:-5173}}
 
 services:
   db:
@@ -76,7 +84,8 @@ services:
     restart: unless-stopped
 
   temporal-ui:
-    image: temporalio/ui:2.28
+    # Теги без префикса v; старые вроде :2.28 могут отсутствовать на Docker Hub
+    image: ${TEMPORAL_UI_IMAGE:-temporalio/ui:2.48.2}
     ports:
       - "${TEMPORAL_UI_PORT:-8233}:8080"
     environment:
@@ -106,7 +115,8 @@ services:
     restart: unless-stopped
     command: >-
       sh -lc "uv run alembic upgrade head &&
-      uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000"
+      uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+      --reload-dir /work/packages/api/app --reload-dir /work/packages/geo-audit"
 
   web:
     build:
@@ -115,7 +125,10 @@ services:
     ports:
       - "${WEB_PORT:-5173}:5173"
     environment:
-      VITE_API_URL: ${VITE_API_URL:-http://localhost:8000}
+      VITE_API_URL: ${VITE_API_URL:-http://localhost:${API_PORT:-8000}}
+      # File watching on bind mounts (enable=false on native Linux if CPU usage is high)
+      CHOKIDAR_USEPOLLING: ${DEV_WATCH_POLLING:-true}
+      CHOKIDAR_INTERVAL: ${CHOKIDAR_INTERVAL:-1000}
     volumes:
       - ./packages/web:/app/packages/web
       - ./packages/widget:/app/packages/widget
@@ -125,6 +138,10 @@ services:
     depends_on:
       - api
     restart: unless-stopped
+    command: >-
+      sh -lc "cd /app/packages/web && bun run build:widget &&
+      (cd /app/packages/widget && bun run dev) &
+      cd /app/packages/web && exec bun run dev:live"
 
   temporal-worker:
     build: *api-build
@@ -137,7 +154,9 @@ services:
       - ./packages/api/alembic:/work/packages/api/alembic
       - ./packages/api/alembic.ini:/work/packages/api/alembic.ini
       - ./packages/geo-audit:/work/packages/geo-audit
-    command: uv run python -m app.workflows.worker
+    command: >-
+      sh -lc "cd /work/packages/api && exec uv run watchfiles --filter python
+      'uv run python -m app.workflows.worker' app /work/packages/geo-audit"
     depends_on:
       db:
         condition: service_healthy

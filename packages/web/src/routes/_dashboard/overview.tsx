@@ -44,7 +44,13 @@ import {
   BarChart,
   Bar,
 } from "recharts";
+import { AvopPageHeader } from "@/components/avop";
+import { OverviewAssistantInsight } from "@/components/dashboard/overview-assistant-insight";
+import { OverviewPeriodKpis } from "@/components/dashboard/overview-period-kpis";
+import { OverviewWindowSparklines } from "@/components/dashboard/overview-window-sparklines";
 import { useCurrentUser } from "@/hooks/use-auth";
+import { useDashboardPeriod } from "@/hooks/use-dashboard-period";
+import { useProjectDashboard } from "@/hooks/use-project-dashboard";
 import {
   useVisibilityScore,
   useSentiment,
@@ -160,6 +166,7 @@ const activityIconMap: Record<string, React.ElementType> = {
 
 function OverviewPage() {
   const { t } = useTranslation("dashboard");
+  const period = useDashboardPeriod();
   const { locale } = useLocale();
   const [preferredProjectId, setPreferredProjectId] = useState<string | null>(
     () => readStoredAnalyticsProjectId(),
@@ -201,6 +208,8 @@ function OverviewPage() {
   const scoresByEngine = useScoresByEngine(selectedProjectId ?? undefined);
   const trafficData = useTrafficData(selectedProjectId ?? undefined);
 
+  const projectDashboard = useProjectDashboard(selectedProjectId ?? undefined, period);
+
   const metricsLoading = visScore.isLoading || sentiment.isLoading;
 
   /* derive positive sentiment percentage */
@@ -223,12 +232,10 @@ function OverviewPage() {
   return (
     <div className="space-y-8">
       {/* Page header */}
-      <div>
-        <h2 className="text-2xl font-bold text-foreground">{t("title")}</h2>
-        <p className="text-sm text-muted-foreground mt-1">
-          {t("welcome", { name: userName })}
-        </p>
-      </div>
+      <AvopPageHeader
+        title={t("title")}
+        description={t("welcome", { name: userName })}
+      />
 
       {hasProjects && (
         <div className="flex items-center gap-3">
@@ -259,6 +266,20 @@ function OverviewPage() {
               ))}
             </SelectContent>
           </Select>
+        </div>
+      )}
+
+      {selectedProjectId && (
+        <div className="space-y-4">
+          <OverviewAssistantInsight projectId={selectedProjectId} />
+          <OverviewPeriodKpis
+            data={projectDashboard.data}
+            isLoading={projectDashboard.isLoading}
+          />
+          <OverviewWindowSparklines
+            data={projectDashboard.data}
+            isLoading={projectDashboard.isLoading}
+          />
         </div>
       )}
 

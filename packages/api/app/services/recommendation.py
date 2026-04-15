@@ -86,7 +86,29 @@ class RecommendationService:
             .where(Recommendation.project_id == project_id)
             .order_by(Recommendation.created_at.desc())
         )
-        return [RecommendationResponse.model_validate(r) for r in result.all()]
+        return [RecommendationResponse.model_validate(x) for x in result.all()]
+
+    async def patch_recommendation_status(
+        self,
+        project_id: UUID,
+        rec_id: UUID,
+        tenant_id: UUID,
+        status: str,
+    ) -> RecommendationResponse:
+        await self._verify_project(project_id, tenant_id)
+        result = await self.db.execute(
+            select(Recommendation).where(
+                Recommendation.id == rec_id,
+                Recommendation.project_id == project_id,
+            ),
+        )
+        rec = result.scalar_one_or_none()
+        if rec is None:
+            raise RecommendationServiceError(404, "rec.not_found", "Not found")
+        rec.status = status
+        await self.db.commit()
+        await self.db.refresh(rec)
+        return RecommendationResponse.model_validate(rec)
 
     async def generate_recommendations(
         self,
@@ -196,15 +218,26 @@ class RecommendationService:
         )
 
         recommendations = []
-        for item in raw_recs:
+        for idx, item in enumerate(raw_recs):
+            cat = item["category"]
+            scope = (
+                "internal" if cat in ("technical", "content") else "external"
+            )
             rec = Recommendation(
-                category=item["category"],
+                category=cat,
                 priority=item["priority"],
                 title=item["title"],
                 description=item["description"],
                 affected_keywords=item.get("affected_keywords"),
                 run_id=run.id,
                 project_id=project_id,
+                status="pending",
+                sort_rank=idx + 1,
+                scope=scope,
+                impact_estimate=item.get("impact_estimate")
+                or f"Priority: {item['priority']}",
+                instructions=item.get("instructions") or item["description"],
+                source=item.get("source") or "ai:recommendation",
             )
             self.db.add(rec)
             recommendations.append(rec)

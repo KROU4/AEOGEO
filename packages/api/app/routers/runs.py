@@ -5,6 +5,7 @@ import json
 import logging
 import os
 from collections.abc import AsyncGenerator
+from datetime import UTC
 from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -25,6 +26,7 @@ from app.schemas.engine_run import (
     EngineRunCreate,
     EngineRunProgress,
     EngineRunResponse,
+    LatestRunStatusResponse,
 )
 from app.schemas.visibility_score import VisibilityScoreResponse
 from app.services.engine_runner import EngineRunnerService
@@ -172,6 +174,48 @@ async def list_runs(
         items=[EngineRunResponse.model_validate(r) for r in items],
         next_cursor=next_cursor,
         has_more=has_more,
+    )
+
+
+# ---------------------------------------------------------------------------
+# GET /projects/{project_id}/runs/latest  — most recent run (any status)
+# ---------------------------------------------------------------------------
+
+@router.get("/latest", response_model=LatestRunStatusResponse)
+async def get_latest_run(
+    project_id: UUID,
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(get_current_user),
+) -> LatestRunStatusResponse:
+    await _verify_project(project_id, user.tenant_id, db)
+    result = await db.execute(
+        select(EngineRun)
+        .where(EngineRun.project_id == project_id)
+        .order_by(EngineRun.created_at.desc())
+        .limit(1),
+    )
+    run = result.scalar_one_or_none()
+    if run is None:
+        raise HTTPException(status_code=404, detail="No runs for this project")
+
+    expected = max(run.answers_expected or 0, 1)
+    progress_pct = int(min(100, round(100 * (run.answers_completed / expected))))
+
+    updated = run.updated_at or run.completed_at or run.created_at
+    if updated.tzinfo is None:
+        updated = updated.replace(tzinfo=UTC)
+
+    return LatestRunStatusResponse(
+        run_id=run.id,
+        status=run.status,
+        completed_at=run.completed_at,
+        stages={
+            "engine": run.engine_status,
+            "parse": run.parse_status,
+            "score": run.score_status,
+        },
+        progress_pct=progress_pct,
+        updated_at=updated,
     )
 
 
@@ -412,7 +456,11 @@ async def retry_run(
             handle = client.get_workflow_handle(f"pipeline-{run_id}")
             await handle.cancel()
         except Exception:
-            logger.warning("Failed to cancel Temporal workflow for run %s before retry", run_id, exc_info=True)
+            logger.warning(
+                "Failed to cancel Temporal workflow for run %s before retry",
+                run_id,
+                exc_info=True,
+            )
 
     service = EngineRunnerService(db)
     reset_run = await service.reset_run_for_retry(run_id)
@@ -422,7 +470,11 @@ async def retry_run(
     try:
         await _start_pipeline_workflow(run_id, retry=True)
     except Exception as exc:
-        logger.warning("Failed to start retry workflow for run %s", run_id, exc_info=True)
+        logger.warning(
+            "Failed to start retry workflow for run %s",
+            run_id,
+            exc_info=True,
+        )
         await db.commit()
         await db.refresh(reset_run)
         raise HTTPException(
@@ -464,7 +516,11 @@ async def cancel_run(
         handle = client.get_workflow_handle(f"pipeline-{run_id}")
         await handle.cancel()
     except Exception:
-        logger.warning("Failed to cancel Temporal workflow for run %s", run_id, exc_info=True)
+        logger.warning(
+            "Failed to cancel Temporal workflow for run %s",
+            run_id,
+            exc_info=True,
+        )
 
     return EngineRunResponse.model_validate(run)
 

@@ -1,0 +1,56 @@
+{
+  "projectTitle": "AVOP GEO Intelligence Platform",
+  "projectId": "9601147732002780888",
+  "designSystemAsset": "assets/34335f51b0ff42ff9a6094ce3993540e",
+  "designSystemNote": "Screen instance id in Stitch canvas: assets-34335f51b0ff42ff9a6094ce3993540e-1776261886441 (use list_design_systems / get_project; get_screen uses design screen ids).",
+  "screens": [
+    {
+      "title": "Design System",
+      "screenId": "assets-34335f51b0ff42ff9a6094ce3993540e-1776261886441",
+      "source": "design_system_asset",
+      "files": {
+        "tokens": "design-system.json"
+      }
+    },
+    {
+      "title": "AVOP - Landing Page",
+      "screenId": "cf090b5ceb8645fa8ab220b5f50649ea",
+      "files": { "html": "screens/01-landing.html", "png": "screens/01-landing.png" }
+    },
+    {
+      "title": "AVOP - Onboarding Wizard",
+      "screenId": "5789202b87ba45c89056f8791cdc1463",
+      "files": { "html": "screens/02-onboarding.html", "png": "screens/02-onboarding.png" }
+    },
+    {
+      "title": "AVOP - Dashboard: Visibility",
+      "screenId": "d886b32bcc7245a2837a5aad520c333a",
+      "files": { "html": "screens/03-dashboard-visibility.html", "png": "screens/03-dashboard-visibility.png" }
+    },
+    {
+      "title": "AVOP - Citations Explorer",
+      "screenId": "c9947e7790c240d18d151936b82d8d07",
+      "files": { "html": "screens/04-citations.html", "png": "screens/04-citations.png" }
+    },
+    {
+      "title": "AVOP - Competitors Racing",
+      "screenId": "004b1dfce54a43cebc4a3e98faae82fb",
+      "files": { "html": "screens/05-competitors.html", "png": "screens/05-competitors.png" }
+    },
+    {
+      "title": "AVOP - Platform Deep Dive",
+      "screenId": "ea96d9ad202541b28b8b117087c9cbe0",
+      "files": { "html": "screens/06-platforms.html", "png": "screens/06-platforms.png" }
+    },
+    {
+      "title": "AVOP - AI Intelligence Assistant",
+      "screenId": "4323a2342d8c4d0b9b04e5946071157b",
+      "files": { "html": "screens/07-assistant.html", "png": "screens/07-assistant.png" }
+    },
+    {
+      "title": "AVOP - Settings & Team",
+      "screenId": "e70d56d0f3b94b91823f44b61a007328",
+      "files": { "html": "screens/08-settings.html", "png": "screens/08-settings.png" }
+    }
+  ]
+}

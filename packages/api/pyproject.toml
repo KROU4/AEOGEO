@@ -22,6 +22,7 @@ dependencies = [
     "pgvector",
     "crawl4ai",
     "pymupdf",
+    "reportlab",
     "python-docx",
     "temporalio",
     "numpy",
@@ -40,6 +41,7 @@ dev = [
     "mypy",
     "pytest",
     "httpx",
+    "types-reportlab",
 ]
 
 [build-system]

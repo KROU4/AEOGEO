@@ -1,6 +1,6 @@
 import { useClerk } from "@clerk/react";
 import { Bell, Sun, Moon, Monitor, LogOut, User, Languages } from "lucide-react";
-import { Link } from "@tanstack/react-router";
+import { Link, useLocation, useNavigate, useSearch } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
@@ -16,6 +16,17 @@ import {
 import { useCurrentUser } from "@/hooks/use-auth";
 import { useTheme } from "@/hooks/use-theme";
 import { useLocale } from "@/hooks/use-locale";
+import {
+  DASHBOARD_PERIODS,
+  type DashboardPeriod,
+} from "@/lib/dashboard-search";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface TopbarProps {
   title: string;
@@ -23,6 +34,13 @@ interface TopbarProps {
 
 export function Topbar({ title }: TopbarProps) {
   const { signOut } = useClerk();
+  const search = useSearch({ strict: false }) as {
+    period?: DashboardPeriod;
+    p?: string;
+  };
+  const period: DashboardPeriod = search.period ?? "30d";
+  const navigate = useNavigate();
+  const location = useLocation();
   const { data: user } = useCurrentUser();
   const { theme, setTheme } = useTheme();
   const { locale, setLocale } = useLocale();
@@ -50,12 +68,36 @@ export function Topbar({ title }: TopbarProps) {
 
   return (
     <header className="flex h-14 items-center justify-between border-b bg-card px-4">
-      <div className="flex items-center gap-3">
+      <div className="flex min-w-0 flex-1 items-center gap-3">
         <SidebarTrigger />
         <Separator orientation="vertical" className="h-5" />
-        <h1 className="text-lg font-semibold text-foreground">{title}</h1>
+        <h1 className="truncate text-lg font-semibold text-foreground">{title}</h1>
       </div>
-      <div className="flex items-center gap-2">
+      <div className="flex shrink-0 items-center gap-2">
+        <Select
+          value={period}
+          onValueChange={(value: DashboardPeriod) => {
+            void navigate({
+              to: location.pathname,
+              search: (prev) => ({
+                ...prev,
+                period: value,
+              }),
+              replace: true,
+            });
+          }}
+        >
+          <SelectTrigger className="h-9 w-[120px]" aria-label={t("topbar.periodLabel")}>
+            <SelectValue placeholder={t("topbar.periodLabel")} />
+          </SelectTrigger>
+          <SelectContent>
+            {DASHBOARD_PERIODS.map((p) => (
+              <SelectItem key={p} value={p}>
+                {t(`topbar.period.${p}`)}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
         <Button
           variant="ghost"
           size="icon"

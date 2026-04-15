@@ -19,6 +19,7 @@ import {
   Swords,
   TrendingUp,
   Loader2,
+  Download,
 } from "lucide-react";
 import {
   AlertDialog,
@@ -30,7 +31,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { useReports, useDeleteReport } from "@/hooks/use-reports";
+import { AvopPageHeader } from "@/components/avop";
+import { useReports, useDeleteReport, useDownloadReportPdf } from "@/hooks/use-reports";
 import { GenerateReportDialog } from "@/components/reports/generate-report-dialog";
 import { ReportShareDialog } from "@/components/reports/report-share-dialog";
 import type { ReportSummary } from "@/types/report";
@@ -83,6 +85,7 @@ function ReportCard({ report }: { report: ReportSummary }) {
   const meta = getReportMeta(report.report_type, t);
   const Icon = meta.icon;
   const deleteReport = useDeleteReport();
+  const downloadPdf = useDownloadReportPdf();
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
@@ -112,8 +115,8 @@ function ReportCard({ report }: { report: ReportSummary }) {
         <CardFooter>
           <Separator className="mb-4" />
         </CardFooter>
-        <div className="flex items-center gap-2 px-6 pb-6 -mt-4">
-          <Button variant="outline" size="sm" className="flex-1" asChild>
+        <div className="flex flex-wrap items-center gap-2 px-6 pb-6 -mt-4">
+          <Button variant="outline" size="sm" className="min-w-[7rem] flex-1" asChild>
             <Link
               to="/reports/$reportId"
               params={{ reportId: report.id }}
@@ -121,6 +124,25 @@ function ReportCard({ report }: { report: ReportSummary }) {
               <Eye className="w-3.5 h-3.5" />
               {tc("actions.view")}
             </Link>
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="min-w-[7rem] flex-1"
+            disabled={downloadPdf.isPending}
+            onClick={() =>
+              downloadPdf.mutate({
+                projectId: report.project_id,
+                reportId: report.id,
+              })
+            }
+          >
+            {downloadPdf.isPending ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : (
+              <Download className="w-3.5 h-3.5" />
+            )}
+            {t("downloadPdf")}
           </Button>
           <Button
             variant="outline"
@@ -195,14 +217,13 @@ function ReportsPage() {
       />
 
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-foreground">{t("title")}</h2>
-          <p className="text-sm text-muted-foreground mt-1">
-            {t("subtitle")}
-          </p>
-        </div>
-        <Button onClick={() => setDialogOpen(true)}>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <AvopPageHeader
+          className="min-w-0 flex-1"
+          title={t("title")}
+          description={t("subtitle")}
+        />
+        <Button className="shrink-0" onClick={() => setDialogOpen(true)}>
           <Plus className="w-4 h-4" />
           {t("generateNew")}
         </Button>

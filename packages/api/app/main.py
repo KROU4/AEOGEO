@@ -9,6 +9,7 @@ from app.routers import (
     attribution,
     audit,
     auth,
+    billing,
     brands,
     content,
     dashboard,
@@ -16,6 +17,10 @@ from app.routers import (
     feedback,
     keywords,
     knowledge,
+    project_answers,
+    project_assistant,
+    project_dashboard_api,
+    project_explorer,
     projects,
     public,
     queries,
@@ -38,6 +43,7 @@ app = FastAPI(
 setup_cors(app)
 
 app.include_router(auth.router, prefix="/api/v1")
+app.include_router(billing.router, prefix="/api/v1")
 app.include_router(dashboard.router, prefix="/api/v1")
 app.include_router(projects.router, prefix="/api/v1")
 app.include_router(content.router, prefix="/api/v1")
@@ -63,6 +69,10 @@ app.include_router(analytics.router, prefix="/api/v1")
 app.include_router(attribution.router, prefix="/api/v1")
 app.include_router(templates.router, prefix="/api/v1")
 app.include_router(ai.router, prefix="/api/v1")
+app.include_router(project_dashboard_api.router, prefix="/api/v1")
+app.include_router(project_assistant.router, prefix="/api/v1")
+app.include_router(project_explorer.router, prefix="/api/v1")
+app.include_router(project_answers.router, prefix="/api/v1")
 
 # Public routes — NO auth dependency (embed_token is the credential)
 app.include_router(public.router, prefix="/api/v1")

@@ -17,6 +17,8 @@ import enQueries from "./locales/en/queries.json";
 import enRuns from "./locales/en/runs.json";
 import enAnswers from "./locales/en/answers.json";
 import enFunnel from "./locales/en/funnel.json";
+import enExplorer from "./locales/en/explorer.json";
+import enMarketing from "./locales/en/marketing.json";
 
 import ruCommon from "./locales/ru/common.json";
 import ruAuth from "./locales/ru/auth.json";
@@ -33,6 +35,8 @@ import ruQueries from "./locales/ru/queries.json";
 import ruRuns from "./locales/ru/runs.json";
 import ruAnswers from "./locales/ru/answers.json";
 import ruFunnel from "./locales/ru/funnel.json";
+import ruExplorer from "./locales/ru/explorer.json";
+import ruMarketing from "./locales/ru/marketing.json";
 
 i18n
   .use(LanguageDetector)
@@ -55,6 +59,8 @@ i18n
         runs: enRuns,
         answers: enAnswers,
         funnel: enFunnel,
+        explorer: enExplorer,
+        marketing: enMarketing,
       },
       ru: {
         common: ruCommon,
@@ -72,6 +78,8 @@ i18n
         runs: ruRuns,
         answers: ruAnswers,
         funnel: ruFunnel,
+        explorer: ruExplorer,
+        marketing: ruMarketing,
       },
     },
     defaultNS: "common",

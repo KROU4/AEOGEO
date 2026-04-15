@@ -35,7 +35,15 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import { AvopPageHeader } from "@/components/avop";
+import { PlatformRankingTable } from "@/components/dashboard/platform-ranking-table";
+import { ShareOfVoiceChart } from "@/components/dashboard/share-of-voice-chart";
+import { VisibilityRunStatusBar } from "@/components/dashboard/visibility-run-status-bar";
+import { VisibilityWeeklyTrends } from "@/components/dashboard/visibility-weekly-trends";
 import { useProjects } from "@/hooks/use-projects";
+import { useProjectDashboardPlatforms } from "@/hooks/use-project-dashboard-platforms";
+import { useProjectSov } from "@/hooks/use-project-sov";
+import { useProjectTrends } from "@/hooks/use-project-trends";
 import { useTrafficData } from "@/hooks/use-analytics";
 import {
   useVisibilityScore,
@@ -151,6 +159,9 @@ function VisibilityPage() {
   const scoresByEngine = useScoresByEngine(selectedProjectId ?? undefined);
   const scoreTrends = useScoreTrends(selectedProjectId ?? undefined);
   const trafficData = useTrafficData(selectedProjectId ?? undefined);
+  const projectSov = useProjectSov(selectedProjectId ?? undefined);
+  const dashboardPlatforms = useProjectDashboardPlatforms(selectedProjectId ?? undefined);
+  const projectTrends = useProjectTrends(selectedProjectId ?? undefined, 12);
 
   /* derive overall score */
   const overallScore = scoreSummary.data?.total_score ?? visScore.data?.score;
@@ -163,10 +174,7 @@ function VisibilityPage() {
   return (
     <div className="space-y-8">
       {/* Page header */}
-      <div>
-        <h2 className="text-2xl font-bold text-foreground">{t("title")}</h2>
-        <p className="text-sm text-muted-foreground mt-1">{t("subtitle")}</p>
-      </div>
+      <AvopPageHeader title={t("title")} description={t("subtitle")} />
 
       {hasProjects && (
         <div className="flex items-center gap-3">
@@ -286,6 +294,27 @@ function VisibilityPage() {
             )}
           </CardContent>
         </Card>
+      )}
+
+      {(hasProjects || projectsLoading) && selectedProjectId && (
+        <ShareOfVoiceChart
+          data={projectSov.data}
+          isLoading={projectSov.isLoading}
+        />
+      )}
+
+      {(hasProjects || projectsLoading) && selectedProjectId && (
+        <PlatformRankingTable
+          data={dashboardPlatforms.data}
+          isLoading={dashboardPlatforms.isLoading}
+        />
+      )}
+
+      {(hasProjects || projectsLoading) && selectedProjectId && (
+        <VisibilityWeeklyTrends
+          data={projectTrends.data}
+          isLoading={projectTrends.isLoading}
+        />
       )}
 
       {/* Trend chart */}
@@ -587,6 +616,8 @@ function VisibilityPage() {
         </Card>
       </div>
       )}
+
+      {selectedProjectId && <VisibilityRunStatusBar projectId={selectedProjectId} />}
     </div>
   );
 }

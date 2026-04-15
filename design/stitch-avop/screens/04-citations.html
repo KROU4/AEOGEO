@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Citations | AVOP Analytics</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=Bricolage+Grotesque:wght@700;800&amp;family=JetBrains+Mono:wght@400;500&amp;family=Space+Grotesk:wght@500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "secondary-container": "#454555",
+                    "on-tertiary-fixed": "#002109",
+                    "secondary-fixed": "#e2e0f4",
+                    "surface-variant": "#343536",
+                    "on-primary-container": "#00424f",
+                    "tertiary-fixed-dim": "#4ae176",
+                    "on-primary-fixed-variant": "#004e5c",
+                    "tertiary-fixed": "#6bff8f",
+                    "surface-dim": "#121315",
+                    "secondary-fixed-dim": "#c6c5d7",
+                    "background": "#0d0e0f",
+                    "surface-container": "#1f2021",
+                    "primary-fixed-dim": "#4cd7f6",
+                    "tertiary": "#4ae176",
+                    "surface-container-lowest": "#0d0e0f",
+                    "on-error": "#690005",
+                    "outline-variant": "#3d494c",
+                    "on-tertiary-container": "#00461b",
+                    "on-primary-fixed": "#001f26",
+                    "on-secondary": "#2f2f3e",
+                    "error-container": "#93000a",
+                    "surface-container-high": "#292a2b",
+                    "primary": "#4cd7f6",
+                    "primary-fixed": "#acedff",
+                    "surface-tint": "#4cd7f6",
+                    "on-error-container": "#ffdad6",
+                    "on-secondary-container": "#b4b3c6",
+                    "primary-container": "#06b6d4",
+                    "on-surface-variant": "#bcc9cd",
+                    "tertiary-container": "#14bf59",
+                    "on-tertiary-fixed-variant": "#005321",
+                    "secondary": "#c6c5d7",
+                    "surface-bright": "#38393a",
+                    "inverse-on-surface": "#303032",
+                    "outline": "#869397",
+                    "on-background": "#e3e2e3",
+                    "on-primary": "#003640",
+                    "error": "#ffb4ab",
+                    "on-secondary-fixed": "#1a1a28",
+                    "surface": "#121315",
+                    "on-surface": "#e3e2e3",
+                    "inverse-surface": "#e3e2e3",
+                    "on-secondary-fixed-variant": "#454555",
+                    "on-tertiary": "#003915",
+                    "inverse-primary": "#00687a",
+                    "surface-container-highest": "#343536",
+                    "surface-container-low": "#1b1c1d"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "fontFamily": {
+                    "headline": ["Space Grotesk", "sans-serif"],
+                    "body": ["Plus Jakarta Sans", "sans-serif"],
+                    "label": ["Plus Jakarta Sans", "sans-serif"],
+                    "mono": ["JetBrains Mono", "monospace"]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 200, 'GRAD' 0, 'opsz' 24;
+        }
+        .citation-gradient {
+            background: linear-gradient(135deg, #4CD7F6 0%, #06B6D4 100%);
+        }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: #0D0E0F; }
+        ::-webkit-scrollbar-thumb { background: #343536; border-radius: 2px; }
+        .glass-panel {
+            background: rgba(31, 32, 33, 0.7);
+            backdrop-filter: blur(12px);
+        }
+    </style>
+</head>
+<body class="bg-surface-container-lowest text-on-surface font-body selection:bg-primary/30">
+<!-- SideNavBar (Anchor) -->
+<aside class="fixed left-0 h-full w-[220px] bg-[#0D0E0F] flex flex-col py-6 px-4 gap-2 z-50">
+<div class="mb-8 px-2">
+<h1 class="text-xl font-['Bricolage_Grotesque'] font-bold text-white">AVOP Internal</h1>
+<p class="text-[10px] text-neutral-500 uppercase tracking-widest font-mono">Analytics Engine</p>
+</div>
+<nav class="flex flex-col gap-1">
+<a class="flex items-center gap-3 px-3 py-2 text-neutral-500 hover:bg-neutral-800/50 hover:text-neutral-200 transition-all duration-150 ease-in-out font-['Plus_Jakarta_Sans'] font-medium text-sm" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="dashboard">dashboard</span>
+                Dashboard
+            </a>
+<a class="flex items-center gap-3 px-3 py-2 text-cyan-400 bg-neutral-900/50 border-l-2 border-cyan-500 transition-all duration-150 ease-in-out font-['Plus_Jakarta_Sans'] font-medium text-sm" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="monitoring">monitoring</span>
+                Analytics
+            </a>
+<a class="flex items-center gap-3 px-3 py-2 text-neutral-500 hover:bg-neutral-800/50 hover:text-neutral-200 transition-all duration-150 ease-in-out font-['Plus_Jakarta_Sans'] font-medium text-sm" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="construction">construction</span>
+                Tools
+            </a>
+<a class="flex items-center gap-3 px-3 py-2 text-neutral-500 hover:bg-neutral-800/50 hover:text-neutral-200 transition-all duration-150 ease-in-out font-['Plus_Jakarta_Sans'] font-medium text-sm" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="folder_managed">folder_managed</span>
+                Projects
+            </a>
+<a class="flex items-center gap-3 px-3 py-2 text-neutral-500 hover:bg-neutral-800/50 hover:text-neutral-200 transition-all duration-150 ease-in-out font-['Plus_Jakarta_Sans'] font-medium text-sm" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="description">description</span>
+                Reports
+            </a>
+<a class="flex items-center gap-3 px-3 py-2 text-neutral-500 hover:bg-neutral-800/50 hover:text-neutral-200 transition-all duration-150 ease-in-out font-['Plus_Jakarta_Sans'] font-medium text-sm" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="settings">settings</span>
+                Settings
+            </a>
+</nav>
+<div class="mt-auto pt-6 border-t border-white/5 gap-1 flex flex-col">
+<a class="flex items-center gap-3 px-3 py-2 text-neutral-500 hover:bg-neutral-800/50 hover:text-neutral-200 transition-all duration-150 ease-in-out font-['Plus_Jakarta_Sans'] font-medium text-sm" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="help">help</span>
+                Support
+            </a>
+<a class="flex items-center gap-3 px-3 py-2 text-neutral-500 hover:bg-neutral-800/50 hover:text-neutral-200 transition-all duration-150 ease-in-out font-['Plus_Jakarta_Sans'] font-medium text-sm" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="menu_book">menu_book</span>
+                Documentation
+            </a>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="ml-[220px] min-h-screen flex flex-col">
+<!-- TopAppBar (Anchor) -->
+<header class="sticky top-0 h-[52px] z-40 bg-[#0D0E0F]/80 backdrop-blur-md border-b border-white/5 flex justify-between items-center px-6 w-full">
+<div class="flex items-center gap-4">
+<span class="text-lg font-['Bricolage_Grotesque'] font-bold text-white">Analytics / Citations</span>
+</div>
+<div class="flex items-center gap-6">
+<div class="relative flex items-center bg-surface-container-low px-3 py-1.5 rounded-sm border-b border-outline-variant/20 focus-within:border-primary transition-colors duration-200">
+<span class="material-symbols-outlined text-neutral-500 text-sm mr-2" data-icon="search">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-sm text-on-surface w-48 placeholder:text-neutral-600 font-body" placeholder="Search explorer..." type="text"/>
+</div>
+<div class="flex items-center gap-4 text-neutral-400">
+<span class="material-symbols-outlined cursor-pointer hover:bg-white/5 p-1.5 rounded" data-icon="calendar_today">calendar_today</span>
+<span class="material-symbols-outlined cursor-pointer hover:bg-white/5 p-1.5 rounded" data-icon="notifications">notifications</span>
+</div>
+<button class="citation-gradient text-on-primary text-xs font-semibold px-4 py-1.5 rounded-sm active:scale-95 transition-transform">Run Analysis</button>
+<div class="w-8 h-8 rounded-full overflow-hidden border border-white/10">
+<img class="w-full h-full object-cover" data-alt="professional male portrait with clean lighting and neutral background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCQTeBmXZEsbBM68oTxn8rtavPLCnRBVi6DQl6CV0DqjudhvqdXtk7BUHRChtaGgSy4dc9QbaqGUH9kg2xfbMuqArPMucQns-bw3IWryzUq-e1A52PQu7seUwgzo165ixMVJv-MwiLW8-0ItuRue5aQZVxLmPKd-ApVhllK0y8N9cSz4jQMps_F5QJMMXHXJjwNYGInS_bS2XlxPblRR4Z-_CY596_nbgWVJoRQblH4_dFnM-mOrNWBK6NrxVZ1-0vyVoqtwJoxvRo"/>
+</div>
+</div>
+</header>
+<!-- Page Canvas -->
+<div class="p-8 space-y-8 max-w-[1600px]">
+<!-- Stat Strip -->
+<div class="grid grid-cols-4 gap-px bg-white/5 p-px overflow-hidden">
+<div class="bg-surface-container-lowest p-6 group">
+<div class="flex justify-between items-start mb-2">
+<span class="text-xs font-label uppercase tracking-widest text-neutral-500">Total Citations</span>
+<span class="material-symbols-outlined text-primary text-sm" data-icon="auto_awesome">auto_awesome</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="text-3xl font-mono font-medium text-white">12,842</span>
+<span class="text-tertiary text-xs font-mono">+12.4%</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-6 group">
+<div class="flex justify-between items-start mb-2">
+<span class="text-xs font-label uppercase tracking-widest text-neutral-500">Unique Domains</span>
+<span class="material-symbols-outlined text-neutral-500 text-sm" data-icon="domain">domain</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="text-3xl font-mono font-medium text-white">458</span>
+<span class="text-neutral-500 text-xs font-mono">Stable</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-6 group">
+<div class="flex justify-between items-start mb-2">
+<span class="text-xs font-label uppercase tracking-widest text-neutral-500">Client Citations</span>
+<span class="material-symbols-outlined text-neutral-500 text-sm" data-icon="fingerprint">fingerprint</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="text-3xl font-mono font-medium text-white">8,102</span>
+<span class="text-tertiary text-xs font-mono">+8.1%</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-6 group">
+<div class="flex justify-between items-start mb-2">
+<span class="text-xs font-label uppercase tracking-widest text-neutral-500">Avg Position</span>
+<span class="material-symbols-outlined text-neutral-500 text-sm" data-icon="leaderboard">leaderboard</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="text-3xl font-mono font-medium text-white">#1.4</span>
+<span class="text-error text-xs font-mono">-0.2</span>
+</div>
+</div>
+</div>
+<!-- Content Layout -->
+<div class="grid grid-cols-12 gap-8 items-start">
+<!-- Main Explorer Table -->
+<div class="col-span-8 space-y-4">
+<div class="flex justify-between items-end">
+<div>
+<h2 class="text-2xl font-headline font-bold text-white">Citation Explorer</h2>
+<p class="text-sm text-neutral-500">Real-time LLM attribution monitoring</p>
+</div>
+<div class="flex gap-2">
+<button class="bg-surface-container-high px-3 py-1 text-xs text-on-surface font-label hover:bg-surface-variant transition-colors">Export .CSV</button>
+<button class="bg-surface-container-high px-3 py-1 text-xs text-on-surface font-label hover:bg-surface-variant transition-colors">Filter View</button>
+</div>
+</div>
+<div class="bg-surface-container-low overflow-hidden">
+<table class="w-full text-left border-separate border-spacing-y-0">
+<thead>
+<tr class="text-[10px] font-mono text-neutral-500 border-b border-white/5 uppercase tracking-widest">
+<th class="px-6 py-4 font-normal">Source Domain</th>
+<th class="px-6 py-4 font-normal">Platform</th>
+<th class="px-6 py-4 font-normal">Query Context</th>
+<th class="px-6 py-4 font-normal text-right">Cited</th>
+<th class="px-6 py-4 font-normal text-right">Trend</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-white/5">
+<!-- Row 1 -->
+<tr class="hover:bg-white/5 group cursor-pointer transition-colors">
+<td class="px-6 py-5">
+<div class="flex items-center gap-3">
+<div class="w-6 h-6 bg-surface-container-highest flex items-center justify-center text-[10px] font-bold text-primary">T</div>
+<span class="text-sm font-medium text-neutral-200">techcrunch.com</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<span class="px-2 py-0.5 bg-primary/10 text-primary text-[10px] font-bold rounded-sm">GPT-4o</span>
+</td>
+<td class="px-6 py-5">
+<p class="text-sm text-neutral-400 line-clamp-1">"What are the leading AI analytics..."</p>
+</td>
+<td class="px-6 py-5 text-right font-mono text-white text-sm">2,412</td>
+<td class="px-6 py-5 text-right">
+<div class="inline-flex items-center gap-1 text-tertiary text-[10px] font-mono">
+<span class="material-symbols-outlined text-[14px]" data-icon="trending_up">trending_up</span>
+                                            +14%
+                                        </div>
+</td>
+</tr>
+<!-- Expanded row concept -->
+<tr class="bg-surface-container-lowest/50">
+<td class="px-6 py-6" colspan="5">
+<div class="border-l-2 border-primary pl-6 py-2">
+<p class="text-xs font-mono text-primary mb-2 uppercase tracking-tighter">Verified Excerpt (OpenAI / GPT-4o)</p>
+<p class="text-sm italic text-neutral-300 leading-relaxed max-w-2xl">
+                                                "...while several platforms offer data tracking, <span class="text-white font-semibold">AVOP Analytics</span> remains the most cited source according to TechCrunch's latest quarterly review of precision instrument tools..."
+                                            </p>
+</div>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-white/5 group cursor-pointer transition-colors">
+<td class="px-6 py-5">
+<div class="flex items-center gap-3">
+<div class="w-6 h-6 bg-surface-container-highest flex items-center justify-center text-[10px] font-bold text-tertiary">V</div>
+<span class="text-sm font-medium text-neutral-200">theverge.com</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<span class="px-2 py-0.5 bg-tertiary/10 text-tertiary text-[10px] font-bold rounded-sm">Claude 3.5</span>
+</td>
+<td class="px-6 py-5">
+<p class="text-sm text-neutral-400 line-clamp-1">"Enterprise software trends 2024..."</p>
+</td>
+<td class="px-6 py-5 text-right font-mono text-white text-sm">1,894</td>
+<td class="px-6 py-5 text-right">
+<div class="inline-flex items-center gap-1 text-neutral-500 text-[10px] font-mono">
+<span class="material-symbols-outlined text-[14px]" data-icon="trending_flat">trending_flat</span>
+                                            0%
+                                        </div>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-white/5 group cursor-pointer transition-colors">
+<td class="px-6 py-5">
+<div class="flex items-center gap-3">
+<div class="w-6 h-6 bg-surface-container-highest flex items-center justify-center text-[10px] font-bold text-secondary">F</div>
+<span class="text-sm font-medium text-neutral-200">forbes.com</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<span class="px-2 py-0.5 bg-secondary/10 text-secondary text-[10px] font-bold rounded-sm">Perplexity</span>
+</td>
+<td class="px-6 py-5">
+<p class="text-sm text-neutral-400 line-clamp-1">"Market share of cloud analytics..."</p>
+</td>
+<td class="px-6 py-5 text-right font-mono text-white text-sm">942</td>
+<td class="px-6 py-5 text-right">
+<div class="inline-flex items-center gap-1 text-tertiary text-[10px] font-mono">
+<span class="material-symbols-outlined text-[14px]" data-icon="trending_up">trending_up</span>
+                                            +4%
+                                        </div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Right Detail Panel -->
+<div class="col-span-4 sticky top-[84px] space-y-6">
+<div class="bg-surface-container-low p-6 space-y-6">
+<div class="flex items-center justify-between">
+<h3 class="text-lg font-headline font-bold text-white">Domain Intelligence</h3>
+<span class="material-symbols-outlined text-neutral-500" data-icon="more_vert">more_vert</span>
+</div>
+<div class="aspect-video bg-surface-container-lowest relative overflow-hidden group">
+<img class="w-full h-full object-cover opacity-50 group-hover:scale-105 transition-transform duration-700" data-alt="high resolution data dashboard on a large screen in a dark room with blue ambient lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD7JK9ButOf7B4DDYnG0eDaNqp-GnJK6NvR6jlHY9uigKYjBrfjeIlckkH_Md2QAFOnYkMlMPcwEYJIWAZa-ZJ4LHKtZLVuH38lNpJQ-PlHyZlAAaLxIYp9cO-8T-YLyRXkoaWxhGvbvTmEt0fcKBQXsFe9Lp_FqG856H_pBsGMVgb4go9yIubxENYnISLRFQJmRacPf9BVMHyy17QT1Y08fqp1nf_znc6dE0i2gwc5p4ggY1G2M14Pky8k102J3F8Ym3kjgYNN5JY"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-low to-transparent"></div>
+<div class="absolute bottom-4 left-4">
+<p class="text-[10px] font-mono text-primary uppercase">Active Session</p>
+<p class="text-sm font-bold text-white">Real-time Attribution Stream</p>
+</div>
+</div>
+<div class="space-y-4">
+<div class="flex justify-between items-center py-3 border-b border-white/5">
+<span class="text-xs text-neutral-500">Domain Authority</span>
+<span class="text-sm font-mono text-white">DA 92</span>
+</div>
+<div class="flex justify-between items-center py-3 border-b border-white/5">
+<span class="text-xs text-neutral-500">Sentiment Skew</span>
+<div class="flex items-center gap-2">
+<div class="w-24 h-1.5 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-tertiary w-[82%]"></div>
+</div>
+<span class="text-xs font-mono text-tertiary">82%</span>
+</div>
+</div>
+<div class="flex justify-between items-center py-3 border-b border-white/5">
+<span class="text-xs text-neutral-500">First Detection</span>
+<span class="text-sm font-mono text-white">2024-03-12</span>
+</div>
+</div>
+<div class="space-y-3">
+<h4 class="text-xs font-mono text-neutral-500 uppercase tracking-widest">Key Performance Drivers</h4>
+<div class="grid grid-cols-2 gap-2">
+<div class="p-3 bg-surface-container-lowest border-l-2 border-primary">
+<p class="text-[10px] text-neutral-500">Direct CTR</p>
+<p class="text-lg font-mono text-white">12.4%</p>
+</div>
+<div class="p-3 bg-surface-container-lowest border-l-2 border-secondary">
+<p class="text-[10px] text-neutral-500">Share Voice</p>
+<p class="text-lg font-mono text-white">28.1%</p>
+</div>
+</div>
+</div>
+<button class="w-full py-3 bg-surface-container-highest text-white text-sm font-label hover:bg-neutral-800 transition-colors border border-white/5">
+                            Generate Full Audit
+                        </button>
+</div>
+<!-- Small Glass Card -->
+<div class="glass-panel p-4 border border-white/5 rounded-sm">
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary" data-icon="info">info</span>
+<div>
+<p class="text-xs font-bold text-white mb-1">AI Recommendation</p>
+<p class="text-[11px] text-neutral-400 leading-relaxed">Increasing technical documentation output on GitHub would likely improve Claude 3.5 citation frequency in the 'Infrastructure' category.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer (Anchor) -->
+<footer class="mt-auto w-full py-16 bg-[#0D0E0F] border-t border-white/5">
+<div class="grid grid-cols-4 gap-8 px-12 max-w-7xl mx-auto">
+<div class="col-span-1 space-y-4">
+<h5 class="text-xl font-['Bricolage_Grotesque'] font-bold text-white">AVOP</h5>
+<p class="text-neutral-500 text-xs leading-relaxed font-body normal-case">Precision attribution for the generative era. Built for analysts who demand sovereign clarity.</p>
+</div>
+<div class="space-y-4">
+<h6 class="text-xs font-['Plus_Jakarta_Sans'] text-white uppercase tracking-wider">Product</h6>
+<ul class="space-y-2">
+<li><a class="text-neutral-600 hover:text-white text-xs transition-opacity duration-300" href="#">Explorer</a></li>
+<li><a class="text-neutral-600 hover:text-white text-xs transition-opacity duration-300" href="#">Benchmarks</a></li>
+<li><a class="text-neutral-600 hover:text-white text-xs transition-opacity duration-300" href="#">Integrations</a></li>
+</ul>
+</div>
+<div class="space-y-4">
+<h6 class="text-xs font-['Plus_Jakarta_Sans'] text-white uppercase tracking-wider">Legal</h6>
+<ul class="space-y-2">
+<li><a class="text-neutral-600 hover:text-white text-xs transition-opacity duration-300" href="#">Privacy</a></li>
+<li><a class="text-neutral-600 hover:text-white text-xs transition-opacity duration-300" href="#">Terms</a></li>
+<li><a class="text-neutral-600 hover:text-white text-xs transition-opacity duration-300" href="#">Compliance</a></li>
+</ul>
+</div>
+<div class="space-y-4 text-right">
+<p class="text-neutral-600 text-[10px] uppercase tracking-widest">© 2024 AVOP Analytics. All rights reserved.</p>
+<div class="flex justify-end gap-4">
+<span class="material-symbols-outlined text-neutral-600 text-sm cursor-pointer hover:text-primary transition-colors" data-icon="share">share</span>
+<span class="material-symbols-outlined text-neutral-600 text-sm cursor-pointer hover:text-primary transition-colors" data-icon="language">language</span>
+</div>
+</div>
+</div>
+</footer>
+</main>
+</body></html>

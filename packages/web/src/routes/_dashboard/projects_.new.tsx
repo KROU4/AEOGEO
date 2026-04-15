@@ -57,12 +57,17 @@ import type {
 } from "@/types/brand";
 import type { PaginatedResponse } from "@/types/api";
 import type { Query, QuerySet } from "@/types/query";
+import {
+  parseDashboardSearch,
+  type DashboardSearchState,
+} from "@/lib/dashboard-search";
 
-type SearchParams = { step?: number };
+type SearchParams = DashboardSearchState & { step?: number };
 
 export const Route = createFileRoute("/_dashboard/projects_/new")({
   component: NewProjectWizard,
   validateSearch: (search: Record<string, unknown>): SearchParams => ({
+    ...parseDashboardSearch(search),
     step: Number(search.step) || 1,
   }),
 });

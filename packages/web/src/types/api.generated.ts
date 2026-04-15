@@ -1232,6 +1232,29 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/projects/{project_id}/reports/{report_id}/download": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: {
+                project_id: string;
+                report_id: string;
+            };
+            cookie?: never;
+        };
+        /**
+         * Download Report Pdf
+         * @description Export stored report JSON as a PDF (generated on demand).
+         */
+        get: operations["download_report_pdf_api_v1_projects__project_id__reports__report_id__download_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/projects/{project_id}/runs": {
         parameters: {
             query?: never;
@@ -7065,6 +7088,38 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ReportResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    download_report_pdf_api_v1_projects__project_id__reports__report_id__download_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                project_id: string;
+                report_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/pdf": string;
                 };
             };
             /** @description Validation Error */

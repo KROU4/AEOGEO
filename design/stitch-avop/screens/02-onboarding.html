@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AVOP Onboarding | The Sovereign Analyst</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&amp;family=Bricolage+Grotesque:wght@700;800&amp;family=JetBrains+Mono:wght@400;500&amp;family=Space+Grotesk:wght@500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-container": "#454555",
+                        "on-tertiary-fixed": "#002109",
+                        "secondary-fixed": "#e2e0f4",
+                        "surface-variant": "#343536",
+                        "on-primary-container": "#00424f",
+                        "tertiary-fixed-dim": "#4ae176",
+                        "on-primary-fixed-variant": "#004e5c",
+                        "tertiary-fixed": "#6bff8f",
+                        "surface-dim": "#121315",
+                        "secondary-fixed-dim": "#c6c5d7",
+                        "background": "#121315",
+                        "surface-container": "#1f2021",
+                        "primary-fixed-dim": "#4cd7f6",
+                        "tertiary": "#4ae176",
+                        "surface-container-lowest": "#0d0e0f",
+                        "on-error": "#690005",
+                        "outline-variant": "#3d494c",
+                        "on-tertiary-container": "#00461b",
+                        "on-primary-fixed": "#001f26",
+                        "on-secondary": "#2f2f3e",
+                        "error-container": "#93000a",
+                        "surface-container-high": "#292a2b",
+                        "primary": "#4cd7f6",
+                        "primary-fixed": "#acedff",
+                        "surface-tint": "#4cd7f6",
+                        "on-error-container": "#ffdad6",
+                        "on-secondary-container": "#b4b3c6",
+                        "primary-container": "#06b6d4",
+                        "on-surface-variant": "#bcc9cd",
+                        "tertiary-container": "#14bf59",
+                        "on-tertiary-fixed-variant": "#005321",
+                        "secondary": "#c6c5d7",
+                        "surface-bright": "#38393a",
+                        "inverse-on-surface": "#303032",
+                        "outline": "#869397",
+                        "on-background": "#e3e2e3",
+                        "on-primary": "#003640",
+                        "error": "#ffb4ab",
+                        "on-secondary-fixed": "#1a1a28",
+                        "surface": "#121315",
+                        "on-surface": "#e3e2e3",
+                        "inverse-surface": "#e3e2e3",
+                        "on-secondary-fixed-variant": "#454555",
+                        "on-tertiary": "#003915",
+                        "inverse-primary": "#00687a",
+                        "surface-container-highest": "#343536",
+                        "surface-container-low": "#1b1c1d"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "headline": ["Space Grotesk"],
+                        "body": ["Plus Jakarta Sans"],
+                        "label": ["Plus Jakarta Sans"]
+                    }
+                },
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .bricolage { font-family: 'Bricolage Grotesque', sans-serif; }
+        .jetbrains { font-family: 'JetBrains Mono', monospace; }
+        .glass { background: rgba(31, 32, 33, 0.7); backdrop-filter: blur(12px); }
+        .gradient-button { background: linear-gradient(135deg, #4CD7F6 0%, #06B6D4 100%); }
+    </style>
+</head>
+<body class="bg-surface-container-lowest text-on-surface antialiased min-h-screen flex flex-col">
+<!-- Header (Suppressed Nav - Top-level Brand only) -->
+<header class="fixed top-0 w-full z-50 py-8 px-12">
+<div class="max-w-7xl mx-auto flex justify-center">
+<span class="bricolage text-3xl font-extrabold text-white tracking-tighter">AVOP</span>
+</div>
+</header>
+<main class="flex-grow flex items-center justify-center px-4 pt-20 pb-12">
+<div class="w-full max-w-[560px] flex flex-col gap-8">
+<!-- Progress Indicator -->
+<div class="flex items-center justify-between px-2">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full flex items-center justify-center bg-primary text-on-primary font-bold text-xs">1</div>
+<div class="h-[1px] w-12 bg-outline-variant/30"></div>
+<div class="w-8 h-8 rounded-full flex items-center justify-center bg-surface-container-high text-on-surface-variant font-bold text-xs">2</div>
+<div class="h-[1px] w-12 bg-outline-variant/30"></div>
+<div class="w-8 h-8 rounded-full flex items-center justify-center bg-surface-container-high text-on-surface-variant font-bold text-xs">3</div>
+</div>
+<div class="jetbrains text-[10px] uppercase tracking-widest text-primary font-medium">Initial Calibration</div>
+</div>
+<!-- Step 1: Add Brand -->
+<div class="glass border border-white/5 rounded-xl p-8 flex flex-col gap-8">
+<div class="space-y-2">
+<h1 class="bricolage text-3xl font-bold text-white leading-tight">Define your domain.</h1>
+<p class="text-on-surface-variant text-sm leading-relaxed max-w-[400px]">Establish your brand's digital identity to begin the competitive mapping process.</p>
+</div>
+<div class="space-y-6">
+<div class="space-y-2">
+<label class="jetbrains text-[10px] uppercase tracking-widest text-on-surface-variant font-semibold">Brand Identity</label>
+<input class="w-full bg-surface-container-low border-0 border-b border-outline-variant/20 focus:border-primary focus:ring-0 px-0 py-3 text-white placeholder:text-neutral-600 transition-all duration-300" placeholder="e.g. Acme Analytics" type="text"/>
+</div>
+<div class="space-y-2">
+<label class="jetbrains text-[10px] uppercase tracking-widest text-on-surface-variant font-semibold">Website URL</label>
+<div class="relative">
+<span class="absolute left-0 top-1/2 -translate-y-1/2 text-neutral-600 font-medium">https://</span>
+<input class="w-full bg-surface-container-low border-0 border-b border-outline-variant/20 focus:border-primary focus:ring-0 px-16 py-3 text-white placeholder:text-neutral-600 transition-all duration-300" placeholder="acme.io" type="text"/>
+</div>
+</div>
+<div class="space-y-2">
+<label class="jetbrains text-[10px] uppercase tracking-widest text-on-surface-variant font-semibold">Primary Industry</label>
+<select class="w-full bg-surface-container-low border-0 border-b border-outline-variant/20 focus:border-primary focus:ring-0 px-0 py-3 text-white appearance-none cursor-pointer">
+<option>SaaS &amp; Cloud Infrastructure</option>
+<option>Fintech &amp; Quantitative Trading</option>
+<option>Healthcare Systems</option>
+<option>E-commerce Logistics</option>
+</select>
+</div>
+</div>
+<button class="gradient-button w-full py-4 rounded-lg text-on-primary font-bold bricolage tracking-tight flex items-center justify-center gap-2 group">
+                    Establish Identity
+                    <span class="material-symbols-outlined text-xl group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</button>
+</div>
+<!-- Contextual Footer (Subtle) -->
+<div class="text-center">
+<p class="text-neutral-500 text-[11px] uppercase tracking-[0.2em]">Sovereign Intelligence Engine v4.2.1</p>
+</div>
+</div>
+</main>
+<!-- Content for Step 2 (Shown conditionally in real app, here for design preview) -->
+<div class="hidden">
+<main class="flex-grow flex items-center justify-center px-4 pt-20 pb-12">
+<div class="w-full max-w-[560px] flex flex-col gap-8">
+<div class="flex items-center justify-between px-2">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full flex items-center justify-center bg-primary-container text-on-primary-container font-bold text-xs"><span class="material-symbols-outlined text-sm">check</span></div>
+<div class="h-[1px] w-12 bg-primary/30"></div>
+<div class="w-8 h-8 rounded-full flex items-center justify-center bg-primary text-on-primary font-bold text-xs">2</div>
+<div class="h-[1px] w-12 bg-outline-variant/30"></div>
+<div class="w-8 h-8 rounded-full flex items-center justify-center bg-surface-container-high text-on-surface-variant font-bold text-xs">3</div>
+</div>
+<div class="jetbrains text-[10px] uppercase tracking-widest text-primary font-medium">Node Identification</div>
+</div>
+<div class="glass border border-white/5 rounded-xl p-8 flex flex-col gap-8">
+<div class="space-y-2">
+<h1 class="bricolage text-3xl font-bold text-white leading-tight">Map your competitors.</h1>
+<p class="text-on-surface-variant text-sm leading-relaxed">Enter up to 5 entities to benchmark against. We'll cross-reference their market positioning.</p>
+</div>
+<div class="space-y-6">
+<div class="space-y-3">
+<div class="relative">
+<input class="w-full bg-surface-container-low border-0 border-b border-outline-variant/20 focus:border-primary focus:ring-0 px-0 py-3 text-white placeholder:text-neutral-600 transition-all duration-300" placeholder="Add competitor URL (e.g. linear.app)" type="text"/>
+<button class="absolute right-0 top-1/2 -translate-y-1/2 text-primary text-xs jetbrains font-bold uppercase tracking-widest">Add Node</button>
+</div>
+<!-- Tags Container -->
+<div class="flex flex-wrap gap-2 pt-2">
+<div class="bg-surface-container-high flex items-center gap-2 px-3 py-1.5 rounded-full group cursor-default">
+<img class="w-4 h-4 rounded-sm grayscale group-hover:grayscale-0 transition-all" data-alt="favicon for linear.app minimalist technology logo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD5_iTyinMNmB5TZZCimYiN-JGyZWCQgTzreaTiRHhaA9JjLS6OW8_SFvCUpXdZhY3YqNKleEwOvN3SRSpAznB7iKsUur8-8rD9sMU-XaTy47OmlVJc4srbVDuqaJExkzoRcekoKVyH9guZierw_eocSqVuMfk99T26QA_IfgyvxDbBra8lR6wqK6TvdMWPDOyhlka8OL572KNcSn--CfDfECfElQiO6c8SGms_pEbWihX1HuAoPn2cw8lwGyYffbWDKTqyYANx3Vg"/>
+<span class="text-xs text-white font-medium">linear.app</span>
+<span class="material-symbols-outlined text-xs text-neutral-500 hover:text-white cursor-pointer">close</span>
+</div>
+<div class="bg-surface-container-high flex items-center gap-2 px-3 py-1.5 rounded-full group cursor-default">
+<img class="w-4 h-4 rounded-sm grayscale group-hover:grayscale-0 transition-all" data-alt="favicon for stripe.com bold professional logo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDGyR90ri1r4u_ANq8WN3MaFkGqjLYp5tYdt2sPY5Yiy-dzNDErHe-WpW9KW1B_kKecXo0giBlZZO99ByP4vkr96EdG2BazKSSvilM16BmK2MX86CtNcZMiQHbn7BUCFA0l6ek5SJCWoczl0ndF8B8FXgsaLwPGImLvQPrfmjCJm_c2lZyz_A20J5qgWalz-50UohgXasFCNMXej-xjGS1HxOVfDuDDU6dypNzvx6WwCbaCz2UWm4xZ2IGLTIl07KWGlWRvO1k56EE"/>
+<span class="text-xs text-white font-medium">stripe.com</span>
+<span class="material-symbols-outlined text-xs text-neutral-500 hover:text-white cursor-pointer">close</span>
+</div>
+</div>
+</div>
+</div>
+<button class="gradient-button w-full py-4 rounded-lg text-on-primary font-bold bricolage tracking-tight flex items-center justify-center gap-2 group">
+                        Initialize Mapping
+                        <span class="material-symbols-outlined text-xl">insights</span>
+</button>
+</div>
+</div>
+</main>
+</div>
+<!-- Content for Step 3: Analysis Screen -->
+<div class="hidden">
+<main class="flex-grow flex items-center justify-center px-4 pt-20 pb-12">
+<div class="w-full max-w-[560px] flex flex-col gap-12">
+<div class="text-center space-y-4">
+<h2 class="bricolage text-4xl font-bold text-white tracking-tighter">Synthesizing Alpha.</h2>
+<div class="flex justify-center items-center gap-3">
+<div class="w-1.5 h-1.5 bg-primary rounded-full animate-pulse"></div>
+<p class="jetbrains text-[10px] uppercase tracking-[0.3em] text-neutral-400">Processing LLM Consensus</p>
+</div>
+</div>
+<div class="space-y-4">
+<!-- LLM Row 1 -->
+<div class="flex items-center justify-between p-6 bg-surface-container-low rounded-xl border border-white/5">
+<div class="flex items-center gap-4">
+<div class="w-8 h-8 rounded bg-neutral-800 flex items-center justify-center">
+<span class="material-symbols-outlined text-neutral-400 text-lg">smart_toy</span>
+</div>
+<div class="space-y-0.5">
+<div class="text-white text-sm font-bold jetbrains">ChatGPT-4o</div>
+<div class="text-[10px] text-neutral-500 uppercase tracking-widest">Market Sentiment Engine</div>
+</div>
+</div>
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<!-- LLM Row 2 -->
+<div class="flex items-center justify-between p-6 bg-surface-container-low rounded-xl border border-white/5">
+<div class="flex items-center gap-4">
+<div class="w-8 h-8 rounded bg-neutral-800 flex items-center justify-center">
+<span class="material-symbols-outlined text-neutral-400 text-lg">travel_explore</span>
+</div>
+<div class="space-y-0.5">
+<div class="text-white text-sm font-bold jetbrains">Perplexity AI</div>
+<div class="text-[10px] text-neutral-500 uppercase tracking-widest">Live Competitive Index</div>
+</div>
+</div>
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<!-- LLM Row 3 (Current/Active) -->
+<div class="flex items-center justify-between p-6 bg-surface-container-high rounded-xl border border-primary/20">
+<div class="flex items-center gap-4">
+<div class="w-8 h-8 rounded bg-primary/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-lg">auto_awesome</span>
+</div>
+<div class="space-y-0.5">
+<div class="text-white text-sm font-bold jetbrains">Gemini 1.5 Pro</div>
+<div class="text-[10px] text-primary/70 uppercase tracking-widest">Deep Semantic Analysis</div>
+</div>
+</div>
+<div class="w-5 h-5 border-2 border-primary/30 border-t-primary rounded-full animate-spin"></div>
+</div>
+<!-- LLm Row 4 (Pending) -->
+<div class="flex items-center justify-between p-6 bg-surface-container-lowest/50 rounded-xl border border-white/5 opacity-50">
+<div class="flex items-center gap-4">
+<div class="w-8 h-8 rounded bg-neutral-900 flex items-center justify-center">
+<span class="material-symbols-outlined text-neutral-600 text-lg">science</span>
+</div>
+<div class="space-y-0.5">
+<div class="text-neutral-400 text-sm font-bold jetbrains">Google AI</div>
+<div class="text-[10px] text-neutral-600 uppercase tracking-widest">Trend forecasting</div>
+</div>
+</div>
+<div class="w-5 h-5 border-2 border-neutral-800 rounded-full"></div>
+</div>
+</div>
+<div class="pt-4 px-6">
+<div class="w-full h-1 bg-surface-container-high rounded-full overflow-hidden">
+<div class="w-[65%] h-full bg-primary transition-all duration-1000"></div>
+</div>
+<div class="mt-4 flex justify-between jetbrains text-[9px] uppercase tracking-widest text-neutral-500">
+<span>Consolidating Nodes...</span>
+<span>65% Complete</span>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- Background Decorative Elements -->
+<div class="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
+<div class="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] bg-primary/5 blur-[120px] rounded-full"></div>
+<div class="absolute -bottom-[10%] -right-[10%] w-[30%] h-[30%] bg-primary/5 blur-[100px] rounded-full"></div>
+<div class="absolute inset-0 opacity-[0.03]" data-alt="subtle dark carbon fiber texture for background depth" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDNMW3z9YpyQtGnJ7nxpAk_5QrsUz3trQe4TaBYQsoCguevUFh1WZdNUykeGchbyViSgrIoQ1qpw9PgaQR6nX8rlTrnzogJ7MsPoZzk5xrzUsD58YfsbfwiskeeuqzXWGEh-7zeQ3R6LckzgfFhss6LnXXst0k8UGXayKrNArIDi_ZdktllmxBQltPOwTtzxdCt7IXd07VFjkXB5xyhLa_Vt4PwYqQiJzCBSwCpjvtBDcRk5SkGNVz-QERnOUqKyT5bCCNxUMgnAi0');"></div>
+</div>
+</body></html>

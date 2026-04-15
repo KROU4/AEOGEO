@@ -1,6 +1,8 @@
+import asyncio
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi.responses import Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.dependencies import get_current_user, get_db
@@ -12,6 +14,7 @@ from app.schemas.report import (
     ReportResponse,
     ShareLinkResponse,
 )
+from app.services.generate_pdf_report import build_report_pdf_bytes
 from app.services.report import ReportService, _to_detail_response
 from app.services.report_generator import ReportGeneratorService
 from app.utils.pagination import PaginatedResponse
@@ -66,6 +69,35 @@ async def generate_report(
     from app.services.report import _to_response
 
     return _to_response(report)
+
+
+@generate_router.get("/{report_id}/download")
+async def download_report_pdf(
+    project_id: UUID,
+    report_id: UUID,
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(get_current_user),
+) -> Response:
+    """Export stored report JSON as a PDF (generated on demand)."""
+    service = ReportService(db)
+    report = await service.get_report(report_id, user.tenant_id)
+    if report is None or report.project_id != project_id:
+        raise HTTPException(status_code=404, detail="Report not found")
+
+    pdf = await asyncio.to_thread(
+        build_report_pdf_bytes,
+        title=report.title,
+        report_type=report.report_type,
+        data_json=report.data_json,
+    )
+    safe_name = f"report-{report_id}.pdf"
+    return Response(
+        content=pdf,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f'attachment; filename="{safe_name}"',
+        },
+    )
 
 
 # ---------------------------------------------------------------------------

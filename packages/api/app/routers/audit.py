@@ -3,16 +3,18 @@
 from __future__ import annotations
 
 import hashlib
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from geo_audit.models import QuickAuditResult
 from geo_audit.service import GeoAuditService
 from redis.asyncio import Redis
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.dependencies import get_db, get_redis
 from app.models.public_audit import PublicAudit
-from app.schemas.audit import QuickAuditRequest
+from app.schemas.audit import QuickAuditEmailBody, QuickAuditRequest
 from app.utils.client_ip import get_client_ip
 
 router = APIRouter(prefix="/audit", tags=["audit"])
@@ -69,6 +71,23 @@ async def quick_audit(
         ip_hash=ip_h,
     )
     db.add(row)
+    await db.flush()
     await db.commit()
+    await db.refresh(row)
 
-    return result
+    return QuickAuditResult(**{**result.model_dump(), "audit_id": row.id})
+
+
+@router.patch("/quick/{audit_id}/email")
+async def patch_quick_audit_email(
+    audit_id: UUID,
+    body: QuickAuditEmailBody,
+    db: AsyncSession = Depends(get_db),
+) -> dict[str, str]:
+    result = await db.execute(select(PublicAudit).where(PublicAudit.id == audit_id))
+    row = result.scalar_one_or_none()
+    if row is None:
+        raise HTTPException(status_code=404, detail="Audit not found")
+    row.email = body.email.strip().lower()
+    await db.commit()
+    return {"audit_id": str(audit_id), "email": row.email}
