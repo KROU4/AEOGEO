@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls C:/Users/KROU4/Desktop/AEOGEO/*.toml C:/Users/KROU4/Desktop/AEOGEO/*.json C:/Users/KROU4/Desktop/AEOGEO/Procfile)"
+    ]
+  }
+}
