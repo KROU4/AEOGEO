@@ -8,6 +8,16 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field
 
 
+class InfrastructureCheck(BaseModel):
+    """Single quick infrastructure signal for the public lead magnet."""
+
+    key: str
+    label: str
+    passed: bool
+    score: float = Field(ge=0, le=40)
+    details: str
+
+
 class QuickAuditResult(BaseModel):
     """Result of a public quick GEO audit (landing / lead gen)."""
 
@@ -21,6 +31,12 @@ class QuickAuditResult(BaseModel):
         description="Per-bot allow/deny inferred from robots.txt",
     )
     has_llms_txt: bool
+    has_sitemap: bool = False
+    sitemap_url_count: int = 0
+    robots_txt_status: str = "unknown"
+    llms_txt_status: str = "unknown"
+    infrastructure_checks: list[InfrastructureCheck] = Field(default_factory=list)
+    readiness_label: str = "Needs work"
     schema_org: dict[str, Any] = Field(
         description="Structured data summary, e.g. types present",
     )

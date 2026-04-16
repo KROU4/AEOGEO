@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import re
 from urllib.parse import urlparse
 
 import httpx
@@ -32,6 +33,30 @@ DEFAULT_HEADERS = {
 }
 
 _SEVERITY_ORDER = {"critical": 0, "warning": 1, "info": 2}
+_HOMEPAGE_TIMEOUT = 15.0
+_MODULE_TIMEOUTS = {
+    "technical": 25.0,
+    "schema": 5.0,
+    "llmstxt": 20.0,
+    "content": 25.0,
+    "citability": 5.0,
+    "brand": 5.0,
+}
+_PLATFORM_SIGNALS = {
+    "wikipedia.org": 25.0,
+    "wikidata.org": 20.0,
+    "linkedin.com": 15.0,
+    "youtube.com": 15.0,
+    "reddit.com": 10.0,
+    "twitter.com": 7.5,
+    "x.com": 7.5,
+    "facebook.com": 5.0,
+    "instagram.com": 5.0,
+    "github.com": 5.0,
+    "g2.com": 7.5,
+    "trustpilot.com": 7.5,
+    "capterra.com": 7.5,
+}
 
 
 def _normalize_url(url: str) -> str:
@@ -57,6 +82,58 @@ def _derive_recommendations(issues: list[AuditIssue]) -> list[str]:
         if len(recs) >= 5:
             break
     return recs
+
+
+async def _with_timeout(coro, timeout: float, fallback):
+    try:
+        return await asyncio.wait_for(coro, timeout=timeout)
+    except asyncio.TimeoutError:
+        return fallback(f"timed out after {timeout:.0f}s")
+
+
+def _page_text_for_brand(html: str) -> str:
+    return html[:250_000].lower()
+
+
+def _extract_likely_brand_name(html: str, netloc: str) -> str:
+    title_match = re.search(
+        r"<title[^>]*>(.*?)</title>", html, re.IGNORECASE | re.DOTALL
+    )
+    if title_match:
+        title = re.sub(r"\s+", " ", title_match.group(1)).strip()
+        for separator in ("|", " - ", " – ", " — ", ":"):
+            if separator in title:
+                title = title.split(separator, 1)[0].strip()
+        if 2 <= len(title) <= 80:
+            return title
+    domain = netloc.split(":")[0].removeprefix("www.")
+    return domain.split(".", 1)[0].replace("-", " ").title()
+
+
+def _run_brand_authority_audit(html: str, normalized_url: str) -> float:
+    """Bounded brand authority check based on page/schema platform signals."""
+    parsed = urlparse(normalized_url)
+    text = _page_text_for_brand(html)
+    brand = _extract_likely_brand_name(html, parsed.netloc)
+    score = 0.0
+
+    if brand and brand.lower() in text:
+        score += 10.0
+
+    for host, points in _PLATFORM_SIGNALS.items():
+        if host in text:
+            score += points
+
+    # sameAs links are especially useful for entity recognition.
+    if "sameas" in text:
+        score += 10.0
+
+    if any(
+        marker in text for marker in ("organization", "localbusiness", "corporation")
+    ):
+        score += 10.0
+
+    return round(min(score, 100.0), 1)
 
 
 def _make_failed_technical(error: str) -> TechnicalAuditResult:
@@ -176,13 +253,13 @@ async def run_full_audit(
         raise ValueError("url is required")
 
     html = ""
+    client = httpx.AsyncClient(
+        headers=DEFAULT_HEADERS, follow_redirects=True, timeout=_HOMEPAGE_TIMEOUT
+    )
     try:
-        async with httpx.AsyncClient(
-            headers=DEFAULT_HEADERS, follow_redirects=True, timeout=40.0
-        ) as client:
-            r = await client.get(normalized_url)
-            r.raise_for_status()
-            html = r.text
+        r = await client.get(normalized_url)
+        r.raise_for_status()
+        html = r.text
     except httpx.HTTPError as exc:
         html = ""
         fetch_error = str(exc)
@@ -191,7 +268,9 @@ async def run_full_audit(
 
     async def _run_technical() -> TechnicalAuditResult:
         try:
-            return await run_technical_audit(normalized_url, html=html or None)
+            return await run_technical_audit(
+                normalized_url, html=html or None, client=client
+            )
         except Exception as exc:
             return _make_failed_technical(str(exc))
 
@@ -203,7 +282,7 @@ async def run_full_audit(
 
     async def _run_llmstxt() -> LlmsTxtResult:
         try:
-            return await run_llmstxt_audit(normalized_url)
+            return await run_llmstxt_audit(normalized_url, client=client)
         except Exception as exc:
             return _make_failed_llmstxt(str(exc))
 
@@ -213,24 +292,60 @@ async def run_full_audit(
                 normalized_url,
                 html=html or None,
                 openai_api_key=openai_api_key,
+                client=client,
             )
         except Exception as exc:
             return _make_failed_content(str(exc))
 
     async def _run_citability() -> float:
         try:
-            result = analyze_html_citability(html) if html else {"average_citability_score": 0.0}
+            result = (
+                analyze_html_citability(html)
+                if html
+                else {"average_citability_score": 0.0}
+            )
             return float(result.get("average_citability_score", 0.0))
         except Exception:
             return 0.0
 
-    technical, schema, llmstxt, content, citability_score = await asyncio.gather(
-        _run_technical(),
-        _run_schema(),
-        _run_llmstxt(),
-        _run_content(),
-        _run_citability(),
+    async def _run_brand_authority() -> float:
+        try:
+            return _run_brand_authority_audit(html, normalized_url) if html else 0.0
+        except Exception:
+            return 0.0
+
+    (
+        technical,
+        schema,
+        llmstxt,
+        content,
+        citability_score,
+        brand_authority,
+    ) = await asyncio.gather(
+        _with_timeout(
+            _run_technical(),
+            _MODULE_TIMEOUTS["technical"],
+            _make_failed_technical,
+        ),
+        _with_timeout(_run_schema(), _MODULE_TIMEOUTS["schema"], _make_failed_schema),
+        _with_timeout(
+            _run_llmstxt(), _MODULE_TIMEOUTS["llmstxt"], _make_failed_llmstxt
+        ),
+        _with_timeout(
+            _run_content(), _MODULE_TIMEOUTS["content"], _make_failed_content
+        ),
+        _with_timeout(
+            _run_citability(),
+            _MODULE_TIMEOUTS["citability"],
+            lambda _error: 0.0,
+        ),
+        _with_timeout(
+            _run_brand_authority(),
+            _MODULE_TIMEOUTS["brand"],
+            lambda _error: 0.0,
+        ),
     )
+    await client.aclose()
 
     platforms = compute_platform_scores(
         ai_crawler_access=technical.ai_crawler_access,
@@ -243,8 +358,6 @@ async def run_full_audit(
         schema_score=schema.score,
         heading_depth=content.heading_depth,
     )
-
-    brand_authority = 0.0
 
     overall_geo_score = round(
         citability_score * 0.25

@@ -27,7 +27,9 @@ _BARE_LINK_RE = re.compile(r"^\s*>\s*(https?://\S+)", re.MULTILINE)
 def _parse_llmstxt(content: str) -> tuple[int, int, list[str], bool, bool, bool]:
     """Return (section_count, link_count, link_urls, has_title, has_sections, has_description)."""
     lines = content.splitlines()
-    has_title = any(line.startswith("# ") and not line.startswith("## ") for line in lines)
+    has_title = any(
+        line.startswith("# ") and not line.startswith("## ") for line in lines
+    )
     sections = [line for line in lines if line.startswith("## ")]
     section_count = len(sections)
 
@@ -41,12 +43,23 @@ def _parse_llmstxt(content: str) -> tuple[int, int, list[str], bool, bool, bool]
     if has_title:
         for line in lines[1:]:
             stripped = line.strip()
-            if stripped and not stripped.startswith("#") and not stripped.startswith("-"):
+            if (
+                stripped
+                and not stripped.startswith("#")
+                and not stripped.startswith("-")
+            ):
                 if len(stripped.split()) >= 5:
                     has_description = True
                     break
 
-    return section_count, len(link_urls), link_urls, has_title, bool(section_count), has_description
+    return (
+        section_count,
+        len(link_urls),
+        link_urls,
+        has_title,
+        bool(section_count),
+        has_description,
+    )
 
 
 def _link_path_depth(url: str) -> int:
@@ -72,7 +85,7 @@ def _links_have_context(content: str, link_urls: list[str]) -> bool:
         stripped = line.strip()
         if stripped.startswith("- ["):
             if "](" in stripped:
-                after_link = stripped[stripped.rfind(")") + 1:].strip()
+                after_link = stripped[stripped.rfind(")") + 1 :].strip()
                 if len(after_link.split()) >= 3:
                     described += 1
     return described >= max(1, len(link_urls) // 2)
@@ -102,7 +115,9 @@ async def _check_links_valid(
     return round(valid_ratio * len(link_urls))
 
 
-async def _get_sitemap_urls(base: str, client: httpx.AsyncClient, limit: int = 10) -> list[str]:
+async def _get_sitemap_urls(
+    base: str, client: httpx.AsyncClient, limit: int = 10
+) -> list[str]:
     """Fetch top URLs from sitemap for template generation."""
     for candidate in (f"{base}/sitemap.xml", f"{base}/sitemap_index.xml"):
         try:
@@ -136,7 +151,10 @@ def _generate_template(base: str, site_title: str, sitemap_urls: list[str]) -> s
         lines.append("")
         for url in sitemap_urls[:10]:
             path = urlparse(url).path.strip("/") or "home"
-            label = path.replace("/", " › ").replace("-", " ").replace("_", " ").title() or "Home"
+            label = (
+                path.replace("/", " › ").replace("-", " ").replace("_", " ").title()
+                or "Home"
+            )
             lines.append(f"- [{label}]({url})")
         lines.append("")
 
@@ -148,7 +166,10 @@ def _generate_template(base: str, site_title: str, sitemap_urls: list[str]) -> s
     return "\n".join(lines)
 
 
-async def run_llmstxt_audit(url: str) -> LlmsTxtResult:
+async def run_llmstxt_audit(
+    url: str,
+    client: httpx.AsyncClient | None = None,
+) -> LlmsTxtResult:
     """Fetch and validate llms.txt for the given URL."""
     parsed = urlparse(url)
     base = f"{parsed.scheme}://{parsed.netloc}"
@@ -159,12 +180,11 @@ async def run_llmstxt_audit(url: str) -> LlmsTxtResult:
     has_llmstxt = False
     has_llmstxt_full = False
 
-    async with httpx.AsyncClient(
-        headers=DEFAULT_HEADERS, follow_redirects=True, timeout=30.0
-    ) as client:
+    async def _run(active_client: httpx.AsyncClient) -> LlmsTxtResult:
+        nonlocal llmstxt_content, llmstxt_url, has_llmstxt, has_llmstxt_full
         for candidate in (f"{base}/llms.txt", f"{base}/llms-full.txt"):
             try:
-                r = await client.get(candidate, timeout=15.0)
+                r = await active_client.get(candidate, timeout=15.0)
                 if r.status_code == 200 and r.text.strip():
                     if candidate.endswith("llms-full.txt"):
                         has_llmstxt_full = True
@@ -185,16 +205,21 @@ async def run_llmstxt_audit(url: str) -> LlmsTxtResult:
                     severity="critical",
                     category="llmstxt",
                     message="No llms.txt found at /llms.txt or /llms-full.txt.",
-                    recommendation="Create an llms.txt file to help AI systems understand your site.",
+                    recommendation=(
+                        "Create an llms.txt file to help AI systems understand your site."
+                    ),
                 )
             )
-            sitemap_urls = await _get_sitemap_urls(base, client)
+            sitemap_urls = await _get_sitemap_urls(base, active_client)
             try:
-                r = await client.get(base, timeout=15.0)
+                r = await active_client.get(base, timeout=15.0)
                 from bs4 import BeautifulSoup  # noqa: PLC0415
+
                 soup = BeautifulSoup(r.text, "lxml")
                 title_tag = soup.find("title")
-                site_title = title_tag.get_text(strip=True) if title_tag else parsed.netloc
+                site_title = (
+                    title_tag.get_text(strip=True) if title_tag else parsed.netloc
+                )
             except Exception:
                 site_title = parsed.netloc
             generated_template = _generate_template(base, site_title, sitemap_urls)
@@ -214,13 +239,18 @@ async def run_llmstxt_audit(url: str) -> LlmsTxtResult:
             )
 
         content = llmstxt_content or ""
-        section_count, link_count, link_urls, has_title, has_sections, has_description = (
-            _parse_llmstxt(content)
-        )
+        (
+            section_count,
+            link_count,
+            link_urls,
+            has_title,
+            has_sections,
+            has_description,
+        ) = _parse_llmstxt(content)
 
         valid_links = 0
         if link_urls:
-            valid_links = await _check_links_valid(link_urls, client)
+            valid_links = await _check_links_valid(link_urls, active_client)
 
         # Completeness score
         score_completeness = 0.0
@@ -248,74 +278,80 @@ async def run_llmstxt_audit(url: str) -> LlmsTxtResult:
             score_usefulness += 30.0
 
         overall_score = round(
-            score_completeness * 0.40
-            + score_accuracy * 0.35
-            + score_usefulness * 0.25,
+            score_completeness * 0.40 + score_accuracy * 0.35 + score_usefulness * 0.25,
             1,
         )
 
-    if not has_title:
-        issues.append(
-            AuditIssue(
-                severity="warning",
-                category="llmstxt",
-                message="llms.txt has no H1 title line (# Title).",
-                recommendation="Add a top-level # title to describe the site.",
+        if not has_title:
+            issues.append(
+                AuditIssue(
+                    severity="warning",
+                    category="llmstxt",
+                    message="llms.txt has no H1 title line (# Title).",
+                    recommendation="Add a top-level # title to describe the site.",
+                )
             )
+
+        if not has_sections:
+            issues.append(
+                AuditIssue(
+                    severity="warning",
+                    category="llmstxt",
+                    message="llms.txt has no section headers (## Section).",
+                    recommendation="Organize llms.txt with ## sections for key site areas.",
+                )
+            )
+
+        if link_count == 0:
+            issues.append(
+                AuditIssue(
+                    severity="critical",
+                    category="llmstxt",
+                    message="llms.txt has no link entries.",
+                    recommendation="Add - [Label](URL) entries to guide AI crawlers to key pages.",
+                )
+            )
+
+        if link_count > 0 and valid_links < link_count:
+            broken = link_count - valid_links
+            issues.append(
+                AuditIssue(
+                    severity="warning",
+                    category="llmstxt",
+                    message=f"{broken} link(s) in llms.txt may be broken or unreachable.",
+                    recommendation="Verify all URLs in llms.txt return 200 OK.",
+                )
+            )
+
+        if not has_description:
+            issues.append(
+                AuditIssue(
+                    severity="info",
+                    category="llmstxt",
+                    message="llms.txt lacks a description paragraph after the title.",
+                    recommendation="Add a short description (> blockquote or paragraph) after the title.",
+                )
+            )
+
+        return LlmsTxtResult(
+            score=min(overall_score, 100.0),
+            has_llmstxt=has_llmstxt,
+            has_llmstxt_full=has_llmstxt_full,
+            llmstxt_url=llmstxt_url,
+            section_count=section_count,
+            link_count=link_count,
+            valid_links=valid_links,
+            score_completeness=score_completeness,
+            score_accuracy=score_accuracy,
+            score_usefulness=score_usefulness,
+            issues=issues,
+            generated_template=None,
         )
 
-    if not has_sections:
-        issues.append(
-            AuditIssue(
-                severity="warning",
-                category="llmstxt",
-                message="llms.txt has no section headers (## Section).",
-                recommendation="Organize llms.txt with ## sections for key site areas.",
-            )
-        )
+    if client is not None:
+        return await _run(client)
 
-    if link_count == 0:
-        issues.append(
-            AuditIssue(
-                severity="critical",
-                category="llmstxt",
-                message="llms.txt has no link entries.",
-                recommendation="Add - [Label](URL) entries to guide AI crawlers to key pages.",
-            )
-        )
-
-    if link_count > 0 and valid_links < link_count:
-        broken = link_count - valid_links
-        issues.append(
-            AuditIssue(
-                severity="warning",
-                category="llmstxt",
-                message=f"{broken} link(s) in llms.txt may be broken or unreachable.",
-                recommendation="Verify all URLs in llms.txt return 200 OK.",
-            )
-        )
-
-    if not has_description:
-        issues.append(
-            AuditIssue(
-                severity="info",
-                category="llmstxt",
-                message="llms.txt lacks a description paragraph after the title.",
-                recommendation="Add a short description (> blockquote or paragraph) after the title.",
-            )
-        )
-
-    return LlmsTxtResult(
-        score=min(overall_score, 100.0),
-        has_llmstxt=has_llmstxt,
-        has_llmstxt_full=has_llmstxt_full,
-        llmstxt_url=llmstxt_url,
-        section_count=section_count,
-        link_count=link_count,
-        valid_links=valid_links,
-        score_completeness=score_completeness,
-        score_accuracy=score_accuracy,
-        score_usefulness=score_usefulness,
-        issues=issues,
-        generated_template=None,
-    )
+    async with httpx.AsyncClient(
+        headers=DEFAULT_HEADERS, follow_redirects=True, timeout=15.0
+    ) as local_client:
+        return await _run(local_client)

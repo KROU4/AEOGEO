@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timedelta
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -31,6 +31,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/projects/{project_id}/site-audit", tags=["site-audit"])
 _SITE_AUDIT_TRIGGER_LIMIT = 10
 _SITE_AUDIT_WINDOW_SEC = 3600
+_SITE_AUDIT_TIMEOUT_FALLBACK = timedelta(minutes=10)
 
 
 # ---------------------------------------------------------------------------
@@ -113,6 +114,46 @@ def _normalize_site_audit_url(url: str) -> str:
         ) from exc
 
 
+def _site_audit_timeout_window() -> timedelta:
+    minutes = max(1, get_settings().site_audit_timeout_minutes)
+    return timedelta(minutes=minutes)
+
+
+def _as_aware_utc(value: datetime) -> datetime:
+    if value.tzinfo is None:
+        return value.replace(tzinfo=UTC)
+    return value.astimezone(UTC)
+
+
+def _is_stale_audit(audit: SiteAudit) -> bool:
+    if audit.status not in {"pending", "running"}:
+        return False
+    started_at = audit.started_at or audit.created_at
+    if started_at is None:
+        return False
+    timeout = _site_audit_timeout_window() or _SITE_AUDIT_TIMEOUT_FALLBACK
+    return datetime.now(UTC) - _as_aware_utc(started_at) > timeout
+
+
+async def _mark_stale_audits_failed(
+    audits: list[SiteAudit],
+    db: AsyncSession,
+) -> None:
+    touched = False
+    timeout_minutes = max(1, get_settings().site_audit_timeout_minutes)
+    for audit in audits:
+        if not _is_stale_audit(audit):
+            continue
+        audit.status = "failed"
+        audit.error_message = (
+            f"Site audit timed out after {timeout_minutes} minutes. "
+            "Check that the Temporal worker is running on task queue aeogeo-pipeline."
+        )
+        touched = True
+    if touched:
+        await db.commit()
+
+
 # ---------------------------------------------------------------------------
 # POST /projects/{project_id}/site-audit  — start a new audit
 # ---------------------------------------------------------------------------
@@ -142,7 +183,7 @@ async def start_site_audit(
 
     url = _normalize_site_audit_url(url)
 
-    started_at = datetime.now(timezone.utc)
+    started_at = datetime.now(UTC)
     audit = SiteAudit(
         project_id=project_id,
         url=url,
@@ -154,17 +195,21 @@ async def start_site_audit(
     await db.flush()
     await db.refresh(audit)
 
-    # Start Temporal workflow (best-effort — if Temporal is unavailable the
-    # audit record still exists with status=pending so it can be retried).
+    # Start Temporal workflow. If this fails, do not leave the frontend polling
+    # a pending audit that can never be picked up by a worker.
     try:
         workflow_id = await _start_site_audit_workflow(audit.id, url)
         audit.temporal_workflow_id = workflow_id
-    except Exception:
-        logger.warning(
-            "Failed to start Temporal SiteAuditWorkflow for audit %s — "
-            "audit saved with status=pending",
+    except Exception as exc:
+        audit.status = "failed"
+        audit.error_message = (
+            "Failed to start Temporal SiteAuditWorkflow. "
+            "Check TEMPORAL_HOST and the aeogeo-pipeline worker service."
+        )
+        logger.exception(
+            "Failed to start Temporal SiteAuditWorkflow for audit %s: %s",
             audit.id,
-            exc_info=True,
+            exc,
         )
 
     await db.commit()
@@ -192,6 +237,7 @@ async def list_site_audits(
         .limit(20)
     )
     audits = list(result.scalars().all())
+    await _mark_stale_audits_failed(audits, db)
     return SiteAuditListResponse(
         items=[SiteAuditResponse.model_validate(a) for a in audits]
     )
@@ -219,6 +265,7 @@ async def get_latest_site_audit(
     audit = result.scalar_one_or_none()
     if audit is None:
         raise HTTPException(status_code=404, detail="No site audits for this project")
+    await _mark_stale_audits_failed([audit], db)
     return SiteAuditResponse.model_validate(audit)
 
 
@@ -236,6 +283,7 @@ async def get_site_audit(
 ) -> SiteAuditResponse:
     await _verify_project(project_id, user.tenant_id, db)
     audit = await _get_audit(audit_id, project_id, db)
+    await _mark_stale_audits_failed([audit], db)
     return SiteAuditResponse.model_validate(audit)
 
 

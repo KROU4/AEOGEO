@@ -71,6 +71,7 @@ def _canonical_in_head(soup: BeautifulSoup) -> bool:
 async def run_technical_audit(
     url: str,
     html: str | None = None,
+    client: httpx.AsyncClient | None = None,
 ) -> TechnicalAuditResult:
     """Run full technical audit for a URL. html may be pre-fetched."""
     parsed = urlparse(url)
@@ -94,15 +95,18 @@ async def run_technical_audit(
         if html is not None:
             return
         try:
-            async with httpx.AsyncClient(
-                headers=DEFAULT_HEADERS, follow_redirects=True, timeout=40.0
-            ) as client:
-                t0 = time.monotonic()
-                r = await client.get(url)
-                ttfb_ms = round((time.monotonic() - t0) * 1000, 1)
-                homepage_status = r.status_code
-                fetched_html = r.text
-                x_robots_tag = r.headers.get("x-robots-tag")
+            t0 = time.monotonic()
+            if client is not None:
+                r = await client.get(url, timeout=15.0)
+            else:
+                async with httpx.AsyncClient(
+                    headers=DEFAULT_HEADERS, follow_redirects=True, timeout=15.0
+                ) as local_client:
+                    r = await local_client.get(url)
+            ttfb_ms = round((time.monotonic() - t0) * 1000, 1)
+            homepage_status = r.status_code
+            fetched_html = r.text
+            x_robots_tag = r.headers.get("x-robots-tag")
         except httpx.HTTPError as exc:
             issues.append(
                 AuditIssue(
@@ -116,12 +120,15 @@ async def run_technical_audit(
     async def _fetch_robots() -> None:
         nonlocal robots_content
         try:
-            async with httpx.AsyncClient(
-                headers=DEFAULT_HEADERS, follow_redirects=True, timeout=20.0
-            ) as client:
-                r = await client.get(f"{base}/robots.txt")
-                if r.status_code == 200:
-                    robots_content = r.text
+            if client is not None:
+                r = await client.get(f"{base}/robots.txt", timeout=10.0)
+            else:
+                async with httpx.AsyncClient(
+                    headers=DEFAULT_HEADERS, follow_redirects=True, timeout=10.0
+                ) as local_client:
+                    r = await local_client.get(f"{base}/robots.txt")
+            if r.status_code == 200:
+                robots_content = r.text
         except httpx.HTTPError:
             pass
 
@@ -133,29 +140,40 @@ async def run_technical_audit(
             f"{base}/sitemap",
         ]
         try:
-            async with httpx.AsyncClient(
-                headers=DEFAULT_HEADERS, follow_redirects=True, timeout=20.0
-            ) as client:
+            owned_client = None
+            active_client = client
+            if active_client is None:
+                owned_client = httpx.AsyncClient(
+                    headers=DEFAULT_HEADERS, follow_redirects=True, timeout=10.0
+                )
+                active_client = await owned_client.__aenter__()
+            try:
                 for candidate in candidates:
                     try:
-                        r = await client.get(candidate)
+                        r = await active_client.get(candidate, timeout=10.0)
                         if r.status_code == 200 and r.text.strip():
                             sitemap_content = r.text
                             sitemap_url_count = _count_sitemap_urls(r.text)
                             break
                     except httpx.HTTPError:
                         continue
+            finally:
+                if owned_client is not None:
+                    await owned_client.__aexit__(None, None, None)
         except Exception:
             pass
 
     async def _fetch_llmstxt() -> None:
         nonlocal has_llmstxt
         try:
-            async with httpx.AsyncClient(
-                headers=DEFAULT_HEADERS, follow_redirects=True, timeout=15.0
-            ) as client:
-                r = await client.get(f"{base}/llms.txt")
-                has_llmstxt = r.status_code == 200 and bool(r.text.strip())
+            if client is not None:
+                r = await client.get(f"{base}/llms.txt", timeout=8.0)
+            else:
+                async with httpx.AsyncClient(
+                    headers=DEFAULT_HEADERS, follow_redirects=True, timeout=8.0
+                ) as local_client:
+                    r = await local_client.get(f"{base}/llms.txt")
+            has_llmstxt = r.status_code == 200 and bool(r.text.strip())
         except httpx.HTTPError:
             has_llmstxt = False
 
@@ -166,13 +184,16 @@ async def run_technical_audit(
             _fetch_llmstxt(),
         )
         try:
-            async with httpx.AsyncClient(
-                headers=DEFAULT_HEADERS, follow_redirects=True, timeout=40.0
-            ) as client:
-                t0 = time.monotonic()
-                r = await client.head(url)
-                ttfb_ms = round((time.monotonic() - t0) * 1000, 1)
-                x_robots_tag = r.headers.get("x-robots-tag")
+            t0 = time.monotonic()
+            if client is not None:
+                r = await client.head(url, timeout=10.0)
+            else:
+                async with httpx.AsyncClient(
+                    headers=DEFAULT_HEADERS, follow_redirects=True, timeout=10.0
+                ) as local_client:
+                    r = await local_client.head(url)
+            ttfb_ms = round((time.monotonic() - t0) * 1000, 1)
+            x_robots_tag = r.headers.get("x-robots-tag")
         except httpx.HTTPError:
             pass
     else:
@@ -183,7 +204,11 @@ async def run_technical_audit(
             _fetch_llmstxt(),
         )
 
-    soup = BeautifulSoup(fetched_html, "lxml") if fetched_html else BeautifulSoup("", "lxml")
+    soup = (
+        BeautifulSoup(fetched_html, "lxml")
+        if fetched_html
+        else BeautifulSoup("", "lxml")
+    )
 
     has_robots_txt = robots_content is not None
     ai_crawler_access: dict[str, str] = {}
@@ -195,7 +220,9 @@ async def run_technical_audit(
 
     has_sitemap = sitemap_content is not None
 
-    meta_robots = soup.find("meta", attrs={"name": lambda n: n and n.lower() == "robots"})
+    meta_robots = soup.find(
+        "meta", attrs={"name": lambda n: n and n.lower() == "robots"}
+    )
     has_meta_robots_noindex = False
     if meta_robots:
         content_val = meta_robots.get("content", "")
@@ -216,7 +243,9 @@ async def run_technical_audit(
     )
     has_og_tags = bool(og_title and og_desc and og_image)
 
-    viewport_tag = soup.find("meta", attrs={"name": lambda n: n and n.lower() == "viewport"})
+    viewport_tag = soup.find(
+        "meta", attrs={"name": lambda n: n and n.lower() == "viewport"}
+    )
     has_mobile_viewport = viewport_tag is not None
 
     og_in_head = _og_in_head(soup)

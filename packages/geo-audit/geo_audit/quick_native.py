@@ -1,15 +1,15 @@
-"""Async native quick audit (no upstream repo clone required)."""
+"""Async native quick audit focused on AI-crawler infrastructure."""
 
 from __future__ import annotations
 
+import re
+import xml.etree.ElementTree as ET
 from urllib.parse import urlparse
 
 import httpx
 
-from geo_audit.citability_core import analyze_html_citability
-from geo_audit.models import QuickAuditResult
+from geo_audit.models import InfrastructureCheck, QuickAuditResult
 from geo_audit.robots_parse import parse_robots_txt, status_implies_crawl_allowed
-from geo_audit.schema_extract import extract_schema_org_types
 
 DEFAULT_HEADERS = {
     "User-Agent": (
@@ -21,6 +21,7 @@ DEFAULT_HEADERS = {
 }
 
 WATCH_BOTS = ("GPTBot", "ClaudeBot", "PerplexityBot")
+SITEMAP_CANDIDATES = ("sitemap.xml", "sitemap_index.xml", "sitemap")
 
 
 def _normalize_url(url: str) -> str:
@@ -32,89 +33,99 @@ def _normalize_url(url: str) -> str:
     return u
 
 
-def _schema_strength(types: list[str]) -> float:
-    if not types:
-        return 0.0
-    return min(100.0, 15.0 * min(len(types), 6))
+def _count_sitemap_urls(content: str) -> int:
+    try:
+        root = ET.fromstring(content)
+    except ET.ParseError:
+        return 0
+    ns = ""
+    if root.tag.startswith("{"):
+        ns = root.tag[: root.tag.index("}") + 1]
+    return len(root.findall(f".//{ns}url")) + len(root.findall(f".//{ns}sitemap"))
 
 
-def _overall_score(
-    citability: float,
-    bot_allowed: list[bool],
-    has_llms: bool,
-    schema_score: float,
-) -> float:
-    crawl_frac = sum(1 for x in bot_allowed if x) / max(len(bot_allowed), 1)
-    crawl_part = crawl_frac * 100.0
-    llms_part = 100.0 if has_llms else 0.0
-    return round(
-        0.38 * citability + 0.22 * crawl_part + 0.15 * llms_part + 0.25 * schema_score,
-        1,
-    )
+def _llms_quality(content: str) -> tuple[bool, str]:
+    stripped = content.strip()
+    if not stripped:
+        return False, "llms.txt is empty."
+    has_title = bool(re.search(r"(?m)^#\s+\S+", stripped))
+    has_section = bool(re.search(r"(?m)^##\s+\S+", stripped))
+    has_link = bool(re.search(r"(?m)^-\s*\[.+?\]\(.+?\)", stripped))
+    if has_title and has_section and has_link:
+        return True, "llms.txt is present and has title, sections, and key links."
+
+    missing = []
+    if not has_title:
+        missing.append("title")
+    if not has_section:
+        missing.append("sections")
+    if not has_link:
+        missing.append("links")
+    return False, f"llms.txt exists but is missing {', '.join(missing)}."
+
+
+def _readiness_label(score: float) -> str:
+    if score >= 34:
+        return "AI crawler ready"
+    if score >= 24:
+        return "Good foundation"
+    if score >= 12:
+        return "Partial setup"
+    return "AI crawlers are mostly blind"
 
 
 def _build_issues_and_tips(
     *,
     fetch_error: str | None,
-    citability: float,
     bots: dict[str, bool],
     has_llms: bool,
-    schema_types: list[str],
+    llms_well_formed: bool,
+    has_sitemap: bool,
+    robots_exists: bool,
+    robots_has_sitemap: bool,
 ) -> tuple[list[str], list[str]]:
     issues: list[str] = []
     tips: list[str] = []
 
     if fetch_error:
-        issues.append(f"Could not fully fetch the page: {fetch_error}")
-
-    if citability < 45:
-        issues.append(
-            "Main content blocks score low for AI citability (structure & facts)."
-        )
+        issues.append(f"Could not fully fetch the homepage: {fetch_error}")
 
     for name, ok in bots.items():
         if not ok:
-            issues.append(f"robots.txt may block or restrict {name}.")
+            issues.append(f"robots.txt blocks or restricts {name}.")
+
+    if not robots_exists:
+        issues.append("No robots.txt found, so crawler rules are unclear.")
+    elif not robots_has_sitemap:
+        issues.append("robots.txt does not point crawlers to a sitemap.")
 
     if not has_llms:
         issues.append(
-            "No llms.txt detected at /llms.txt (helps AI crawlers understand your site)."
+            "No llms.txt found at /llms.txt, so AI systems lack a site briefing."
         )
-
-    if not schema_types:
+    elif not llms_well_formed:
         issues.append(
-            "No JSON-LD structured data found (Organization/WebSite helps entity clarity)."
+            "llms.txt exists but is incomplete; AI crawlers need sections and key links."
         )
 
-    if len(issues) < 5 and citability < 65:
-        issues.append(
-            "Passages are not in the 134–167 word “highly citable” window often enough."
-        )
+    if not has_sitemap:
+        issues.append("No XML sitemap found at the standard sitemap locations.")
 
-    if not has_llms and len(tips) < 3:
+    if has_llms and llms_well_formed and all(bots.values()) and has_sitemap:
+        issues.append("Core AI crawler files are discoverable and readable.")
+
+    if not has_llms:
         tips.append(
-            "Publish llms.txt at /.well-known/ or /llms.txt with site summary and key URLs."
+            "Publish /llms.txt with a short site summary and links to your key pages."
         )
 
-    if schema_types:
-        if "Organization" not in schema_types and "LocalBusiness" not in schema_types:
-            tips.append(
-                "Add Organization (or LocalBusiness) JSON-LD with sameAs links to profiles."
-            )
-    else:
+    if not robots_exists or not all(bots.values()) or not robots_has_sitemap:
         tips.append(
-            "Add Organization + WebSite JSON-LD including logo and social sameAs."
+            "Update robots.txt to allow major AI crawlers and include a Sitemap directive."
         )
 
-    if not all(bots.values()) and len(tips) < 3:
-        tips.append(
-            "Adjust robots.txt so major AI crawlers can access content you want cited."
-        )
-
-    if citability < 55 and len(tips) < 3:
-        tips.append(
-            "Rewrite key sections as self-contained answer blocks with stats and definitions."
-        )
+    if not has_sitemap:
+        tips.append("Generate and expose /sitemap.xml so crawlers can discover pages.")
 
     return issues[:5], tips[:3]
 
@@ -128,77 +139,143 @@ async def run_quick_audit_native(url: str) -> QuickAuditResult:
     base = f"{parsed.scheme}://{parsed.netloc}"
 
     fetch_error: str | None = None
-    html = ""
     robots_status: dict[str, str] = {}
+    robots_exists = False
+    robots_has_sitemap = False
+    has_sitemap = False
+    sitemap_url_count = 0
+    has_llms = False
+    llms_well_formed = False
+    llms_details = "No llms.txt found at /llms.txt."
+
     async with httpx.AsyncClient(
-        headers=DEFAULT_HEADERS, follow_redirects=True, timeout=40.0
+        headers=DEFAULT_HEADERS, follow_redirects=True, timeout=15.0
     ) as client:
         try:
-            r = await client.get(target)
+            r = await client.get(target, timeout=8.0)
             r.raise_for_status()
-            html = r.text
         except httpx.HTTPError as exc:
             fetch_error = str(exc)
 
         try:
-            robots_url = f"{base}/robots.txt"
-            rr = await client.get(robots_url, timeout=15.0)
+            rr = await client.get(f"{base}/robots.txt", timeout=8.0)
             if rr.status_code == 200:
+                robots_exists = True
                 robots_status = parse_robots_txt(rr.text)
+                robots_has_sitemap = bool(re.search(r"(?im)^sitemap\s*:", rr.text))
             else:
-                for c in WATCH_BOTS:
-                    robots_status[c] = "NO_ROBOTS_TXT"
+                for crawler in WATCH_BOTS:
+                    robots_status[crawler] = "NO_ROBOTS_TXT"
         except httpx.HTTPError:
-            for c in WATCH_BOTS:
-                robots_status[c] = "NO_ROBOTS_TXT"
+            for crawler in WATCH_BOTS:
+                robots_status[crawler] = "NO_ROBOTS_TXT"
 
-        has_llms = False
         try:
-            lr = await client.get(f"{base}/llms.txt", timeout=12.0)
+            lr = await client.get(f"{base}/llms.txt", timeout=8.0)
             has_llms = lr.status_code == 200 and bool(lr.text.strip())
+            if has_llms:
+                llms_well_formed, llms_details = _llms_quality(lr.text)
         except httpx.HTTPError:
             has_llms = False
 
-    cit_result = (
-        analyze_html_citability(html) if html else {"average_citability_score": 0.0}
-    )
-    citability = float(cit_result.get("average_citability_score", 0.0))
-
-    schema_types = extract_schema_org_types(html) if html else []
-    schema_score = _schema_strength(schema_types)
+        for name in SITEMAP_CANDIDATES:
+            try:
+                sr = await client.get(f"{base}/{name}", timeout=8.0)
+                if sr.status_code == 200 and sr.text.strip():
+                    count = _count_sitemap_urls(sr.text)
+                    if count > 0:
+                        has_sitemap = True
+                        sitemap_url_count = count
+                        break
+            except httpx.HTTPError:
+                continue
 
     bots_bool: dict[str, bool] = {}
     for name in WATCH_BOTS:
-        st = robots_status.get(name, "NOT_MENTIONED")
-        if st == "NO_ROBOTS_TXT":
+        status = robots_status.get(name, "NOT_MENTIONED")
+        if status == "NO_ROBOTS_TXT":
             bots_bool[name] = True
         else:
-            bots_bool[name] = status_implies_crawl_allowed(st)
+            bots_bool[name] = status_implies_crawl_allowed(status)
 
-    overall = _overall_score(
-        citability,
-        [bots_bool[b] for b in WATCH_BOTS],
-        has_llms,
-        schema_score,
+    crawler_allowed = all(bots_bool.values())
+    llms_score = 14.0 if has_llms and llms_well_formed else 7.0 if has_llms else 0.0
+    robots_score = (
+        14.0
+        if robots_exists and crawler_allowed and robots_has_sitemap
+        else 9.0
+        if robots_exists and crawler_allowed
+        else 0.0
     )
+    sitemap_score = 12.0 if has_sitemap else 0.0
+    overall = round(llms_score + robots_score + sitemap_score, 1)
+
+    infrastructure_checks = [
+        InfrastructureCheck(
+            key="llms_txt",
+            label="llms.txt AI brief",
+            passed=has_llms and llms_well_formed,
+            score=llms_score,
+            details=llms_details,
+        ),
+        InfrastructureCheck(
+            key="robots_txt",
+            label="AI crawler access",
+            passed=robots_exists and crawler_allowed and robots_has_sitemap,
+            score=robots_score,
+            details=(
+                "robots.txt allows GPTBot, ClaudeBot, and PerplexityBot and includes a Sitemap directive."
+                if robots_exists and crawler_allowed and robots_has_sitemap
+                else "robots.txt should allow major AI crawlers and point them to your sitemap."
+            ),
+        ),
+        InfrastructureCheck(
+            key="sitemap",
+            label="Sitemap discovery",
+            passed=has_sitemap,
+            score=sitemap_score,
+            details=(
+                f"XML sitemap found with {sitemap_url_count} discoverable entries."
+                if has_sitemap
+                else "No valid XML sitemap found at /sitemap.xml or /sitemap_index.xml."
+            ),
+        ),
+    ]
 
     issues, tips = _build_issues_and_tips(
         fetch_error=fetch_error,
-        citability=citability,
         bots=bots_bool,
         has_llms=has_llms,
-        schema_types=schema_types,
+        llms_well_formed=llms_well_formed,
+        has_sitemap=has_sitemap,
+        robots_exists=robots_exists,
+        robots_has_sitemap=robots_has_sitemap,
     )
-
-    if fetch_error and overall > 0:
-        overall = min(overall, 35.0)
 
     return QuickAuditResult(
         overall_geo_score=min(100.0, max(0.0, overall)),
-        citability_score=min(100.0, max(0.0, citability)),
+        citability_score=min(100.0, max(0.0, overall * 2.5)),
         ai_crawler_access=bots_bool,
         has_llms_txt=has_llms,
-        schema_org={"types": schema_types},
+        has_sitemap=has_sitemap,
+        sitemap_url_count=sitemap_url_count,
+        robots_txt_status=(
+            "ai_ready"
+            if robots_exists and crawler_allowed and robots_has_sitemap
+            else "needs_work"
+            if robots_exists
+            else "missing"
+        ),
+        llms_txt_status=(
+            "well_formed"
+            if has_llms and llms_well_formed
+            else "incomplete"
+            if has_llms
+            else "missing"
+        ),
+        infrastructure_checks=infrastructure_checks,
+        readiness_label=_readiness_label(overall),
+        schema_org={"quick_check": "llms.txt, robots.txt, sitemap", "max_score": 40},
         top_issues=issues[:5],
         top_recommendations=tips[:3],
     )

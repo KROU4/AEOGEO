@@ -3282,6 +3282,22 @@ export interface components {
             url: string;
         };
         /**
+         * InfrastructureCheck
+         * @description Single quick infrastructure signal for the public lead magnet.
+         */
+        InfrastructureCheck: {
+            /** Details */
+            details: string;
+            /** Key */
+            key: string;
+            /** Label */
+            label: string;
+            /** Passed */
+            passed: boolean;
+            /** Score */
+            score: number;
+        };
+        /**
          * QuickAuditResult
          * @description Result of a public quick GEO audit (landing / lead gen).
          */
@@ -3302,8 +3318,18 @@ export interface components {
             citability_score: number;
             /** Has Llms Txt */
             has_llms_txt: boolean;
+            /** Has Sitemap */
+            has_sitemap?: boolean;
+            /** Infrastructure Checks */
+            infrastructure_checks?: components["schemas"]["InfrastructureCheck"][];
+            /** Llms Txt Status */
+            llms_txt_status?: string;
             /** Overall Geo Score */
             overall_geo_score: number;
+            /** Readiness Label */
+            readiness_label?: string;
+            /** Robots Txt Status */
+            robots_txt_status?: string;
             /**
              * Schema Org
              * @description Structured data summary, e.g. types present
@@ -3311,6 +3337,8 @@ export interface components {
             schema_org: {
                 [key: string]: unknown;
             };
+            /** Sitemap Url Count */
+            sitemap_url_count?: number;
             /** Top Issues */
             top_issues: string[];
             /** Top Recommendations */

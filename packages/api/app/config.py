@@ -6,6 +6,8 @@ from functools import lru_cache
 from pydantic import AliasChoices, Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+PRODUCTION_WEB_ORIGIN = "https://avop.up.railway.app"
+
 
 class Settings(BaseSettings):
     database_url: str = "postgresql+asyncpg://aeogeo:localdev@localhost:5432/aeogeo"
@@ -15,7 +17,7 @@ class Settings(BaseSettings):
         default="temporal:7233",
         validation_alias=AliasChoices("TEMPORAL_HOST", "TEMPORAL_ADDRESS"),
     )
-    cors_origins: str = "http://localhost:5173"
+    cors_origins: str = f"http://localhost:5173,{PRODUCTION_WEB_ORIGIN}"
     # Optional: single regex (e.g. https://.*\\.up\\.railway\\.app) when the web URL
     # changes per deploy.
     cors_origin_regex: str = ""
@@ -41,6 +43,7 @@ class Settings(BaseSettings):
     sentry_environment: str = "production"
     log_json: bool = False
     referral_track_webhook_url: str = ""
+    site_audit_timeout_minutes: int = 10
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
@@ -68,11 +71,14 @@ class Settings(BaseSettings):
 
     @property
     def cors_origins_list(self) -> list[str]:
-        return [
+        origins = [
             origin.strip().rstrip("/")
             for origin in self.cors_origins.split(",")
             if origin.strip()
         ]
+        if PRODUCTION_WEB_ORIGIN not in origins:
+            origins.append(PRODUCTION_WEB_ORIGIN)
+        return origins
 
     @property
     def clerk_enabled(self) -> bool:

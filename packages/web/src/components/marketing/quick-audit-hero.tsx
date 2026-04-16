@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Check, Loader2, X } from "lucide-react";
+import { ArrowRight, Check, FileSearch, Loader2, Radar, Sparkles, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,6 +9,7 @@ import type { QuickAuditResult } from "@/types/quick-audit";
 import { cn } from "@/lib/utils";
 
 const BOT_ORDER = ["GPTBot", "ClaudeBot", "PerplexityBot"] as const;
+const MAX_QUICK_SCORE = 40;
 
 function normalizeAuditUrl(raw: string): string {
   const u = raw.trim();
@@ -82,6 +83,41 @@ export function QuickAuditHero({ landingInline = false }: QuickAuditHeroProps) {
       )}`
     : "/register";
 
+  const normalizedChecks = result?.infrastructure_checks?.length
+    ? result.infrastructure_checks
+    : [
+        {
+          key: "llms_txt",
+          label: "llms.txt AI brief",
+          passed: result?.has_llms_txt ?? false,
+          score: result?.has_llms_txt ? 14 : 0,
+          details: result?.has_llms_txt
+            ? "llms.txt detected."
+            : "No llms.txt detected at /llms.txt.",
+        },
+        {
+          key: "robots_txt",
+          label: "AI crawler access",
+          passed: BOT_ORDER.every((bot) => result?.ai_crawler_access?.[bot]),
+          score: BOT_ORDER.every((bot) => result?.ai_crawler_access?.[bot]) ? 9 : 0,
+          details: "robots.txt should allow major AI crawlers.",
+        },
+        {
+          key: "sitemap",
+          label: "Sitemap discovery",
+          passed: result?.has_sitemap ?? false,
+          score: result?.has_sitemap ? 12 : 0,
+          details: result?.has_sitemap
+            ? "XML sitemap detected."
+            : "No sitemap found at standard locations.",
+        },
+      ];
+
+  const scorePct = result
+    ? Math.min(100, Math.round((result.overall_geo_score / MAX_QUICK_SCORE) * 100))
+    : 0;
+  const healthy = result ? result.overall_geo_score >= 30 : false;
+
   const inputBlock = landingInline ? (
     <div className="relative max-w-lg group">
       <div className="absolute -inset-0.5 rounded-lg bg-gradient-to-r from-primary to-[#06b6d4] opacity-25 blur transition duration-1000 group-focus-within:opacity-50" />
@@ -148,89 +184,160 @@ export function QuickAuditHero({ landingInline = false }: QuickAuditHeroProps) {
     result != null ? (
       <div
         className={cn(
-          "mt-8 space-y-6 border-t pt-8",
-          landingInline ? "border-white/10" : "border-border",
+          "mt-8 overflow-hidden rounded-[2rem] border",
+          landingInline
+            ? "border-white/10 bg-[#071112]/85 text-white shadow-[0_24px_90px_rgba(0,0,0,0.45)]"
+            : "border-border bg-card text-foreground shadow-2xl",
         )}
       >
-        <div className="flex flex-col gap-6 md:flex-row md:items-start">
-          <div
-            className={cn(
-              "flex shrink-0 flex-col items-center justify-center rounded-2xl border px-8 py-6",
-              landingInline
-                ? "border-primary/30 bg-primary/5"
-                : "border-primary/30 bg-primary/5",
-            )}
-          >
-            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              {t("auditScoreLabel")}
-            </p>
-            <p
-              className="text-5xl font-bold tabular-nums text-primary md:text-6xl"
-              style={{
-                fontFamily: "var(--font-avop-display, var(--font-sans))",
-              }}
-            >
-              {Math.round(result.overall_geo_score)}
-            </p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              {t("auditCitability", { score: Math.round(result.citability_score) })}
-            </p>
+        <div className="relative grid gap-0 lg:grid-cols-[0.95fr_1.05fr]">
+          <div className="pointer-events-none absolute inset-0 opacity-70">
+            <div className="absolute -left-24 top-8 h-56 w-56 rounded-full bg-cyan-400/20 blur-3xl" />
+            <div className="absolute -bottom-24 right-8 h-64 w-64 rounded-full bg-emerald-300/15 blur-3xl" />
+            <div className="quick-audit-scanline absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-cyan-300/20 to-transparent" />
           </div>
 
-          <div className="min-w-0 flex-1 space-y-4">
+          <div className="relative border-b border-white/10 p-6 md:p-8 lg:border-b-0 lg:border-r">
+            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-cyan-300/25 bg-cyan-300/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-cyan-200">
+              <Radar className="h-3.5 w-3.5" />
+              AI crawler scan
+            </div>
+
+            <div className="relative mx-auto flex aspect-square max-w-[260px] items-center justify-center rounded-full border border-white/10 bg-black/20">
+              <div className="quick-audit-orbit absolute inset-5 rounded-full border border-dashed border-cyan-200/25" />
+              <div className="quick-audit-orbit-reverse absolute inset-10 rounded-full border border-dashed border-emerald-200/20" />
+              <div className="absolute inset-0 rounded-full bg-[radial-gradient(circle,rgba(34,211,238,0.18),transparent_58%)]" />
+              <div className="relative text-center">
+                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-cyan-100/70">
+                  readiness
+                </p>
+                <p className="mt-2 text-6xl font-black tabular-nums text-white">
+                  {Math.round(result.overall_geo_score)}
+                </p>
+                <p className="text-sm font-semibold text-cyan-100">
+                  / {MAX_QUICK_SCORE}
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-6">
+              <div className="mb-2 flex items-center justify-between text-xs font-semibold uppercase tracking-[0.18em] text-white/60">
+                <span>{result.readiness_label}</span>
+                <span>{scorePct}% of quick-check max</span>
+              </div>
+              <div className="h-3 overflow-hidden rounded-full bg-white/10">
+                <div
+                  className={cn(
+                    "quick-audit-fill h-full rounded-full",
+                    healthy
+                      ? "bg-gradient-to-r from-emerald-300 via-cyan-300 to-white"
+                      : "bg-gradient-to-r from-red-400 via-amber-300 to-cyan-300",
+                  )}
+                  style={{ width: `${scorePct}%` }}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="relative space-y-5 p-6 md:p-8">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-cyan-200">
+                {healthy ? "Your AI files are discoverable" : "AI crawlers need clearer signals"}
+              </p>
+              <h3 className="mt-2 text-2xl font-black tracking-tight md:text-3xl">
+                {healthy
+                  ? "The basics are in place. Now test the full GEO picture."
+                  : "Search bots can miss your site before content quality even matters."}
+              </h3>
+              <p className="mt-3 text-sm leading-6 text-white/65">
+                We checked the three files AI crawlers look for first: `llms.txt`,
+                `robots.txt`, and `sitemap.xml`. Full audit checks content, schema,
+                citations, competitors, and platform readiness.
+              </p>
+            </div>
+
+            <div className="grid gap-3">
+              {normalizedChecks.map((check, index) => (
+                <div
+                  key={check.key}
+                  className="quick-audit-card-reveal rounded-2xl border border-white/10 bg-white/[0.055] p-4 backdrop-blur"
+                  style={{ animationDelay: `${index * 120}ms` }}
+                >
+                  <div className="flex items-start gap-3">
+                    <span
+                      className={cn(
+                        "mt-0.5 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border",
+                        check.passed
+                          ? "border-emerald-300/30 bg-emerald-300/15 text-emerald-200"
+                          : "border-red-300/30 bg-red-300/10 text-red-200",
+                      )}
+                    >
+                      {check.passed ? (
+                        <Check className="h-4 w-4" />
+                      ) : (
+                        <X className="h-4 w-4" />
+                      )}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-between gap-3">
+                        <p className="font-semibold text-white">{check.label}</p>
+                        <p className="font-mono text-xs text-white/60">
+                          +{Math.round(check.score)}
+                        </p>
+                      </div>
+                      <p className="mt-1 text-sm leading-5 text-white/60">
+                        {check.details}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
             <div className="flex flex-wrap gap-2">
               {BOT_ORDER.map((bot) => (
                 <span
                   key={bot}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background/80 px-3 py-1 text-xs font-medium"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-black/20 px-3 py-1 text-xs font-medium text-white/75"
                 >
                   {result.ai_crawler_access[bot] ? (
-                    <Check className="h-3.5 w-3.5 text-emerald-500" />
+                    <Check className="h-3.5 w-3.5 text-emerald-300" />
                   ) : (
-                    <X className="h-3.5 w-3.5 text-destructive" />
+                    <X className="h-3.5 w-3.5 text-red-300" />
                   )}
                   {bot}
                 </span>
               ))}
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background/80 px-3 py-1 text-xs font-medium">
-                {result.has_llms_txt ? (
-                  <Check className="h-3.5 w-3.5 text-emerald-500" />
-                ) : (
-                  <X className="h-3.5 w-3.5 text-destructive" />
-                )}
-                llms.txt
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-black/20 px-3 py-1 text-xs font-medium text-white/75">
+                <FileSearch className="h-3.5 w-3.5 text-cyan-200" />
+                {result.sitemap_url_count} sitemap URLs
               </span>
             </div>
 
-            <div>
-              <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+              <p className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-white/50">
+                <Sparkles className="h-3.5 w-3.5 text-cyan-200" />
                 {t("auditIssues")}
               </p>
-              <ul className="space-y-2 text-sm">
-                {result.top_issues.map((issue, i) => (
-                  <li
-                    key={`${i}-${issue.slice(0, 24)}`}
-                    className={
-                      i === 0
-                        ? "text-foreground"
-                        : "blur-sm select-none text-muted-foreground"
-                    }
-                  >
-                    {issue}
-                  </li>
+              <ul className="space-y-2 text-sm text-white/75">
+                {result.top_issues.slice(0, 3).map((issue, i) => (
+                  <li key={`${i}-${issue.slice(0, 24)}`}>{issue}</li>
                 ))}
               </ul>
+            </div>
+
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+              <Button size="lg" asChild className="group">
+                <a href={registerHref}>
+                  {t("auditCta")}
+                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                </a>
+              </Button>
             </div>
           </div>
         </div>
 
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-          <Button size="lg" asChild>
-            <a href={registerHref}>{t("auditCta")}</a>
-          </Button>
-        </div>
-
-        <div className="space-y-2 border-t border-border pt-6">
+        <div className="space-y-2 border-t border-white/10 bg-black/15 p-6 md:p-8">
           <Label htmlFor="audit-email" className="text-muted-foreground">
             {t("auditEmailLabel")}
           </Label>

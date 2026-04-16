@@ -139,3 +139,72 @@
   animation: avop-marquee 30s linear infinite;
   will-change: transform;
 }
+
+@keyframes quick-audit-scanline {
+  0% {
+    transform: translate3d(0, -120%, 0);
+    opacity: 0;
+  }
+  18% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: translate3d(0, 720%, 0);
+    opacity: 0;
+  }
+}
+
+@keyframes quick-audit-orbit {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes quick-audit-orbit-reverse {
+  to {
+    transform: rotate(-360deg);
+  }
+}
+
+@keyframes quick-audit-fill {
+  0% {
+    transform: scaleX(0);
+    filter: saturate(0.6);
+  }
+  100% {
+    transform: scaleX(1);
+    filter: saturate(1.25);
+  }
+}
+
+@keyframes quick-audit-card-reveal {
+  from {
+    transform: translateY(14px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.quick-audit-scanline {
+  animation: quick-audit-scanline 2.9s ease-in-out infinite;
+}
+
+.quick-audit-orbit {
+  animation: quick-audit-orbit 14s linear infinite;
+}
+
+.quick-audit-orbit-reverse {
+  animation: quick-audit-orbit-reverse 18s linear infinite;
+}
+
+.quick-audit-fill {
+  animation: quick-audit-fill 900ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  transform-origin: left;
+}
+
+.quick-audit-card-reveal {
+  animation: quick-audit-card-reveal 520ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}

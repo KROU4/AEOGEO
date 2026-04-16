@@ -28,10 +28,10 @@ _AUTHOR_TEXT_RE = re.compile(
 )
 
 
-def _extract_text_metrics(
-    soup: BeautifulSoup, base_domain: str
-) -> dict[str, object]:
-    for el in soup.find_all(["script", "style", "nav", "footer", "header", "aside", "form"]):
+def _extract_text_metrics(soup: BeautifulSoup, base_domain: str) -> dict[str, object]:
+    for el in soup.find_all(
+        ["script", "style", "nav", "footer", "header", "aside", "form"]
+    ):
         el.decompose()
 
     headings = soup.find_all(["h1", "h2", "h3", "h4", "h5", "h6"])
@@ -63,7 +63,9 @@ def _extract_text_metrics(
     statistical_density = (len(number_matches) / max(word_count, 1)) * 1000.0
 
     has_author = False
-    meta_author = soup.find("meta", attrs={"name": lambda n: n and n.lower() == "author"})
+    meta_author = soup.find(
+        "meta", attrs={"name": lambda n: n and n.lower() == "author"}
+    )
     if meta_author and meta_author.get("content"):
         has_author = True
     if not has_author:
@@ -176,7 +178,12 @@ def _heuristic_eeat(
     if has_canonical:
         score_trustworthiness += 12.5
 
-    return score_experience, score_expertise, score_authoritativeness, score_trustworthiness
+    return (
+        score_experience,
+        score_expertise,
+        score_authoritativeness,
+        score_trustworthiness,
+    )
 
 
 async def _ai_eeat_scores(
@@ -196,7 +203,7 @@ async def _ai_eeat_scores(
         'Reply ONLY with valid JSON: {"experience": N, "expertise": N, "authoritativeness": N, "trustworthiness": N}'
     )
     try:
-        async with httpx.AsyncClient(timeout=30.0) as client:
+        async with httpx.AsyncClient(timeout=12.0) as client:
             response = await client.post(
                 "https://api.openai.com/v1/chat/completions",
                 headers={
@@ -243,6 +250,7 @@ async def run_content_quality_audit(
     url: str,
     html: str | None = None,
     openai_api_key: str | None = None,
+    client: httpx.AsyncClient | None = None,
 ) -> ContentQualityResult:
     """Run content quality and E-E-A-T audit."""
     parsed = urlparse(url)
@@ -252,12 +260,15 @@ async def run_content_quality_audit(
 
     if html is None:
         try:
-            async with httpx.AsyncClient(
-                headers=DEFAULT_HEADERS, follow_redirects=True, timeout=40.0
-            ) as client:
-                r = await client.get(url)
-                r.raise_for_status()
-                html = r.text
+            if client is not None:
+                r = await client.get(url, timeout=15.0)
+            else:
+                async with httpx.AsyncClient(
+                    headers=DEFAULT_HEADERS, follow_redirects=True, timeout=15.0
+                ) as local_client:
+                    r = await local_client.get(url)
+            r.raise_for_status()
+            html = r.text
         except httpx.HTTPError as exc:
             issues.append(
                 AuditIssue(
@@ -286,16 +297,19 @@ async def run_content_quality_audit(
     has_canonical = canonical_tag is not None
     article_schema = _article_schema_present(soup)
 
-    score_experience, score_expertise, score_authoritativeness, score_trustworthiness = (
-        _heuristic_eeat(
-            has_author=has_author,
-            has_publish_date=has_publish_date,
-            heading_depth=heading_depth,
-            statistical_density=statistical_density,
-            is_https=is_https,
-            has_canonical=has_canonical,
-            article_schema=article_schema,
-        )
+    (
+        score_experience,
+        score_expertise,
+        score_authoritativeness,
+        score_trustworthiness,
+    ) = _heuristic_eeat(
+        has_author=has_author,
+        has_publish_date=has_publish_date,
+        heading_depth=heading_depth,
+        statistical_density=statistical_density,
+        is_https=is_https,
+        has_canonical=has_canonical,
+        article_schema=article_schema,
     )
 
     ai_scored = False
@@ -304,7 +318,12 @@ async def run_content_quality_audit(
         if top_blocks:
             ai_result = await _ai_eeat_scores(top_blocks, openai_api_key)
             if ai_result is not None:
-                score_experience, score_expertise, score_authoritativeness, score_trustworthiness = ai_result
+                (
+                    score_experience,
+                    score_expertise,
+                    score_authoritativeness,
+                    score_trustworthiness,
+                ) = ai_result
                 ai_scored = True
 
     topical_authority_modifier = 0.0

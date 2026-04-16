@@ -16,6 +16,18 @@ def setup_cors(app: FastAPI, settings: Settings) -> None:
         logger.warning("CORS is not configured; falling back to localhost:5173")
         allowed_origins = ["http://localhost:5173"]
 
+    if "*" in allowed_origins:
+        logger.warning(
+            "CORS_ORIGINS contains '*' while credentials are enabled; use explicit "
+            "origins such as https://avop.up.railway.app instead."
+        )
+
+    logger.info(
+        "Configuring CORS: allow_origins=%s allow_origin_regex=%r",
+        allowed_origins,
+        settings.cors_origin_regex or None,
+    )
+
     app.add_middleware(
         CORSMiddleware,
         allow_origins=allowed_origins,
