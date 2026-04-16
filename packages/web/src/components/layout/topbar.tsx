@@ -1,4 +1,3 @@
-import { useClerk } from "@clerk/react";
 import { Bell, Sun, Moon, Monitor, LogOut, User } from "lucide-react";
 import { Link, useLocation, useNavigate, useSearch } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
@@ -27,13 +26,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { LocaleSegmentToggle } from "@/components/ui/locale-segment-toggle";
+import { useSessionClerk } from "@/lib/session-auth";
 
 interface TopbarProps {
   title: string;
 }
 
 export function Topbar({ title }: TopbarProps) {
-  const { signOut } = useClerk();
+  const { signOut } = useSessionClerk();
   const search = useSearch({ strict: false }) as {
     period?: DashboardPeriod;
     p?: string;

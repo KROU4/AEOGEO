@@ -1,8 +1,8 @@
 import { Navigate, createFileRoute, Outlet, useSearch } from "@tanstack/react-router";
-import { useAuth } from "@clerk/react";
 import { useLocale } from "@/hooks/use-locale";
 import { FunnelProgress } from "@/components/funnel/funnel-progress";
 import { useTranslation } from "react-i18next";
+import { useSessionAuth } from "@/lib/session-auth";
 
 export const Route = createFileRoute("/_funnel")({
   component: FunnelLayout,
@@ -11,7 +11,7 @@ export const Route = createFileRoute("/_funnel")({
 const TOTAL_STEPS = 8; // Steps 2-9 (step 1 is auth, handled externally)
 
 function FunnelLayout() {
-  const { isLoaded, isSignedIn } = useAuth();
+  const { isLoaded, isSignedIn } = useSessionAuth();
   const { locale, setLocale } = useLocale();
   const { t } = useTranslation("funnel");
   const search = useSearch({ strict: false }) as { step?: number };

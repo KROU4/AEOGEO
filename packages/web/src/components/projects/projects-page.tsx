@@ -15,6 +15,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { PlaceholderCard } from "@/components/layout/placeholder-card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -31,7 +32,6 @@ import { cn } from "@/lib/utils";
 import type { Project } from "@/types/project";
 import {
   ArrowUpRight,
-  BookOpen,
   ExternalLink,
   FilePenLine,
   FolderOpen,
@@ -39,13 +39,11 @@ import {
   LayoutGrid,
   Loader2,
   MoreHorizontal,
-  PlayCircle,
   Plus,
   Sparkles,
   Trash2,
   Users,
 } from "lucide-react";
-import { KnowledgePackDialog } from "@/components/projects/knowledge-pack-dialog";
 import { ProjectEditDialog } from "@/components/projects/project-edit-dialog";
 
 type SortMode = "recent" | "name" | "score";
@@ -119,17 +117,11 @@ function ProjectGridCard({
   project,
   onEdit,
   onDelete,
-  onOpenKnowledge,
-  onOpenQueries,
-  onOpenRuns,
   onOpenProject,
 }: {
   project: Project;
   onEdit: () => void;
   onDelete: () => void;
-  onOpenKnowledge: () => void;
-  onOpenQueries: () => void;
-  onOpenRuns: () => void;
   onOpenProject: () => void;
 }) {
   const { t } = useTranslation("projects");
@@ -209,18 +201,6 @@ function ProjectGridCard({
                     <ArrowUpRight className="h-4 w-4" />
                     {t("viewProject")}
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={onOpenKnowledge}>
-                    <BookOpen className="h-4 w-4" />
-                    {t("grid.menuKnowledge")}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={onOpenQueries}>
-                    <LayoutGrid className="h-4 w-4" />
-                    {t("grid.menuQueries")}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={onOpenRuns}>
-                    <PlayCircle className="h-4 w-4" />
-                    {t("grid.menuRuns")}
-                  </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={onEdit}>
                     <FilePenLine className="h-4 w-4" />
@@ -277,15 +257,7 @@ function ProjectGridCard({
           </div>
 
           <div className="flex flex-wrap gap-2 border-t border-border/60 pt-4">
-            <Button
-              variant="outline"
-              className="flex-1 min-w-[150px]"
-              onClick={onOpenKnowledge}
-            >
-              <BookOpen className="h-4 w-4" />
-              {t("grid.openKnowledge")}
-            </Button>
-            <Button className="flex-1 min-w-[150px]" onClick={onOpenProject}>
+            <Button className="min-w-[150px] flex-1" onClick={onOpenProject}>
               <ArrowUpRight className="h-4 w-4" />
               {t("viewProject")}
             </Button>
@@ -304,7 +276,6 @@ export function ProjectsPage() {
   const deleteProject = useDeleteProject();
   const [deleteTarget, setDeleteTarget] = useState<Project | null>(null);
   const [editTarget, setEditTarget] = useState<Project | null>(null);
-  const [knowledgeTarget, setKnowledgeTarget] = useState<Project | null>(null);
   const sortedProjects = [...projects].sort((a, b) => compareProjects(a, b, "recent"));
 
   const scoredProjects = projects.filter((project) => project.visibility_score != null);
@@ -321,21 +292,7 @@ export function ProjectsPage() {
 
   function openProject(projectId: string) {
     navigate({
-      to: "/projects/$projectId",
-      params: { projectId },
-    });
-  }
-
-  function openQueries(projectId: string) {
-    navigate({
-      to: "/projects/$projectId/queries",
-      params: { projectId },
-    });
-  }
-
-  function openRuns(projectId: string) {
-    navigate({
-      to: "/projects/$projectId/runs",
+      to: "/projects/$projectId/site-audit",
       params: { projectId },
     });
   }
@@ -350,7 +307,7 @@ export function ProjectsPage() {
           </p>
         </div>
         <Button asChild>
-          <Link to="/new-project" search={{ step: 1 }}>
+          <Link to="/projects/new">
             <Plus className="w-4 h-4" />
             {t("newProject")}
           </Link>
@@ -370,25 +327,21 @@ export function ProjectsPage() {
       )}
 
       {!isLoading && !error && projects.length === 0 && (
-        <Card className="border-dashed">
-          <CardContent className="flex flex-col items-center justify-center py-16">
-            <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-muted">
-              <FolderOpen className="h-6 w-6 text-muted-foreground" />
-            </div>
-            <h3 className="mb-1 text-lg font-semibold text-foreground">
-              {t("emptyTitle")}
-            </h3>
-            <p className="mb-6 max-w-sm text-center text-sm text-muted-foreground">
-              {t("emptyDescription")}
-            </p>
+        <div className="space-y-4">
+          <PlaceholderCard
+            icon={FolderOpen}
+            title={t("emptyTitle")}
+            description={t("emptyDescription")}
+          />
+          <div className="flex justify-center">
             <Button asChild>
-              <Link to="/new-project" search={{ step: 1 }}>
+              <Link to="/projects/new">
                 <Plus className="w-4 h-4" />
                 {t("newProject")}
               </Link>
             </Button>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       )}
 
       <AlertDialog
@@ -455,9 +408,6 @@ export function ProjectsPage() {
                   project={project}
                   onEdit={() => setEditTarget(project)}
                   onDelete={() => setDeleteTarget(project)}
-                  onOpenKnowledge={() => setKnowledgeTarget(project)}
-                  onOpenQueries={() => openQueries(project.id)}
-                  onOpenRuns={() => openRuns(project.id)}
                   onOpenProject={() => openProject(project.id)}
                 />
               ))}
@@ -471,12 +421,6 @@ export function ProjectsPage() {
         project={editTarget}
       />
 
-      <KnowledgePackDialog
-        open={!!knowledgeTarget}
-        onOpenChange={(open) => !open && setKnowledgeTarget(null)}
-        project={knowledgeTarget}
-        onEditKnowledge={() => setKnowledgeTarget(null)}
-      />
     </div>
   );
 }

@@ -8,38 +8,41 @@ import {
   useNavigate,
   useSearch,
 } from "@tanstack/react-router";
-import { useAuth } from "@clerk/react";
 import { useTranslation } from "react-i18next";
 import {
   SidebarProvider,
   SidebarInset,
 } from "@/components/ui/sidebar";
+import { AlertCircle } from "lucide-react";
+import { PlaceholderCard } from "@/components/layout/placeholder-card";
 import { AppSidebar } from "@/components/layout/app-sidebar";
 import { Topbar } from "@/components/layout/topbar";
 import { useCurrentUser } from "@/hooks/use-auth";
-import { useProject } from "@/hooks/use-projects";
+import { useProject, useProjects } from "@/hooks/use-projects";
 import { ApiError } from "@/lib/api-client";
 import {
   parseDashboardSearch,
   persistProjectAliasFromSearch,
 } from "@/lib/dashboard-search";
+import { useSessionAuth } from "@/lib/session-auth";
 
 export const Route = createFileRoute("/_dashboard")({
   validateSearch: (search: Record<string, unknown>) =>
     parseDashboardSearch(search),
   component: DashboardLayout,
+  errorComponent: DashboardErrorBoundary,
 });
 
 const segmentToNavKey: Record<string, string> = {
-  overview: "nav.overview",
-  visibility: "nav.visibility",
+  overview: "nav.projects",
+  visibility: "nav.projects",
   reports: "nav.reports",
   projects: "nav.projects",
   settings: "nav.settings",
-  citations: "nav.citations",
-  competitors: "nav.competitors",
-  platforms: "nav.platforms",
-  assistant: "nav.assistant",
+  citations: "nav.projects",
+  competitors: "nav.projects",
+  platforms: "nav.projects",
+  assistant: "nav.projects",
 };
 
 const UUID_SEGMENT_RE =
@@ -87,7 +90,7 @@ function ProjectAliasSync() {
 }
 
 function DashboardLayout() {
-  const { isLoaded, isSignedIn } = useAuth();
+  const { isLoaded, isSignedIn } = useSessionAuth();
   const currentUserQuery = useCurrentUser();
   const { t } = useTranslation("common");
   const location = useLocation();
@@ -95,6 +98,7 @@ function DashboardLayout() {
   const lastMatch = matches[matches.length - 1];
   const projectId = getProjectIdFromMatches(matches);
   const { data: project } = useProject(projectId);
+  const projectsQuery = useProjects();
 
   const pathSegments = location.pathname.split("/").filter(Boolean);
   const lastSegment = pathSegments[pathSegments.length - 1] || "overview";
@@ -124,7 +128,22 @@ function DashboardLayout() {
     currentUserQuery.error instanceof ApiError &&
     currentUserQuery.error.code === "auth.bootstrap_required"
   ) {
-    return <Navigate to="/complete-signup" />;
+    return <Navigate to="/projects/new" replace />;
+  }
+
+  /** Empty workspace: force first project creation, but allow Reports/Settings so nav is usable. */
+  const allowedPathWhenNoProjects =
+    location.pathname === "/projects/new" ||
+    location.pathname.startsWith("/reports") ||
+    location.pathname.startsWith("/settings");
+
+  if (
+    currentUserQuery.data &&
+    projectsQuery.data &&
+    projectsQuery.data.items.length === 0 &&
+    !allowedPathWhenNoProjects
+  ) {
+    return <Navigate to="/projects/new" replace />;
   }
 
   return (
@@ -144,5 +163,17 @@ function DashboardLayout() {
         </main>
       </SidebarInset>
     </SidebarProvider>
+  );
+}
+
+function DashboardErrorBoundary() {
+  return (
+    <div className="p-8">
+      <PlaceholderCard
+        icon={AlertCircle}
+        title="Something went wrong"
+        description="Reload the page and try again."
+      />
+    </div>
   );
 }

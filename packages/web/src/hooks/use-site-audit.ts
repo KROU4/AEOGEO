@@ -117,6 +117,8 @@ export interface SiteAudit {
   status: SiteAuditStatus;
   error_message?: string | null;
   temporal_workflow_id?: string | null;
+  /** Server anchor for “how long the audit has been running” (set when the audit is created). */
+  started_at?: string | null;
   created_at: string;
   updated_at?: string | null;
   result_json?: FullSiteAuditResult | null;
@@ -145,7 +147,7 @@ export function useLatestSiteAudit(projectId: string | undefined) {
     },
     refetchInterval: (query) => {
       const status = query.state.data?.status;
-      if (status && ACTIVE_STATUSES.includes(status)) return 3000;
+      if (status && ACTIVE_STATUSES.includes(status)) return 8000;
       return false;
     },
   });
@@ -173,7 +175,7 @@ export function useSiteAudit(
     enabled: !!projectId && !!auditId,
     refetchInterval: (query) => {
       const status = query.state.data?.status;
-      if (status && ACTIVE_STATUSES.includes(status)) return 3000;
+      if (status && ACTIVE_STATUSES.includes(status)) return 8000;
       return false;
     },
   });

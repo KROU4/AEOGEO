@@ -65,10 +65,10 @@ async def create_engine_run_activity(
     from sqlalchemy import select
     from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
-    from app.config import Settings
+    from app.config import get_settings
     from app.models.engine_run import EngineRun
 
-    settings = Settings()
+    settings = get_settings()
     engine = create_async_engine(settings.database_url, echo=False)
     session_factory = async_sessionmaker(engine, expire_on_commit=False)
 

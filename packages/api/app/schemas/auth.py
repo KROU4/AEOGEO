@@ -34,6 +34,22 @@ class UserResponse(BaseModel):
     created_at: str
 
 
+class NotificationPreferences(BaseModel):
+    weekly_reports: bool = True
+    citation_alerts: bool = True
+    competitor_movements: bool = False
+    content_published: bool = True
+    team_activity: bool = False
+
+
+class NotificationPreferencesUpdate(BaseModel):
+    weekly_reports: bool | None = None
+    citation_alerts: bool | None = None
+    competitor_movements: bool | None = None
+    content_published: bool | None = None
+    team_activity: bool | None = None
+
+
 class TeamProjectMembershipResponse(BaseModel):
     project_id: str
     project_name: str

@@ -3,12 +3,12 @@
 from __future__ import annotations
 
 import logging
-import os
 from uuid import UUID
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.config import get_settings
 from app.models.scheduled_run import ScheduledRun
 from app.schemas.scheduled_run import (
     ScheduledRunCreate,
@@ -140,8 +140,7 @@ class SchedulerService:
         try:
             from temporalio.client import Client as TemporalClient, Schedule, ScheduleActionStartWorkflow, ScheduleSpec, ScheduleIntervalSpec
 
-            temporal_host = os.getenv("TEMPORAL_HOST", "temporal:7233")
-            client = await TemporalClient.connect(temporal_host)
+            client = await TemporalClient.connect(get_settings().temporal_host)
 
             schedule_id = f"scheduled-run-{schedule.id}"
             await client.create_schedule(
@@ -184,8 +183,7 @@ class SchedulerService:
         try:
             from temporalio.client import Client as TemporalClient
 
-            temporal_host = os.getenv("TEMPORAL_HOST", "temporal:7233")
-            client = await TemporalClient.connect(temporal_host)
+            client = await TemporalClient.connect(get_settings().temporal_host)
 
             handle = client.get_schedule_handle(f"scheduled-run-{schedule_id}")
             await handle.delete()

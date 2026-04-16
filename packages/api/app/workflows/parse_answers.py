@@ -44,46 +44,21 @@ async def parse_run_answers_activity(input: ParseInput) -> ParseResult:
     import uuid
 
     from redis.asyncio import Redis
-    from sqlalchemy import select
 
-    from app.config import Settings
+    from app.config import get_settings
     from app.dependencies import async_session
-    from app.models.engine_run import EngineRun
-    from app.models.project import Project
     from app.services.ai_key import AIKeyService
     from app.services.parse_runner import ParseRunnerService
 
-    settings = Settings()
+    settings = get_settings()
 
     async with async_session() as db:
-        # Resolve API key for parsing LLM calls
-        run_result = await db.execute(
-            select(EngineRun).where(EngineRun.id == uuid.UUID(input.run_id))
-        )
-        run = run_result.scalar_one()
-        project_result = await db.execute(
-            select(Project).where(Project.id == run.project_id)
-        )
-        project = project_result.scalar_one()
-
         key_service = AIKeyService(db)
-        # Try OpenAI key first (parse uses OpenAI function calling)
-        api_key = None
+        # Parse uses OpenAI-style API; allow OPENAI_API_KEY or OPENROUTER_API_KEY.
         base_url = "https://api.openai.com/v1/chat/completions"
-
-        exact_key = await key_service._find_active_key("openai", project.tenant_id)
-        if not exact_key:
-            exact_key = await key_service._find_active_key("openai", None)
-        if exact_key:
-            api_key = key_service._decrypt_and_mark(exact_key)
-        else:
-            # Fall back to OpenRouter
-            or_key = await key_service._find_active_key("openrouter", project.tenant_id)
-            if not or_key:
-                or_key = await key_service._find_active_key("openrouter", None)
-            if or_key:
-                api_key = key_service._decrypt_and_mark(or_key)
-                base_url = "https://openrouter.ai/api/v1/chat/completions"
+        api_key, used_openrouter = key_service.resolve_key_meta("openai")
+        if api_key and used_openrouter:
+            base_url = "https://openrouter.ai/api/v1/chat/completions"
 
         redis = Redis.from_url(settings.redis_url, decode_responses=True)
         try:

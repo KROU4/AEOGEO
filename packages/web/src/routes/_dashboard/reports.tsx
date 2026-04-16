@@ -35,6 +35,7 @@ import { AvopPageHeader } from "@/components/avop";
 import { useReports, useDeleteReport, useDownloadReportPdf } from "@/hooks/use-reports";
 import { GenerateReportDialog } from "@/components/reports/generate-report-dialog";
 import { ReportShareDialog } from "@/components/reports/report-share-dialog";
+import { PlaceholderCard } from "@/components/layout/placeholder-card";
 import type { ReportSummary } from "@/types/report";
 import { useLocale } from "@/hooks/use-locale";
 import { formatDate } from "@/lib/format";
@@ -243,23 +244,19 @@ function ReportsPage() {
       )}
 
       {!isLoading && !error && reports.length === 0 && (
-        <Card className="border-dashed">
-          <CardContent className="flex flex-col items-center justify-center py-16">
-            <div className="w-14 h-14 rounded-full bg-muted flex items-center justify-center mb-4">
-              <FileBarChart className="w-6 h-6 text-muted-foreground" />
-            </div>
-            <h3 className="text-lg font-semibold text-foreground mb-1">
-              {t("emptyTitle")}
-            </h3>
-            <p className="text-sm text-muted-foreground mb-6 text-center max-w-sm">
-              {t("emptyDescription")}
-            </p>
+        <div className="space-y-4">
+          <PlaceholderCard
+            icon={FileBarChart}
+            title={t("emptyTitle")}
+            description={t("emptyDescription")}
+          />
+          <div className="flex justify-center">
             <Button onClick={() => setDialogOpen(true)}>
               <Plus className="w-4 h-4" />
               {t("generateNew")}
             </Button>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       )}
 
       {/* Report cards */}

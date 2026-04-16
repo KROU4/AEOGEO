@@ -1,5 +1,5 @@
 import secrets
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from uuid import UUID
 
 from sqlalchemy import select
@@ -30,8 +30,14 @@ def _shareable_url(token: str | None) -> str | None:
 def _share_link_active(report: Report, now: datetime | None = None) -> bool:
     if not report.shareable_token or not report.expires_at:
         return False
-    current_time = now or datetime.utcnow()
-    return report.expires_at > current_time
+    exp = report.expires_at
+    cur = now if now is not None else datetime.now(UTC)
+    # SQLite/tests may return naive UTC; Postgres may return aware — compare safely.
+    if exp.tzinfo is None and cur.tzinfo is not None:
+        cur = cur.replace(tzinfo=None)
+    elif exp.tzinfo is not None and cur.tzinfo is None:
+        cur = cur.replace(tzinfo=UTC)
+    return exp > cur
 
 
 def _to_response(report: Report) -> ReportResponse:
@@ -123,9 +129,7 @@ class ReportService:
 
         return _to_response(report)
 
-    async def get_report(
-        self, report_id: UUID, tenant_id: UUID
-    ) -> Report | None:
+    async def get_report(self, report_id: UUID, tenant_id: UUID) -> Report | None:
         result = await self.db.execute(
             select(Report)
             .join(Project, Report.project_id == Project.id)
@@ -133,9 +137,7 @@ class ReportService:
         )
         return result.scalar_one_or_none()
 
-    async def delete_report(
-        self, report_id: UUID, tenant_id: UUID
-    ) -> bool:
+    async def delete_report(self, report_id: UUID, tenant_id: UUID) -> bool:
         report = await self.get_report(report_id, tenant_id)
         if report is None:
             return False
@@ -167,7 +169,7 @@ class ReportService:
             return None
 
         report.shareable_token = secrets.token_urlsafe(32)
-        report.expires_at = datetime.utcnow() + timedelta(days=expires_in_days)
+        report.expires_at = datetime.now(UTC) + timedelta(days=expires_in_days)
 
         await self.db.commit()
         await self.db.refresh(report)
@@ -177,9 +179,7 @@ class ReportService:
             expires_at=report.expires_at,
         )
 
-    async def get_shared_report(
-        self, share_token: str
-    ) -> PublicReportResponse | None:
+    async def get_shared_report(self, share_token: str) -> PublicReportResponse | None:
         result = await self.db.execute(
             select(Report).where(Report.shareable_token == share_token)
         )

@@ -20,6 +20,7 @@ import { Route as DashboardReportsRouteImport } from "./routes/_dashboard/report
 import { Route as DashboardProjectsRouteImport } from "./routes/_dashboard/projects"
 import { Route as DashboardPlatformsRouteImport } from "./routes/_dashboard/platforms"
 import { Route as DashboardOverviewRouteImport } from "./routes/_dashboard/overview"
+import { Route as DashboardOnboardingRouteImport } from "./routes/_dashboard/onboarding"
 import { Route as DashboardCompetitorsRouteImport } from "./routes/_dashboard/competitors"
 import { Route as DashboardCitationsRouteImport } from "./routes/_dashboard/citations"
 import { Route as DashboardAssistantRouteImport } from "./routes/_dashboard/assistant"
@@ -88,6 +89,11 @@ const DashboardPlatformsRoute = DashboardPlatformsRouteImport.update({
 const DashboardOverviewRoute = DashboardOverviewRouteImport.update({
   id: "/overview",
   path: "/overview",
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardOnboardingRoute = DashboardOnboardingRouteImport.update({
+  id: "/onboarding",
+  path: "/onboarding",
   getParentRoute: () => DashboardRoute,
 } as any)
 const DashboardCompetitorsRoute = DashboardCompetitorsRouteImport.update({
@@ -193,6 +199,7 @@ export interface FileRoutesByFullPath {
   "/assistant": typeof DashboardAssistantRoute
   "/citations": typeof DashboardCitationsRoute
   "/competitors": typeof DashboardCompetitorsRoute
+  "/onboarding": typeof DashboardOnboardingRoute
   "/overview": typeof DashboardOverviewRoute
   "/platforms": typeof DashboardPlatformsRoute
   "/projects": typeof DashboardProjectsRouteWithChildren
@@ -220,6 +227,7 @@ export interface FileRoutesByTo {
   "/assistant": typeof DashboardAssistantRoute
   "/citations": typeof DashboardCitationsRoute
   "/competitors": typeof DashboardCompetitorsRoute
+  "/onboarding": typeof DashboardOnboardingRoute
   "/overview": typeof DashboardOverviewRoute
   "/platforms": typeof DashboardPlatformsRoute
   "/projects": typeof DashboardProjectsRouteWithChildren
@@ -251,6 +259,7 @@ export interface FileRoutesById {
   "/_dashboard/assistant": typeof DashboardAssistantRoute
   "/_dashboard/citations": typeof DashboardCitationsRoute
   "/_dashboard/competitors": typeof DashboardCompetitorsRoute
+  "/_dashboard/onboarding": typeof DashboardOnboardingRoute
   "/_dashboard/overview": typeof DashboardOverviewRoute
   "/_dashboard/platforms": typeof DashboardPlatformsRoute
   "/_dashboard/projects": typeof DashboardProjectsRouteWithChildren
@@ -280,6 +289,7 @@ export interface FileRouteTypes {
     | "/assistant"
     | "/citations"
     | "/competitors"
+    | "/onboarding"
     | "/overview"
     | "/platforms"
     | "/projects"
@@ -307,6 +317,7 @@ export interface FileRouteTypes {
     | "/assistant"
     | "/citations"
     | "/competitors"
+    | "/onboarding"
     | "/overview"
     | "/platforms"
     | "/projects"
@@ -337,6 +348,7 @@ export interface FileRouteTypes {
     | "/_dashboard/assistant"
     | "/_dashboard/citations"
     | "/_dashboard/competitors"
+    | "/_dashboard/onboarding"
     | "/_dashboard/overview"
     | "/_dashboard/platforms"
     | "/_dashboard/projects"
@@ -439,6 +451,13 @@ declare module "@tanstack/react-router" {
       path: "/overview"
       fullPath: "/overview"
       preLoaderRoute: typeof DashboardOverviewRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    "/_dashboard/onboarding": {
+      id: "/_dashboard/onboarding"
+      path: "/onboarding"
+      fullPath: "/onboarding"
+      preLoaderRoute: typeof DashboardOnboardingRouteImport
       parentRoute: typeof DashboardRoute
     }
     "/_dashboard/competitors": {
@@ -632,6 +651,7 @@ interface DashboardRouteChildren {
   DashboardAssistantRoute: typeof DashboardAssistantRoute
   DashboardCitationsRoute: typeof DashboardCitationsRoute
   DashboardCompetitorsRoute: typeof DashboardCompetitorsRoute
+  DashboardOnboardingRoute: typeof DashboardOnboardingRoute
   DashboardOverviewRoute: typeof DashboardOverviewRoute
   DashboardPlatformsRoute: typeof DashboardPlatformsRoute
   DashboardProjectsRoute: typeof DashboardProjectsRouteWithChildren
@@ -645,6 +665,7 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardAssistantRoute: DashboardAssistantRoute,
   DashboardCitationsRoute: DashboardCitationsRoute,
   DashboardCompetitorsRoute: DashboardCompetitorsRoute,
+  DashboardOnboardingRoute: DashboardOnboardingRoute,
   DashboardOverviewRoute: DashboardOverviewRoute,
   DashboardPlatformsRoute: DashboardPlatformsRoute,
   DashboardProjectsRoute: DashboardProjectsRouteWithChildren,

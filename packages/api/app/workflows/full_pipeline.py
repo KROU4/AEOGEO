@@ -2,8 +2,8 @@
 
 Orchestrates the complete measurement cycle by chaining child workflows:
   1. RunEngineWorkflow  -- query engines, save raw answers
-  2. ParseAnswersWorkflow -- extract mentions, citations, sentiment (future)
-  3. ScoreRunWorkflow -- compute visibility scores (future)
+  2. ParseAnswersWorkflow -- extract mentions, citations, sentiment
+  3. ScoreRunWorkflow -- compute visibility scores
 
 This is the top-level workflow that API endpoints trigger to start a run.
 """
@@ -28,6 +28,7 @@ with workflow.unsafe.imports_passed_through():
         update_run_status_activity,
     )
     from app.workflows.score_run import ScoreInput, ScoreResult
+    from app.workflows.activities import dispatch_run_completed_event_activity
 
 logger = logging.getLogger(__name__)
 
@@ -194,6 +195,21 @@ class FullPipelineWorkflow:
             overall,
             len(stages),
         )
+
+        if overall in {"completed", "partial"}:
+            try:
+                await workflow.execute_activity(
+                    dispatch_run_completed_event_activity,
+                    run_id,
+                    start_to_close_timeout=timedelta(seconds=30),
+                    retry_policy=RetryPolicy(maximum_attempts=1),
+                )
+            except Exception as exc:
+                workflow.logger.warning(
+                    "Failed to dispatch run completion integration event for run %s: %s",
+                    run_id,
+                    exc,
+                )
 
         return PipelineResult(
             run_id=run_id,

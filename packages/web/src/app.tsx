@@ -7,6 +7,8 @@ import { RouterProvider, createRouter } from "@tanstack/react-router";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
 import { setAccessTokenProvider, clearTokenCache } from "@/lib/auth";
+import { isAuthBypassed } from "@/lib/session-auth";
+import { initTolt } from "@/lib/tolt";
 import { routeTree } from "./routeTree.gen";
 import { createQueryClient } from "./lib/query-client";
 
@@ -19,6 +21,7 @@ declare module "@tanstack/react-router" {
 }
 
 const clerkPublishableKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || "";
+const authBypassEnabled = isAuthBypassed();
 
 function ClerkSessionBridge() {
   const queryClient = useQueryClient();
@@ -65,7 +68,21 @@ const persister = createSyncStoragePersister({
 export function App() {
   const [queryClient] = useState(() => createQueryClient());
 
-  if (!clerkPublishableKey) {
+  useEffect(() => {
+    if (!authBypassEnabled) {
+      return;
+    }
+    setAccessTokenProvider(async () => "e2e-token");
+    return () => {
+      setAccessTokenProvider(null);
+    };
+  }, []);
+
+  useEffect(() => {
+    initTolt();
+  }, []);
+
+  if (!authBypassEnabled && !clerkPublishableKey) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background p-6 text-center">
         <div className="max-w-md space-y-2">
@@ -77,6 +94,20 @@ export function App() {
           </p>
         </div>
       </div>
+    );
+  }
+
+  if (authBypassEnabled) {
+    return (
+      <PersistQueryClientProvider
+        client={queryClient}
+        persistOptions={{ persister, maxAge: 5 * 60 * 1000 }}
+      >
+        <TooltipProvider>
+          <RouterProvider router={router} />
+          <Toaster />
+        </TooltipProvider>
+      </PersistQueryClientProvider>
     );
   }
 

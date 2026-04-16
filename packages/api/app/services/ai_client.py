@@ -16,7 +16,7 @@ from redis.asyncio import Redis
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.config import Settings
+from app.config import get_settings
 from app.models.tenant_quota import TenantQuota
 from app.services.ai_key import AIKeyService
 from app.services.ai_usage import AIUsageService
@@ -94,7 +94,7 @@ class AIClient:
         self.key_service = AIKeyService(db)
         self.usage_service = AIUsageService(db)
         self.rate_limiter = RateLimiter(redis)
-        self.settings = Settings()
+        self.settings = get_settings()
 
     async def complete(
         self,
@@ -113,19 +113,11 @@ class AIClient:
                 raise UsageLimitError("Usage limit reached. Contact your administrator.")
             raise RateLimitError("Too many requests. Please try again shortly.")
 
-        # 2. Resolve API key (with fallback logic)
-        api_key = await self.key_service.resolve_key(provider, self.tenant_id)
-        using_openrouter = False
+        # 2. Resolve API key from environment (native provider or OpenRouter fallback)
+        api_key, using_openrouter = self.key_service.resolve_key_meta(provider)
 
         if api_key is None:
             raise NoAPIKeyError(f"No API key configured for {provider}")
-
-        # Detect if we fell back to OpenRouter
-        native_key = await self.key_service._find_active_key(provider, self.tenant_id)
-        if native_key is None:
-            native_key = await self.key_service._find_active_key(provider, None)
-        if native_key is None and provider != "openrouter":
-            using_openrouter = True
 
         # 3. Make the actual API call
         start_time = time.monotonic()

@@ -2,12 +2,11 @@ from datetime import datetime, timedelta, timezone
 
 from jose import JWTError, jwt
 
-from app.config import Settings
-
-settings = Settings()
+from app.config import get_settings
 
 
 def create_access_token(data: dict) -> str:
+    settings = get_settings()
     to_encode = data.copy()
     expire = datetime.now(timezone.utc) + timedelta(
         minutes=settings.access_token_expire_minutes
@@ -17,6 +16,7 @@ def create_access_token(data: dict) -> str:
 
 
 def create_refresh_token(data: dict) -> str:
+    settings = get_settings()
     to_encode = data.copy()
     expire = datetime.now(timezone.utc) + timedelta(
         days=settings.refresh_token_expire_days
@@ -26,6 +26,7 @@ def create_refresh_token(data: dict) -> str:
 
 
 def decode_token(token: str) -> dict | None:
+    settings = get_settings()
     try:
         payload = jwt.decode(
             token, settings.secret_key, algorithms=[settings.algorithm]

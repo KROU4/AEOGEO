@@ -1,18 +1,19 @@
 """AI provider key service — CRUD and key resolution with fallback logic."""
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from app.config import get_settings
 from app.models.ai_provider_key import AIProviderKey
 from app.utils.encryption import decrypt_value, encrypt_value
 
 
 def _utcnow_naive() -> datetime:
-    return datetime.now(timezone.utc).replace(tzinfo=None)
+    return datetime.now(UTC).replace(tzinfo=None)
 
 
 class AIKeyService:
@@ -80,31 +81,37 @@ class AIKeyService:
         await self.db.flush()
         return key
 
+    @staticmethod
+    def _plain_from_env(provider: str) -> str | None:
+        """Return trimmed API key from process environment (Settings), or None."""
+        s = get_settings()
+        by_provider = {
+            "openai": s.openai_api_key,
+            "openrouter": s.openrouter_api_key,
+            "anthropic": s.anthropic_api_key,
+            "google": s.google_api_key,
+        }
+        raw = (by_provider.get(provider) or "").strip()
+        return raw or None
+
+    def resolve_key_meta(self, provider: str) -> tuple[str | None, bool]:
+        """Resolve key from env only. Returns (api_key, used_openrouter_fallback)."""
+        native = self._plain_from_env(provider)
+        if native:
+            return (native, False)
+        if provider == "openrouter":
+            return (None, False)
+        or_key = self._plain_from_env("openrouter")
+        if or_key:
+            return (or_key, True)
+        return (None, False)
+
     async def resolve_key(
-        self, provider: str, tenant_id: uuid.UUID
+        self, provider: str, _tenant_id: uuid.UUID
     ) -> str | None:
-        """Resolve API key with fallback: tenant key → global key → OpenRouter fallback."""
-        # 1. Tenant-specific key for this provider
-        key = await self._find_active_key(provider, tenant_id)
-        if key:
-            return self._decrypt_and_mark(key)
-
-        # 2. Global key for this provider
-        key = await self._find_active_key(provider, None)
-        if key:
-            return self._decrypt_and_mark(key)
-
-        # 3. OpenRouter fallback (if not already requesting openrouter)
-        if provider != "openrouter":
-            key = await self._find_active_key("openrouter", tenant_id)
-            if key:
-                return self._decrypt_and_mark(key)
-
-            key = await self._find_active_key("openrouter", None)
-            if key:
-                return self._decrypt_and_mark(key)
-
-        return None
+        """Env key for provider, else OpenRouter fallback."""
+        key, _ = self.resolve_key_meta(provider)
+        return key
 
     async def _find_active_key(
         self, provider: str, tenant_id: uuid.UUID | None

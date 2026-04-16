@@ -35,6 +35,7 @@ class Project(UUIDMixin, TimestampMixin, Base):
     recommendations: Mapped[list["Recommendation"]] = relationship(  # noqa: F821
         back_populates="project"
     )
+    content_push_events: Mapped[list["ContentPushEvent"]] = relationship()  # noqa: F821
 
     def __repr__(self) -> str:
         return f"<Project {self.name!r}>"

@@ -1,16 +1,20 @@
 """Site GEO audit router — start, list, and retrieve audits per project."""
+
 from __future__ import annotations
 
 import logging
-import os
+from datetime import datetime, timezone
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import Response, StreamingResponse
+from pydantic import HttpUrl, TypeAdapter, ValidationError
+from redis.asyncio import Redis
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.dependencies import get_current_user, get_db
+from app.config import get_settings
+from app.dependencies import get_current_user, get_db, get_redis
 from app.models.brand import Brand
 from app.models.project import Project
 from app.models.site_audit import SiteAudit
@@ -20,10 +24,13 @@ from app.schemas.site_audit import (
     SiteAuditResponse,
     SiteAuditStartRequest,
 )
+from app.utils.rate_limit import enforce_rate_limit
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/projects/{project_id}/site-audit", tags=["site-audit"])
+_SITE_AUDIT_TRIGGER_LIMIT = 10
+_SITE_AUDIT_WINDOW_SEC = 3600
 
 
 # ---------------------------------------------------------------------------
@@ -71,8 +78,7 @@ async def _start_site_audit_workflow(audit_id: UUID, url: str) -> str:
     """Start a Temporal SiteAuditWorkflow and return its workflow ID."""
     from temporalio.client import Client as TemporalClient
 
-    temporal_host = os.getenv("TEMPORAL_HOST", "temporal:7233")
-    temporal_client = await TemporalClient.connect(temporal_host)
+    temporal_client = await TemporalClient.connect(get_settings().temporal_host)
     workflow_id = f"site-audit-{audit_id}"
     await temporal_client.start_workflow(
         "SiteAuditWorkflow",
@@ -81,6 +87,30 @@ async def _start_site_audit_workflow(audit_id: UUID, url: str) -> str:
         task_queue="aeogeo-pipeline",
     )
     return workflow_id
+
+
+async def _enforce_site_audit_rate(redis: Redis, tenant_id: UUID) -> None:
+    await enforce_rate_limit(
+        redis,
+        key=f"site_audit:trigger:{tenant_id}",
+        limit=_SITE_AUDIT_TRIGGER_LIMIT,
+        window_sec=_SITE_AUDIT_WINDOW_SEC,
+        error_code="site_audit.rate_limited",
+        message="Too many site audit launches. Try again later.",
+    )
+
+
+def _normalize_site_audit_url(url: str) -> str:
+    try:
+        return str(TypeAdapter(HttpUrl).validate_python(url))
+    except ValidationError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={
+                "code": "site_audit.invalid_url",
+                "message": "Invalid or unsupported URL.",
+            },
+        ) from exc
 
 
 # ---------------------------------------------------------------------------
@@ -93,15 +123,15 @@ async def start_site_audit(
     project_id: UUID,
     body: SiteAuditStartRequest,
     db: AsyncSession = Depends(get_db),
+    redis: Redis = Depends(get_redis),
     user: User = Depends(get_current_user),
 ) -> SiteAuditResponse:
     await _verify_project(project_id, user.tenant_id, db)
+    await _enforce_site_audit_rate(redis, user.tenant_id)
 
-    url = body.url
+    url: str | None = str(body.url) if body.url else None
     if not url:
-        brand = await db.scalar(
-            select(Brand).where(Brand.project_id == project_id)
-        )
+        brand = await db.scalar(select(Brand).where(Brand.project_id == project_id))
         url = brand.website if brand else None
 
     if not url:
@@ -110,11 +140,15 @@ async def start_site_audit(
             detail="No URL provided and no brand website configured for this project.",
         )
 
+    url = _normalize_site_audit_url(url)
+
+    started_at = datetime.now(timezone.utc)
     audit = SiteAudit(
         project_id=project_id,
         url=url,
         status="pending",
         overall_geo_score=0,
+        started_at=started_at,
     )
     db.add(audit)
     await db.flush()

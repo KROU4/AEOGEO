@@ -12,7 +12,7 @@ import logging
 import os
 import uuid
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import UTC, datetime
 
 import httpx
 from redis.asyncio import Redis
@@ -56,7 +56,7 @@ Given the text of an AI engine's response to a user query, identify:
 2. **Citations** — Any URLs or source references cited in the answer. For each:
    - source_url: the full URL
    - source_title: descriptive title if available, otherwise infer from URL
-   - is_client_source: false (the caller will reconcile this later)
+   - is_client_source: false unless the answer explicitly cites the client's domain
 
 Call the `extract_entities` function with your findings. If the answer contains
 no identifiable mentions or citations, call the function with empty arrays.
@@ -178,7 +178,7 @@ class ParseRunnerService:
             logger.warning("Answer %s has empty raw_response, skipping", answer_id)
             answer.parse_status = "completed"
             answer.parse_error = None
-            answer.parsed_at = datetime.utcnow()
+            answer.parsed_at = datetime.now(UTC)
             answer.score_status = "pending"
             answer.score_error = None
             answer.scored_at = None
@@ -290,7 +290,7 @@ class ParseRunnerService:
             for answer in empty_answers:
                 answer.parse_status = "completed"
                 answer.parse_error = None
-                answer.parsed_at = datetime.utcnow()
+                answer.parsed_at = datetime.now(UTC)
                 answer.score_status = "pending"
                 answer.score_error = None
                 answer.scored_at = None
@@ -322,7 +322,7 @@ class ParseRunnerService:
                     errors += 1
 
                 if run is not None:
-                    run.parse_completed = parsed + skipped
+                    run.parse_completed = parsed
                 await self.db.flush()
 
         await self.db.commit()
@@ -480,7 +480,7 @@ class ParseRunnerService:
 
         answer.parse_status = "completed"
         answer.parse_error = None
-        answer.parsed_at = datetime.utcnow()
+        answer.parsed_at = datetime.now(UTC)
         answer.score_status = "pending"
         answer.score_error = None
         answer.scored_at = None

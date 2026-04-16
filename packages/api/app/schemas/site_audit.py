@@ -5,7 +5,7 @@ import uuid
 from datetime import datetime
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, HttpUrl
 
 
 class SiteAuditStartRequest(BaseModel):
@@ -14,7 +14,7 @@ class SiteAuditStartRequest(BaseModel):
     If ``url`` is omitted, the project's brand website is used.
     """
 
-    url: str | None = None
+    url: HttpUrl | None = None
 
 
 class SiteAuditResponse(BaseModel):
@@ -28,6 +28,7 @@ class SiteAuditResponse(BaseModel):
     error_message: str | None = None
     temporal_workflow_id: str | None = None
     result_json: dict[str, Any] | None = None
+    started_at: datetime | None = None
     created_at: datetime
 
 

@@ -11,7 +11,7 @@ from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.config import Settings
+from app.config import Settings, get_settings
 from app.models.project import Project, ProjectMember
 from app.models.public_audit import PublicAudit
 from app.models.role import Permission, Role, RolePermission, UserRole
@@ -68,7 +68,7 @@ DEFAULT_ROLE_PERMISSIONS = {
 class AuthService:
     def __init__(self, db: AsyncSession, settings: Settings | None = None):
         self.db = db
-        self.settings = settings or Settings()
+        self.settings = settings or get_settings()
         self.clerk = ClerkService(self.settings)
 
     async def get_user_by_id(self, user_id: UUID | str) -> User | None:

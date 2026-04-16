@@ -2,9 +2,10 @@
 from __future__ import annotations
 
 import uuid
+from datetime import datetime
 from typing import TYPE_CHECKING, Any
 
-from sqlalchemy import JSON, ForeignKey, Numeric, String, Text
+from sqlalchemy import JSON, DateTime, ForeignKey, Numeric, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .base import Base, TimestampMixin, UUIDMixin
@@ -27,6 +28,11 @@ class SiteAudit(UUIDMixin, TimestampMixin, Base):
     )
     # status: pending | running | completed | failed
     status: Mapped[str] = mapped_column(String(32), nullable=False, default="pending")
+    # Wall-clock start for this audit run (set when the record is created / workflow triggered).
+    started_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+    )
     error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
     temporal_workflow_id: Mapped[str | None] = mapped_column(
         String(256), nullable=True

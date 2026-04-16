@@ -1,13 +1,13 @@
-import { useAuth } from "@clerk/react";
 import { createFileRoute, Navigate } from "@tanstack/react-router";
 import { AvopLanding } from "@/components/marketing/avop-landing";
+import { useSessionAuth } from "@/lib/session-auth";
 
 export const Route = createFileRoute("/")({
   component: HomePage,
 });
 
 function HomePage() {
-  const { isLoaded, isSignedIn } = useAuth();
+  const { isLoaded, isSignedIn } = useSessionAuth();
 
   if (!isLoaded) {
     return (
@@ -18,7 +18,7 @@ function HomePage() {
   }
 
   if (isSignedIn) {
-    return <Navigate to="/overview" />;
+    return <Navigate to="/projects" />;
   }
 
   return <AvopLanding />;

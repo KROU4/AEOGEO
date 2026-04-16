@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useBootstrap, useCurrentUser } from "@/hooks/use-auth";
 import { ApiError } from "@/lib/api-client";
+import { trackReferralSignup } from "@/lib/tolt";
 
 export const Route = createFileRoute("/_auth/complete-signup")({
   component: CompleteSignupPage,
@@ -58,6 +59,9 @@ function CompleteSignupPage() {
       { name: user?.fullName ?? undefined },
       {
         onSuccess: () => {
+          if (email) {
+            void trackReferralSignup(email).catch(() => {});
+          }
           void router.navigate({ to: "/overview" });
         },
         onError: (err) => {
@@ -125,6 +129,9 @@ function CompleteSignupPage() {
       },
       {
         onSuccess: () => {
+          if (email) {
+            void trackReferralSignup(email).catch(() => {});
+          }
           void router.navigate({ to: "/overview" });
         },
         onError: (err) => {

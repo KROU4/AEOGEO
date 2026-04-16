@@ -16,6 +16,7 @@ from app.dependencies import get_db, get_redis
 from app.models.public_audit import PublicAudit
 from app.schemas.audit import QuickAuditEmailBody, QuickAuditRequest
 from app.utils.client_ip import get_client_ip
+from app.utils.rate_limit import enforce_rate_limit
 
 router = APIRouter(prefix="/audit", tags=["audit"])
 
@@ -28,18 +29,14 @@ def _ip_hash(ip: str) -> str:
 
 
 async def _enforce_quick_audit_rate(redis: Redis, ip_h: str) -> None:
-    key = f"audit:quick:{ip_h}"
-    count = await redis.incr(key)
-    if count == 1:
-        await redis.expire(key, _QUICK_AUDIT_WINDOW_SEC)
-    if count > _QUICK_AUDIT_LIMIT:
-        raise HTTPException(
-            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-            detail={
-                "code": "audit.rate_limited",
-                "message": "Too many quick audits. Try again later.",
-            },
-        )
+    await enforce_rate_limit(
+        redis,
+        key=f"audit:quick:{ip_h}",
+        limit=_QUICK_AUDIT_LIMIT,
+        window_sec=_QUICK_AUDIT_WINDOW_SEC,
+        error_code="audit.rate_limited",
+        message="Too many quick audits. Try again later.",
+    )
 
 
 @router.post("/quick", response_model=QuickAuditResult)
@@ -80,11 +77,18 @@ async def quick_audit(
 
 @router.patch("/quick/{audit_id}/email")
 async def patch_quick_audit_email(
+    request: Request,
     audit_id: UUID,
     body: QuickAuditEmailBody,
     db: AsyncSession = Depends(get_db),
 ) -> dict[str, str]:
-    result = await db.execute(select(PublicAudit).where(PublicAudit.id == audit_id))
+    ip_h = _ip_hash(get_client_ip(request))
+    result = await db.execute(
+        select(PublicAudit).where(
+            PublicAudit.id == audit_id,
+            PublicAudit.ip_hash == ip_h,
+        )
+    )
     row = result.scalar_one_or_none()
     if row is None:
         raise HTTPException(status_code=404, detail="Audit not found")

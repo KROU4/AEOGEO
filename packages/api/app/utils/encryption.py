@@ -2,7 +2,7 @@
 
 from cryptography.fernet import Fernet
 
-from app.config import Settings
+from app.config import get_settings
 
 _fernet: Fernet | None = None
 
@@ -10,7 +10,7 @@ _fernet: Fernet | None = None
 def _get_fernet() -> Fernet:
     global _fernet
     if _fernet is None:
-        settings = Settings()
+        settings = get_settings()
         if not settings.encryption_key:
             raise RuntimeError(
                 "ENCRYPTION_KEY is not set. "

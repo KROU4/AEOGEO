@@ -1,4 +1,4 @@
-import { getAccessToken } from "@/lib/auth";
+import { clearTokenCache, getAccessToken } from "@/lib/auth";
 
 const BASE_URL = import.meta.env.VITE_API_URL || "";
 const API_PREFIX = "/api/v1";
@@ -15,7 +15,8 @@ export class ApiError extends Error {
   }
 }
 
-async function getAuthHeaders(): Promise<HeadersInit> {
+/** JSON request bodies — POST / PUT / PATCH. */
+async function getAuthHeadersJson(): Promise<HeadersInit> {
   const headers: HeadersInit = {
     "Content-Type": "application/json",
   };
@@ -28,14 +29,19 @@ async function getAuthHeaders(): Promise<HeadersInit> {
   return headers;
 }
 
-/** Authorization only (e.g. binary downloads — avoid JSON Content-Type on GET). */
-async function getAuthHeadersBinary(): Promise<HeadersInit> {
+/** Bearer only — GET / DELETE (no body; avoid Content-Type on GET per HTTP semantics). */
+async function getAuthHeadersAuthOnly(): Promise<HeadersInit> {
   const headers: HeadersInit = {};
   const token = await getAccessToken();
   if (token) {
     headers["Authorization"] = `Bearer ${token}`;
   }
   return headers;
+}
+
+/** Authorization only (e.g. binary downloads — avoid JSON Content-Type on GET). */
+async function getAuthHeadersBinary(): Promise<HeadersInit> {
+  return getAuthHeadersAuthOnly();
 }
 
 function buildUrl(path: string): string {
@@ -81,10 +87,17 @@ async function handleResponse<T>(
 }
 
 export async function apiGet<T>(path: string): Promise<T> {
-  const response = await fetch(buildUrl(path), {
+  let response = await fetch(buildUrl(path), {
     method: "GET",
-    headers: await getAuthHeaders(),
+    headers: await getAuthHeadersAuthOnly(),
   });
+  if (response.status === 401) {
+    clearTokenCache();
+    response = await fetch(buildUrl(path), {
+      method: "GET",
+      headers: await getAuthHeadersAuthOnly(),
+    });
+  }
   return handleResponse<T>(response);
 }
 
@@ -152,7 +165,7 @@ export async function apiPatchPublic<T>(path: string, body?: unknown): Promise<T
 export async function apiPost<T>(path: string, body?: unknown): Promise<T> {
   const response = await fetch(buildUrl(path), {
     method: "POST",
-    headers: await getAuthHeaders(),
+    headers: await getAuthHeadersJson(),
     body: body ? JSON.stringify(body) : undefined,
   });
   return handleResponse<T>(response);
@@ -161,7 +174,7 @@ export async function apiPost<T>(path: string, body?: unknown): Promise<T> {
 export async function apiPut<T>(path: string, body?: unknown): Promise<T> {
   const response = await fetch(buildUrl(path), {
     method: "PUT",
-    headers: await getAuthHeaders(),
+    headers: await getAuthHeadersJson(),
     body: body ? JSON.stringify(body) : undefined,
   });
   return handleResponse<T>(response);
@@ -170,7 +183,7 @@ export async function apiPut<T>(path: string, body?: unknown): Promise<T> {
 export async function apiPatch<T>(path: string, body?: unknown): Promise<T> {
   const response = await fetch(buildUrl(path), {
     method: "PATCH",
-    headers: await getAuthHeaders(),
+    headers: await getAuthHeadersJson(),
     body: body ? JSON.stringify(body) : undefined,
   });
   return handleResponse<T>(response);
@@ -179,7 +192,7 @@ export async function apiPatch<T>(path: string, body?: unknown): Promise<T> {
 export async function apiDelete<T>(path: string): Promise<T> {
   const response = await fetch(buildUrl(path), {
     method: "DELETE",
-    headers: await getAuthHeaders(),
+    headers: await getAuthHeadersAuthOnly(),
   });
   return handleResponse<T>(response);
 }
@@ -229,7 +242,7 @@ export async function apiSSE(
   onEvent: (event: SSEEvent) => void,
   signal?: AbortSignal,
 ): Promise<void> {
-  const headers = await getAuthHeaders();
+  const headers = await getAuthHeadersJson();
   const response = await fetch(buildUrl(path), {
     method: "POST",
     headers,

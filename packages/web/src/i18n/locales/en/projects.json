@@ -197,5 +197,27 @@
       "viewQueries": "Open Queries",
       "viewRuns": "Open Runs"
     }
+  },
+  "createFlow": {
+    "title": "New project",
+    "subtitle": "Enter a name and website. We will run a GEO site audit automatically.",
+    "websiteLabel": "Website URL",
+    "websitePlaceholder": "https://example.com",
+    "startAudit": "Create & start audit",
+    "starting": "Starting…",
+    "nameRequired": "Enter a project name.",
+    "invalidUrl": "Enter a valid website URL (e.g. example.com).",
+    "auditStarted": "GEO audit started.",
+    "createFailed": "Could not create the project or start the audit. Try again."
+  },
+  "siteAudit": {
+    "runningHint": "A full GEO audit usually takes about 10–25 minutes; large or slow sites can take longer. You can leave this page — we keep checking until it finishes.",
+    "runningFor": "Running for {{time}}",
+    "phasesNote": "Typical stages (order may vary).",
+    "phase0": "Crawl & technical SEO",
+    "phase1": "Structured data & schema",
+    "phase2": "Content quality (E-E-A-T)",
+    "phase3": "AI citability & platform readiness",
+    "phase4": "Scores & recommendations"
   }
 }

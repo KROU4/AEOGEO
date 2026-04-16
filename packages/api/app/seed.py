@@ -9,7 +9,7 @@ import asyncio
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
-from app.config import Settings
+from app.config import get_settings
 from app.models.engine import Engine
 from app.models.role import Permission, Role, RolePermission, UserRole
 from app.models.tenant import Tenant
@@ -20,7 +20,7 @@ from app.utils.security import hash_password
 # Import all models so Base.metadata knows about every table
 import app.models  # noqa: F401
 
-settings = Settings()
+settings = get_settings()
 
 PERMISSIONS = [
     ("dashboard", "view"),
@@ -45,14 +45,15 @@ ROLES = [
     ("Viewer", False),
 ]
 
-# (name, slug, provider, model_id, is_active, icon_url)
+# (name, slug, provider, model_name, is_active, icon_url, adapter_config)
 ENGINES = [
-    ("ChatGPT", "chatgpt", "openai", "gpt-4o", True, "https://cdn.aeogeo.com/icons/chatgpt.svg"),
-    ("Gemini", "gemini", "google", "gemini-2.5-flash", True, "https://cdn.aeogeo.com/icons/gemini.svg"),
-    ("Perplexity", "perplexity", "openrouter", "perplexity/sonar-pro", True, "https://cdn.aeogeo.com/icons/perplexity.svg"),
-    ("Google AI Overviews", "ai-overviews", "google", "scraper", True, "https://cdn.aeogeo.com/icons/ai-overviews.svg"),
-    ("Claude", "claude", "anthropic", "claude-sonnet-4", True, "https://cdn.aeogeo.com/icons/claude.svg"),
-    ("Copilot", "copilot", "openrouter", None, False, "https://cdn.aeogeo.com/icons/copilot.svg"),
+    ("ChatGPT", "chatgpt", "openai", "gpt-4o", True, "https://cdn.aeogeo.com/icons/chatgpt.svg", None),
+    ("Gemini", "gemini", "google", "gemini-2.5-flash", True, "https://cdn.aeogeo.com/icons/gemini.svg", None),
+    ("Perplexity", "perplexity", "openrouter", "perplexity/sonar-pro", True, "https://cdn.aeogeo.com/icons/perplexity.svg", None),
+    ("Google AI Overviews", "ai-overviews", "google", None, True, "https://cdn.aeogeo.com/icons/ai-overviews.svg", {"type": "scraper"}),
+    ("Claude", "claude", "anthropic", "claude-sonnet-4", True, "https://cdn.aeogeo.com/icons/claude.svg", None),
+    ("Copilot", "copilot", "openrouter", "openai/gpt-4o-mini", False, "https://cdn.aeogeo.com/icons/copilot.svg", None),
+    ("Meta AI", "meta-ai", "openrouter", "meta-llama/llama-4-maverick", True, "https://cdn.aeogeo.com/icons/meta-ai.svg", None),
 ]
 
 async def seed() -> None:
@@ -92,9 +93,24 @@ async def seed() -> None:
         await _get_or_create_tenant_quota(db, tenant.id)
 
         # --- AI Engines ---
-        for name, slug, provider, model_id, is_active, icon_url in ENGINES:
+        for (
+            name,
+            slug,
+            provider,
+            model_name,
+            is_active,
+            icon_url,
+            adapter_config,
+        ) in ENGINES:
             await _get_or_create_engine(
-                db, name, slug, provider, is_active, icon_url
+                db,
+                name,
+                slug,
+                provider,
+                model_name,
+                is_active,
+                icon_url,
+                adapter_config,
             )
 
         await db.commit()
@@ -226,8 +242,10 @@ async def _get_or_create_engine(
     name: str,
     slug: str,
     provider: str,
+    model_name: str | None,
     is_active: bool,
     icon_url: str | None,
+    adapter_config: dict | None,
 ) -> Engine:
     result = await db.execute(select(Engine).where(Engine.slug == slug))
     engine = result.scalar_one_or_none()
@@ -236,14 +254,33 @@ async def _get_or_create_engine(
             name=name,
             slug=slug,
             provider=provider,
+            model_name=model_name,
             is_active=is_active,
             icon_url=icon_url,
+            adapter_config=adapter_config,
         )
         db.add(engine)
         await db.flush()
         print(f"  Created engine: {name} ({provider})")
     else:
-        print(f"  Engine already exists: {name} ({provider})")
+        updated = False
+        if engine.model_name != model_name:
+            engine.model_name = model_name
+            updated = True
+        if engine.adapter_config != adapter_config:
+            engine.adapter_config = adapter_config
+            updated = True
+        if engine.icon_url != icon_url:
+            engine.icon_url = icon_url
+            updated = True
+        if engine.is_active != is_active:
+            engine.is_active = is_active
+            updated = True
+        if updated:
+            await db.flush()
+            print(f"  Updated engine: {name} ({provider})")
+        else:
+            print(f"  Engine already exists: {name} ({provider})")
     return engine
 
 

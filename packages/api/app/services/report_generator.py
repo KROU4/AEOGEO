@@ -9,7 +9,7 @@ Produces report types:
 from __future__ import annotations
 
 import logging
-from datetime import datetime
+from datetime import UTC, datetime
 from uuid import UUID
 
 from sqlalchemy import func, select
@@ -99,7 +99,7 @@ class ReportGeneratorService:
 
         data: dict = {
             "report_type": "visibility_audit",
-            "generated_at": datetime.utcnow().isoformat(),
+            "generated_at": datetime.now(UTC).isoformat(),
             "run_id": str(run.id) if run else None,
         }
 
@@ -214,7 +214,7 @@ class ReportGeneratorService:
 
         data: dict = {
             "report_type": "competitive_analysis",
-            "generated_at": datetime.utcnow().isoformat(),
+            "generated_at": datetime.now(UTC).isoformat(),
             "run_id": str(run.id) if run else None,
         }
 
@@ -347,7 +347,7 @@ class ReportGeneratorService:
 
         data: dict = {
             "report_type": "content_performance",
-            "generated_at": datetime.utcnow().isoformat(),
+            "generated_at": datetime.now(UTC).isoformat(),
             "published_content": [],
             "total_published": 0,
             "score_trends": trends,
@@ -357,7 +357,7 @@ class ReportGeneratorService:
             "content_type_breakdown": {},
         }
 
-        title = f"Content Performance Report — {datetime.utcnow().strftime('%b %d, %Y')}"
+        title = f"Content Performance Report — {datetime.now(UTC).strftime('%b %d, %Y')}"
 
         report = Report(
             title=title,

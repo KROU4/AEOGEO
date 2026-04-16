@@ -14,11 +14,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useCurrentUser } from "@/hooks/use-auth";
-import {
-  analyticsNavItems,
-  intelligenceNavItems,
-  systemNavItems,
-} from "@/lib/constants";
+import { projectsNavItems, systemNavItems } from "@/lib/constants";
 
 export function AppSidebar() {
   const location = useLocation();
@@ -35,7 +31,7 @@ export function AppSidebar() {
   return (
     <Sidebar className="!border-r-0 px-2 py-6">
       <SidebarHeader className="mb-8 px-2 pt-2">
-        <Link to="/overview" className="flex flex-col gap-1">
+        <Link to="/projects" className="flex flex-col gap-1">
           <span
             className="text-xl font-bold leading-tight text-sidebar-foreground dark:text-white"
             style={{ fontFamily: "var(--font-avop-display, var(--font-sans))" }}
@@ -50,29 +46,9 @@ export function AppSidebar() {
 
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>{t("navGroups.analytics")}</SidebarGroupLabel>
+          <SidebarGroupLabel>{t("navGroups.projects")}</SidebarGroupLabel>
           <SidebarMenu>
-            {analyticsNavItems.map((item) => (
-              <SidebarMenuItem key={item.href}>
-                <SidebarMenuButton
-                  asChild
-                  isActive={location.pathname.startsWith(item.href)}
-                  tooltip={t(item.labelKey)}
-                >
-                  <Link to={item.href}>
-                    <item.icon />
-                    <span>{t(item.labelKey)}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
-          </SidebarMenu>
-        </SidebarGroup>
-
-        <SidebarGroup>
-          <SidebarGroupLabel>{t("navGroups.intelligence")}</SidebarGroupLabel>
-          <SidebarMenu>
-            {intelligenceNavItems.map((item) => (
+            {projectsNavItems.map((item) => (
               <SidebarMenuItem key={item.href}>
                 <SidebarMenuButton
                   asChild
@@ -115,11 +91,11 @@ export function AppSidebar() {
           <Avatar size="sm">
             <AvatarFallback>{initials}</AvatarFallback>
           </Avatar>
-          <div className="flex flex-col min-w-0">
-            <span className="text-sm font-medium text-sidebar-foreground truncate">
+          <div className="flex min-w-0 flex-col">
+            <span className="truncate text-sm font-medium text-sidebar-foreground">
               {user?.name || "User"}
             </span>
-            <span className="text-xs text-muted-foreground truncate">
+            <span className="truncate text-xs text-muted-foreground">
               {user?.email || "user@example.com"}
             </span>
           </div>

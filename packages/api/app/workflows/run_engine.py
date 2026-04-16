@@ -12,7 +12,7 @@ from __future__ import annotations
 import asyncio
 import logging
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from uuid import UUID
 
 from temporalio import activity, workflow
@@ -20,14 +20,16 @@ from temporalio.common import RetryPolicy
 
 with workflow.unsafe.imports_passed_through():
     from sqlalchemy import delete, select
-    from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+    from sqlalchemy.ext.asyncio import (
+        AsyncSession,
+        async_sessionmaker,
+        create_async_engine,
+    )
     from sqlalchemy.orm import selectinload
 
-    from app.config import Settings
+    from app.config import get_settings
     from app.models.answer import Answer
-    from app.models.engine import Engine
     from app.models.engine_run import EngineRun
-    from app.models.project import Project
     from app.models.query import Query
     from app.services.ai_key import AIKeyService
     from app.services.engine_connector import get_connector
@@ -126,7 +128,7 @@ class ExecuteQueryResult:
 
 def _make_session_factory() -> async_sessionmaker[AsyncSession]:
     """Create a standalone session factory for activities (not request-scoped)."""
-    settings = Settings()
+    settings = get_settings()
     engine = create_async_engine(settings.database_url, echo=False)
     return async_sessionmaker(engine, expire_on_commit=False)
 
@@ -142,8 +144,8 @@ async def update_run_status_activity(input: UpdateStatusInput) -> None:
     factory = _make_session_factory()
     async with factory() as session:
         svc = EngineRunnerService(session)
-        started_at = datetime.utcnow() if input.set_started else None
-        completed_at = datetime.utcnow() if input.set_completed else None
+        started_at = datetime.now(UTC) if input.set_started else None
+        completed_at = datetime.now(UTC) if input.set_completed else None
         await svc.update_run_status(
             run_id=UUID(input.run_id),
             started_at=started_at,
@@ -157,12 +159,12 @@ async def update_run_status_activity(input: UpdateStatusInput) -> None:
             answers_completed=input.answers_completed,
             parse_completed=input.parse_completed,
             score_completed=input.score_completed,
-            engine_started_at=datetime.utcnow() if input.set_engine_started else None,
-            engine_completed_at=datetime.utcnow() if input.set_engine_completed else None,
-            parse_started_at=datetime.utcnow() if input.set_parse_started else None,
-            parse_completed_at=datetime.utcnow() if input.set_parse_completed else None,
-            score_started_at=datetime.utcnow() if input.set_score_started else None,
-            score_completed_at=datetime.utcnow() if input.set_score_completed else None,
+            engine_started_at=datetime.now(UTC) if input.set_engine_started else None,
+            engine_completed_at=datetime.now(UTC) if input.set_engine_completed else None,
+            parse_started_at=datetime.now(UTC) if input.set_parse_started else None,
+            parse_completed_at=datetime.now(UTC) if input.set_parse_completed else None,
+            score_started_at=datetime.now(UTC) if input.set_score_started else None,
+            score_completed_at=datetime.now(UTC) if input.set_score_completed else None,
         )
         await session.commit()
     activity.logger.info("Updated pipeline state for run %s", input.run_id)
@@ -194,50 +196,26 @@ async def load_run_queries_activity(run_id: str) -> LoadRunQueriesResult:
 
         engine = run.engine
 
-        # Resolve API key from database.
-        # Two-step: try exact provider first, then OpenRouter fallback.
-        # When falling back to OpenRouter, override provider so get_connector
-        # routes through OpenRouter instead of the native API.
-        project_result = await session.execute(
-            select(Project).where(Project.id == run.project_id)
-        )
-        project = project_result.scalar_one()
+        # Keys: OPENAI_API_KEY / OPENROUTER_API_KEY / … in server env.
         key_service = AIKeyService(session)
 
         resolved_provider = engine.provider
         resolved_model = engine.model_name
 
-        # Step 1: exact provider key (tenant → global)
-        exact_key = await key_service._find_active_key(engine.provider, project.tenant_id)
-        if not exact_key:
-            exact_key = await key_service._find_active_key(engine.provider, None)
-
-        if exact_key:
-            api_key = key_service._decrypt_and_mark(exact_key)
-        elif engine.provider not in ("openrouter",):
-            # Step 2: OpenRouter fallback — switch routing to OpenRouter
-            or_key = await key_service._find_active_key("openrouter", project.tenant_id)
-            if not or_key:
-                or_key = await key_service._find_active_key("openrouter", None)
-            if or_key:
-                api_key = key_service._decrypt_and_mark(or_key)
-                resolved_provider = "openrouter"
-                # OpenRouter uses {provider}/{model} format
-                _PROVIDER_DEFAULT_MODELS = {
-                    "openai": "openai/gpt-5.4-mini",
-                    "anthropic": "anthropic/claude-haiku-4.5",
-                    "google": "google/gemini-2.5-flash",
-                }
-                if resolved_model and "/" not in resolved_model:
-                    resolved_model = f"{engine.provider}/{resolved_model}"
-                elif not resolved_model:
-                    resolved_model = _PROVIDER_DEFAULT_MODELS.get(
-                        engine.provider, f"{engine.provider}/default"
-                    )
-            else:
-                api_key = None
-        else:
-            api_key = None
+        api_key, used_openrouter = key_service.resolve_key_meta(engine.provider)
+        if api_key and used_openrouter and engine.provider not in ("openrouter",):
+            resolved_provider = "openrouter"
+            provider_default_models = {
+                "openai": "openai/gpt-5.4-mini",
+                "anthropic": "anthropic/claude-haiku-4.5",
+                "google": "google/gemini-2.5-flash",
+            }
+            if resolved_model and "/" not in resolved_model:
+                resolved_model = f"{engine.provider}/{resolved_model}"
+            elif not resolved_model:
+                resolved_model = provider_default_models.get(
+                    engine.provider, f"{engine.provider}/default"
+                )
 
         # Fail early with a clear message if no key is available
         adapter_config = engine.adapter_config or {}
@@ -245,7 +223,8 @@ async def load_run_queries_activity(run_id: str) -> LoadRunQueriesResult:
         if api_key is None and needs_key:
             raise ValueError(
                 f"No API key configured for provider '{engine.provider}'. "
-                f"Add one in Admin > API Keys."
+                "Set the matching environment variable on the API server "
+                "(e.g. OPENAI_API_KEY or OPENROUTER_API_KEY)."
             )
 
         return LoadRunQueriesResult(

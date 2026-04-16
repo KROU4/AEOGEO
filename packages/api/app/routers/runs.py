@@ -3,18 +3,19 @@
 import asyncio
 import json
 import logging
-import os
 from collections.abc import AsyncGenerator
 from datetime import UTC
 from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import StreamingResponse
+from redis.asyncio import Redis
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.dependencies import async_session, get_current_user, get_db
+from app.config import get_settings
+from app.dependencies import async_session, get_current_user, get_db, get_redis
 from app.models.answer import Answer
 from app.models.engine import Engine, ProjectEngine
 from app.models.engine_run import EngineRun
@@ -36,15 +37,19 @@ from app.utils.pagination import (
     apply_cursor_pagination,
     paginate_results,
 )
+from app.utils.rate_limit import enforce_rate_limit
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/projects/{project_id}/runs", tags=["runs"])
+_RUN_TRIGGER_LIMIT = 30
+_RUN_TRIGGER_WINDOW_SEC = 3600
 
 
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 async def _verify_project(
     project_id: UUID,
@@ -85,8 +90,7 @@ async def _get_run(
 async def _start_pipeline_workflow(run_id: UUID, *, retry: bool = False) -> None:
     from temporalio.client import Client as TemporalClient
 
-    temporal_host = os.getenv("TEMPORAL_HOST", "temporal:7233")
-    temporal_client = await TemporalClient.connect(temporal_host)
+    temporal_client = await TemporalClient.connect(get_settings().temporal_host)
     workflow_id = f"pipeline-{run_id}"
     if retry:
         workflow_id = f"{workflow_id}-retry-{uuid4()}"
@@ -99,18 +103,32 @@ async def _start_pipeline_workflow(run_id: UUID, *, retry: bool = False) -> None
     )
 
 
+async def _enforce_run_trigger_rate(redis: Redis, tenant_id: UUID) -> None:
+    await enforce_rate_limit(
+        redis,
+        key=f"runs:trigger:{tenant_id}",
+        limit=_RUN_TRIGGER_LIMIT,
+        window_sec=_RUN_TRIGGER_WINDOW_SEC,
+        error_code="runs.rate_limited",
+        message="Too many run launches. Try again later.",
+    )
+
+
 # ---------------------------------------------------------------------------
 # POST /projects/{project_id}/runs  — trigger engine run
 # ---------------------------------------------------------------------------
+
 
 @router.post("", response_model=EngineRunResponse, status_code=201)
 async def trigger_run(
     project_id: UUID,
     body: EngineRunCreate,
     db: AsyncSession = Depends(get_db),
+    redis: Redis = Depends(get_redis),
     user: User = Depends(get_current_user),
 ) -> EngineRunResponse:
     await _verify_project(project_id, user.tenant_id, db)
+    await _enforce_run_trigger_rate(redis, user.tenant_id)
 
     run = EngineRun(
         status="pending",
@@ -145,6 +163,7 @@ async def trigger_run(
 # ---------------------------------------------------------------------------
 # GET /projects/{project_id}/runs  — list runs
 # ---------------------------------------------------------------------------
+
 
 @router.get("", response_model=PaginatedResponse[EngineRunResponse])
 async def list_runs(
@@ -181,6 +200,7 @@ async def list_runs(
 # ---------------------------------------------------------------------------
 # GET /projects/{project_id}/runs/latest  — most recent run (any status)
 # ---------------------------------------------------------------------------
+
 
 @router.get("/latest", response_model=LatestRunStatusResponse)
 async def get_latest_run(
@@ -227,9 +247,8 @@ async def get_latest_run(
             continue
         stages[slug] = er.status
         exp = max(er.answers_expected or 0, 1)
-        progress_samples.append(
-            int(min(100, round(100 * (er.answers_completed / exp))))
-        )
+        completed = er.answers_completed or 0
+        progress_samples.append(int(min(100, round(100 * (completed / exp)))))
 
     if not stages:
         stages = {
@@ -238,7 +257,8 @@ async def get_latest_run(
             "score": run.score_status,
         }
         expected = max(run.answers_expected or 0, 1)
-        progress_pct = int(min(100, round(100 * (run.answers_completed / expected))))
+        completed = run.answers_completed or 0
+        progress_pct = int(min(100, round(100 * (completed / expected))))
     else:
         progress_pct = (
             int(sum(progress_samples) / len(progress_samples))
@@ -264,6 +284,7 @@ async def get_latest_run(
 # GET /projects/{project_id}/runs/{run_id}  — run detail
 # ---------------------------------------------------------------------------
 
+
 @router.get("/{run_id}", response_model=EngineRunResponse)
 async def get_run(
     project_id: UUID,
@@ -280,6 +301,7 @@ async def get_run(
 # GET /projects/{project_id}/runs/{run_id}/progress  — run progress
 # ---------------------------------------------------------------------------
 
+
 @router.get("/{run_id}/progress", response_model=EngineRunProgress)
 async def get_run_progress(
     project_id: UUID,
@@ -292,7 +314,9 @@ async def get_run_progress(
 
     # Total queries = number of approved queries in the query set
     total_queries_result = await db.execute(
-        select(func.count()).select_from(QueryModel).where(
+        select(func.count())
+        .select_from(QueryModel)
+        .where(
             QueryModel.query_set_id == run.query_set_id,
             QueryModel.status == "approved",
         )
@@ -300,14 +324,18 @@ async def get_run_progress(
     total_queries: int = total_queries_result.scalar() or 0
 
     persisted_answers_result = await db.execute(
-        select(func.count()).select_from(Answer).where(
+        select(func.count())
+        .select_from(Answer)
+        .where(
             Answer.run_id == run.id,
         )
     )
     persisted_answers: int = persisted_answers_result.scalar() or 0
 
     parsed_answers_result = await db.execute(
-        select(func.count()).select_from(Answer).where(
+        select(func.count())
+        .select_from(Answer)
+        .where(
             Answer.run_id == run.id,
             Answer.parse_status == "completed",
         )
@@ -352,7 +380,9 @@ def _sse_event(event: str, data: dict) -> str:
 
 
 async def _get_run_or_none(
-    run_id: UUID, project_id: UUID, db: AsyncSession,
+    run_id: UUID,
+    project_id: UUID,
+    db: AsyncSession,
 ) -> EngineRun | None:
     result = await db.execute(
         select(EngineRun).where(
@@ -364,12 +394,15 @@ async def _get_run_or_none(
 
 
 async def _build_progress_snapshot(
-    run: EngineRun, db: AsyncSession,
+    run: EngineRun,
+    db: AsyncSession,
 ) -> dict:
     """Build a progress dict for a single run."""
     total_queries: int = (
         await db.execute(
-            select(func.count()).select_from(QueryModel).where(
+            select(func.count())
+            .select_from(QueryModel)
+            .where(
                 QueryModel.query_set_id == run.query_set_id,
                 QueryModel.status == "approved",
             )
@@ -378,7 +411,9 @@ async def _build_progress_snapshot(
 
     persisted_answers: int = (
         await db.execute(
-            select(func.count()).select_from(Answer).where(
+            select(func.count())
+            .select_from(Answer)
+            .where(
                 Answer.run_id == run.id,
             )
         )
@@ -386,7 +421,9 @@ async def _build_progress_snapshot(
 
     parsed_answers: int = (
         await db.execute(
-            select(func.count()).select_from(Answer).where(
+            select(func.count())
+            .select_from(Answer)
+            .where(
                 Answer.run_id == run.id,
                 Answer.parse_status == "completed",
             )
@@ -399,8 +436,7 @@ async def _build_progress_snapshot(
         "error_message": run.error_message,
         "engine": {
             "status": run.engine_status,
-            "total": run.answers_expected
-            or (total_queries * run.sample_count),
+            "total": run.answers_expected or (total_queries * run.sample_count),
             "completed": run.answers_completed,
         },
         "parse": {
@@ -423,7 +459,11 @@ async def stream_runs_progress(
     db: AsyncSession = Depends(get_db),
     user: User = Depends(get_current_user),
 ) -> StreamingResponse:
-    """Stream progress for multiple runs via SSE."""
+    """Stream progress for multiple runs via SSE.
+
+    ``run_ids`` are filtered per run through `_get_run_or_none(run_id, project_id)` —
+    only runs belonging to this project are returned; unknown IDs are skipped (no leak).
+    """
     await _verify_project(project_id, user.tenant_id, db)
     run_ids = body.run_ids
 
@@ -431,9 +471,12 @@ async def stream_runs_progress(
         prev: dict[str, dict] = {}
         deadline = asyncio.get_event_loop().time() + 600  # 10 min
 
-        yield _sse_event("stream_start", {
-            "run_ids": [str(r) for r in run_ids],
-        })
+        yield _sse_event(
+            "stream_start",
+            {
+                "run_ids": [str(r) for r in run_ids],
+            },
+        )
 
         while asyncio.get_event_loop().time() < deadline:
             async with async_session() as poll_db:
@@ -451,9 +494,12 @@ async def stream_runs_progress(
                         all_terminal = False
 
             if all_terminal and prev:
-                yield _sse_event("all_complete", {
-                    "run_ids": [str(r) for r in run_ids],
-                })
+                yield _sse_event(
+                    "all_complete",
+                    {
+                        "run_ids": [str(r) for r in run_ids],
+                    },
+                )
                 return
 
             await asyncio.sleep(1.5)
@@ -492,8 +538,7 @@ async def retry_run(
         try:
             from temporalio.client import Client as TemporalClient
 
-            temporal_address = os.getenv("TEMPORAL_ADDRESS", "temporal:7233")
-            client = await TemporalClient.connect(temporal_address)
+            client = await TemporalClient.connect(get_settings().temporal_host)
             handle = client.get_workflow_handle(f"pipeline-{run_id}")
             await handle.cancel()
         except Exception:
@@ -544,23 +589,31 @@ async def cancel_run(
             detail="Only pending or running runs can be cancelled",
         )
 
+    temporal_cancel_failed = False
+    try:
+        from temporalio.client import Client as TemporalClient
+
+        client = await TemporalClient.connect(get_settings().temporal_host)
+        handle = client.get_workflow_handle(f"pipeline-{run_id}")
+        await handle.cancel()
+    except Exception:
+        temporal_cancel_failed = True
+        logger.warning(
+            "Temporal cancel failed for run %s before DB update — "
+            "will still mark cancelled in DB",
+            run_id,
+            exc_info=True,
+        )
+
     run.status = "cancelled"
     await db.commit()
     await db.refresh(run)
 
-    # Best-effort Temporal workflow cancellation
-    try:
-        from temporalio.client import Client as TemporalClient
-
-        temporal_address = os.getenv("TEMPORAL_ADDRESS", "temporal:7233")
-        client = await TemporalClient.connect(temporal_address)
-        handle = client.get_workflow_handle(f"pipeline-{run_id}")
-        await handle.cancel()
-    except Exception:
-        logger.warning(
-            "Failed to cancel Temporal workflow for run %s",
+    if temporal_cancel_failed:
+        logger.error(
+            "Run %s marked cancelled in DB but Temporal cancel did not succeed; "
+            "workflow may still be running until it observes cancellation.",
             run_id,
-            exc_info=True,
         )
 
     return EngineRunResponse.model_validate(run)
@@ -569,6 +622,7 @@ async def cancel_run(
 # ---------------------------------------------------------------------------
 # GET /projects/{project_id}/runs/{run_id}/answers  — list answers
 # ---------------------------------------------------------------------------
+
 
 @router.get(
     "/{run_id}/answers",
@@ -607,6 +661,7 @@ async def list_answers(
 # ---------------------------------------------------------------------------
 # GET /projects/{project_id}/runs/{run_id}/answers/{answer_id}  — answer detail
 # ---------------------------------------------------------------------------
+
 
 @router.get(
     "/{run_id}/answers/{answer_id}",

@@ -20,6 +20,7 @@
   "navGroups": {
     "platform": "Platform",
     "manage": "Manage",
+    "projects": "Workspace",
     "analytics": "Analytics",
     "intelligence": "Intelligence",
     "settings": "Settings",

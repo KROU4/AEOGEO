@@ -46,6 +46,7 @@ from .answer import Answer  # noqa: F401
 
 # Site GEO audits (FK → projects)
 from .site_audit import SiteAudit  # noqa: F401
+from .content_push_event import ContentPushEvent  # noqa: F401
 
 __all__ = [
     "AIProviderKey",
@@ -54,6 +55,7 @@ __all__ = [
     "Base",
     "Brand",
     "Citation",
+    "ContentPushEvent",
     "Competitor",
     "Engine",
     "EngineRun",

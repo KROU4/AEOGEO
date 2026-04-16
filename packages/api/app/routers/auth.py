@@ -1,17 +1,28 @@
 import logging
+from collections.abc import Mapping
+import json
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
+from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 from svix.webhooks import Webhook, WebhookVerificationError
 
 from app.config import Settings
-from app.dependencies import get_clerk_identity, get_current_user, get_db, get_settings
+from app.dependencies import (
+    get_clerk_identity,
+    get_current_user,
+    get_db,
+    get_redis,
+    get_settings,
+)
 from app.models.user import User
 from app.schemas.auth import (
     BootstrapRequest,
     InviteRequest,
     InviteResponse,
     MessageResponse,
+    NotificationPreferences,
+    NotificationPreferencesUpdate,
     TeamMemberResponse,
     UserResponse,
 )
@@ -21,6 +32,26 @@ from app.services.clerk import ClerkIdentity
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+
+DEFAULT_NOTIFICATION_PREFERENCES = NotificationPreferences()
+
+
+def _notification_key(user_id: str) -> str:
+    return f"user:{user_id}:notification_prefs"
+
+
+async def _load_notification_preferences(
+    redis: Redis,
+    user_id: str,
+) -> NotificationPreferences:
+    raw = await redis.get(_notification_key(user_id))
+    if not raw:
+        return DEFAULT_NOTIFICATION_PREFERENCES
+
+    data = json.loads(raw)
+    if not isinstance(data, Mapping):
+        return DEFAULT_NOTIFICATION_PREFERENCES
+    return NotificationPreferences.model_validate(data)
 
 
 def _to_user_response(user: User, permissions: list[str]) -> UserResponse:
@@ -131,6 +162,29 @@ async def team(
 @router.post("/logout", response_model=MessageResponse)
 async def logout() -> MessageResponse:
     return MessageResponse(message="Signed out")
+
+
+@router.get("/me/notifications", response_model=NotificationPreferences)
+async def get_my_notification_preferences(
+    current_user: User = Depends(get_current_user),
+    redis: Redis = Depends(get_redis),
+) -> NotificationPreferences:
+    return await _load_notification_preferences(redis, str(current_user.id))
+
+
+@router.patch("/me/notifications", response_model=NotificationPreferences)
+async def patch_my_notification_preferences(
+    body: NotificationPreferencesUpdate,
+    current_user: User = Depends(get_current_user),
+    redis: Redis = Depends(get_redis),
+) -> NotificationPreferences:
+    current = await _load_notification_preferences(redis, str(current_user.id))
+    payload = body.model_dump(exclude_none=True)
+    merged = NotificationPreferences.model_validate(
+        {**current.model_dump(), **payload}
+    )
+    await redis.set(_notification_key(str(current_user.id)), merged.model_dump_json())
+    return merged
 
 
 def _clerk_user_primary_email(data: dict) -> str | None:

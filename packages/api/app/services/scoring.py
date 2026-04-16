@@ -8,7 +8,7 @@ and per-query summaries.
 from __future__ import annotations
 
 import logging
-from datetime import datetime
+from datetime import UTC, datetime
 from decimal import Decimal
 from uuid import UUID
 
@@ -101,7 +101,7 @@ class ScoringService:
 
         answer.score_status = "completed"
         answer.score_error = None
-        answer.scored_at = datetime.utcnow()
+        answer.scored_at = datetime.now(UTC)
 
         await self.db.flush()
 

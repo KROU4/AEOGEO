@@ -6,6 +6,12 @@ import { useLocale } from "@/hooks/use-locale";
 import { useTeamMembers } from "@/hooks/use-team";
 import { useProjects, useProject, useUpdateProject } from "@/hooks/use-projects";
 import { useBillingPlan } from "@/hooks/use-billing-plan";
+import {
+  useIntegrationSettings,
+  useNotificationPreferences,
+  useUpdateIntegrationSettings,
+  useUpdateNotificationPreferences,
+} from "@/hooks/use-settings";
 import { InviteMemberDialog } from "@/components/settings/invite-member-dialog";
 import {
   Card,
@@ -527,6 +533,16 @@ function TeamTab() {
 
 function NotificationsTab() {
   const { t } = useTranslation("settings");
+  const { data: prefs } = useNotificationPreferences();
+  const updatePrefs = useUpdateNotificationPreferences();
+
+  const resolvedPrefs = {
+    weekly_reports: prefs?.weekly_reports ?? true,
+    citation_alerts: prefs?.citation_alerts ?? true,
+    competitor_movements: prefs?.competitor_movements ?? false,
+    content_published: prefs?.content_published ?? true,
+    team_activity: prefs?.team_activity ?? false,
+  };
 
   return (
     <Card>
@@ -546,7 +562,13 @@ function NotificationsTab() {
               {t("notifications.weeklyReportsDesc")}
             </p>
           </div>
-          <Switch defaultChecked />
+          <Switch
+            checked={resolvedPrefs.weekly_reports}
+            disabled={updatePrefs.isPending}
+            onCheckedChange={(checked) =>
+              updatePrefs.mutate({ weekly_reports: checked })
+            }
+          />
         </div>
 
         <Separator />
@@ -560,7 +582,13 @@ function NotificationsTab() {
               {t("notifications.citationAlertsDesc")}
             </p>
           </div>
-          <Switch defaultChecked />
+          <Switch
+            checked={resolvedPrefs.citation_alerts}
+            disabled={updatePrefs.isPending}
+            onCheckedChange={(checked) =>
+              updatePrefs.mutate({ citation_alerts: checked })
+            }
+          />
         </div>
 
         <Separator />
@@ -574,7 +602,13 @@ function NotificationsTab() {
               {t("notifications.competitorMovementsDesc")}
             </p>
           </div>
-          <Switch />
+          <Switch
+            checked={resolvedPrefs.competitor_movements}
+            disabled={updatePrefs.isPending}
+            onCheckedChange={(checked) =>
+              updatePrefs.mutate({ competitor_movements: checked })
+            }
+          />
         </div>
 
         <Separator />
@@ -588,7 +622,13 @@ function NotificationsTab() {
               {t("notifications.contentPublishedDesc")}
             </p>
           </div>
-          <Switch defaultChecked />
+          <Switch
+            checked={resolvedPrefs.content_published}
+            disabled={updatePrefs.isPending}
+            onCheckedChange={(checked) =>
+              updatePrefs.mutate({ content_published: checked })
+            }
+          />
         </div>
 
         <Separator />
@@ -602,7 +642,13 @@ function NotificationsTab() {
               {t("notifications.teamActivityDesc")}
             </p>
           </div>
-          <Switch />
+          <Switch
+            checked={resolvedPrefs.team_activity}
+            disabled={updatePrefs.isPending}
+            onCheckedChange={(checked) =>
+              updatePrefs.mutate({ team_activity: checked })
+            }
+          />
         </div>
       </CardContent>
     </Card>
@@ -724,6 +770,26 @@ function BillingTab() {
 
 function IntegrationsTab() {
   const { t } = useTranslation("settings");
+  const { data } = useIntegrationSettings();
+  const updateIntegrations = useUpdateIntegrationSettings();
+
+  const [genericWebhookUrl, setGenericWebhookUrl] = useState("");
+  const [slackWebhookUrl, setSlackWebhookUrl] = useState("");
+  const [slackEnabled, setSlackEnabled] = useState(false);
+
+  useEffect(() => {
+    setGenericWebhookUrl(data?.generic_webhook_url ?? "");
+    setSlackWebhookUrl(data?.slack_webhook_url ?? "");
+    setSlackEnabled(data?.slack_enabled ?? false);
+  }, [data]);
+
+  function saveIntegrations() {
+    updateIntegrations.mutate({
+      generic_webhook_url: genericWebhookUrl.trim() || null,
+      slack_webhook_url: slackWebhookUrl.trim() || null,
+      slack_enabled: slackEnabled,
+    });
+  }
 
   return (
     <Card>
@@ -731,8 +797,49 @@ function IntegrationsTab() {
         <CardTitle>{t("integrations.title")}</CardTitle>
         <CardDescription>{t("integrations.subtitle")}</CardDescription>
       </CardHeader>
-      <CardContent>
-        <p className="text-sm text-muted-foreground">{t("integrations.avopStub")}</p>
+      <CardContent className="space-y-6">
+        <div className="space-y-2">
+          <Label htmlFor="generic-webhook-url">Webhook URL</Label>
+          <Input
+            id="generic-webhook-url"
+            value={genericWebhookUrl}
+            onChange={(event) => setGenericWebhookUrl(event.target.value)}
+            placeholder="https://example.com/webhooks/aeogeo"
+          />
+          <p className="text-xs text-muted-foreground">
+            Send run/report events to your automation stack (Zapier/Make/custom).
+          </p>
+        </div>
+
+        <Separator />
+
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-foreground">
+                Slack Notifications
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Post project updates to a Slack incoming webhook.
+              </p>
+            </div>
+            <Switch
+              checked={slackEnabled}
+              onCheckedChange={setSlackEnabled}
+              disabled={updateIntegrations.isPending}
+            />
+          </div>
+          <Input
+            value={slackWebhookUrl}
+            onChange={(event) => setSlackWebhookUrl(event.target.value)}
+            placeholder="https://hooks.slack.com/services/..."
+            disabled={!slackEnabled}
+          />
+        </div>
+
+        <Button onClick={saveIntegrations} disabled={updateIntegrations.isPending}>
+          Save integrations
+        </Button>
       </CardContent>
     </Card>
   );

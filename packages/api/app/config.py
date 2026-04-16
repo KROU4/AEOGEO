@@ -1,6 +1,9 @@
 import base64
+import warnings
 from binascii import Error as BinasciiError
+from functools import lru_cache
 
+from pydantic import AliasChoices, Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -8,8 +11,13 @@ class Settings(BaseSettings):
     database_url: str = "postgresql+asyncpg://aeogeo:localdev@localhost:5432/aeogeo"
     redis_url: str = "redis://localhost:6379"
     secret_key: str = "change-me"
+    temporal_host: str = Field(
+        default="temporal:7233",
+        validation_alias=AliasChoices("TEMPORAL_HOST", "TEMPORAL_ADDRESS"),
+    )
     cors_origins: str = "http://localhost:5173"
-    # Optional: single regex (e.g. https://.*\\.up\\.railway\\.app) when the web URL changes per deploy.
+    # Optional: single regex (e.g. https://.*\\.up\\.railway\\.app) when the web URL
+    # changes per deploy.
     cors_origin_regex: str = ""
     debug: bool = False
     access_token_expire_minutes: int = 30
@@ -18,14 +26,45 @@ class Settings(BaseSettings):
     encryption_key: str = ""
     openrouter_base_url: str = "https://openrouter.ai/api/v1"
     tavily_api_key: str = ""
+    # LLM / AI providers — set in server env only (not stored in DB or UI).
+    openai_api_key: str = ""
+    openrouter_api_key: str = ""
+    anthropic_api_key: str = ""
+    google_api_key: str = ""
     clerk_publishable_key: str = ""
     clerk_secret_key: str = ""
     clerk_frontend_api_url: str = ""
     clerk_api_url: str = "https://api.clerk.com/v1"
     clerk_invitation_redirect_url: str = ""
     clerk_webhook_secret: str = ""
+    sentry_dsn: str = ""
+    sentry_environment: str = "production"
+    log_json: bool = False
+    referral_track_webhook_url: str = ""
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+
+    @field_validator("secret_key", mode="after")
+    @classmethod
+    def warn_default_secret(cls, value: str) -> str:
+        if value == "change-me":
+            warnings.warn(
+                "SECRET_KEY is 'change-me' — set a real key for production.",
+                UserWarning,
+                stacklevel=2,
+            )
+        return value
+
+    @field_validator("debug", mode="before")
+    @classmethod
+    def normalize_debug(cls, value: object) -> object:
+        if isinstance(value, str):
+            lowered = value.strip().lower()
+            if lowered in {"release", "prod", "production"}:
+                return False
+            if lowered in {"dev", "debug", "development"}:
+                return True
+        return value
 
     @property
     def cors_origins_list(self) -> list[str]:
@@ -91,3 +130,8 @@ class Settings(BaseSettings):
             return ""
 
         return decoded.rstrip("$")
+
+
+@lru_cache
+def get_settings() -> Settings:
+    return Settings()

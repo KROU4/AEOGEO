@@ -6,7 +6,7 @@ from redis.asyncio import Redis
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
-from app.config import Settings
+from app.config import get_settings
 from app.models.role import Role, UserRole
 from app.models.user import User
 from app.services.auth import AuthService
@@ -14,11 +14,11 @@ from app.services.clerk import (
     ClerkAPIError,
     ClerkConfigurationError,
     ClerkIdentity,
-    ClerkTokenVerificationError,
     ClerkService,
+    ClerkTokenVerificationError,
 )
 
-settings = Settings()
+settings = get_settings()
 
 engine = create_async_engine(settings.database_url, echo=settings.debug)
 async_session = async_sessionmaker(engine, expire_on_commit=False)
@@ -26,10 +26,6 @@ async_session = async_sessionmaker(engine, expire_on_commit=False)
 bearer_scheme = HTTPBearer(auto_error=False)
 
 _redis: Redis | None = None
-
-
-def get_settings() -> Settings:
-    return settings
 
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:

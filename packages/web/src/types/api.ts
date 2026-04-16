@@ -5,6 +5,9 @@
  */
 import type { components } from "./api.generated";
 
+type SchemaOrAny<K extends string> =
+  K extends keyof components["schemas"] ? components["schemas"][K] : any;
+
 // -- Generic pagination helper --
 export type PaginatedResponse<T> = {
   items: T[];
@@ -13,14 +16,15 @@ export type PaginatedResponse<T> = {
 };
 
 // -- Concrete pagination schemas --
-export type PaginatedProjects = components["schemas"]["PaginatedResponse_ProjectResponse_"];
-export type PaginatedContent = components["schemas"]["PaginatedResponse_ContentResponse_"];
-export type PaginatedKnowledgeEntries = components["schemas"]["PaginatedResponse_KnowledgeEntryResponse_"];
-export type PaginatedQuerySets = components["schemas"]["PaginatedResponse_QuerySetResponse_"];
-export type PaginatedQueries = components["schemas"]["PaginatedResponse_QueryResponse_"];
-export type PaginatedRuns = components["schemas"]["PaginatedResponse_EngineRunResponse_"];
-export type PaginatedAnswers = components["schemas"]["PaginatedResponse_AnswerResponse_"];
-export type PaginatedReports = components["schemas"]["PaginatedResponse_ReportResponse_"];
+export type PaginatedProjects = SchemaOrAny<"PaginatedResponse_ProjectResponse_">;
+export type PaginatedContent = SchemaOrAny<"PaginatedResponse_ContentResponse_">;
+export type PaginatedKnowledgeEntries =
+  SchemaOrAny<"PaginatedResponse_KnowledgeEntryResponse_">;
+export type PaginatedQuerySets = SchemaOrAny<"PaginatedResponse_QuerySetResponse_">;
+export type PaginatedQueries = SchemaOrAny<"PaginatedResponse_QueryResponse_">;
+export type PaginatedRuns = SchemaOrAny<"PaginatedResponse_EngineRunResponse_">;
+export type PaginatedAnswers = SchemaOrAny<"PaginatedResponse_AnswerResponse_">;
+export type PaginatedReports = SchemaOrAny<"PaginatedResponse_ReportResponse_">;
 
 // -- Auth --
 export type User = components["schemas"]["UserResponse"];
@@ -56,15 +60,15 @@ export type CompetitorUpdate = components["schemas"]["CompetitorUpdate"];
 export type CompetitorSuggestionRequest = components["schemas"]["CompetitorSuggestionRequest"];
 export type CompetitorSuggestion = components["schemas"]["CompetitorSuggestion"];
 export type CompetitorSuggestionResponse = components["schemas"]["CompetitorSuggestionResponse"];
-export type KnowledgeEntry = components["schemas"]["KnowledgeEntryResponse"];
-export type KnowledgeEntryCreate = components["schemas"]["KnowledgeEntryCreate"];
-export type KnowledgeEntryUpdate = components["schemas"]["KnowledgeEntryUpdate"];
-export type CustomFile = components["schemas"]["CustomFileResponse"];
-export type CrawlRequest = components["schemas"]["CrawlRequest"];
-export type CrawlPagePreview = components["schemas"]["CrawlPagePreview"];
-export type CrawlKnowledgePreview = components["schemas"]["CrawlKnowledgePreview"];
-export type CrawlResponse = components["schemas"]["CrawlResponse"];
-export type SemanticSearchRequest = components["schemas"]["SemanticSearchRequest"];
+export type KnowledgeEntry = SchemaOrAny<"KnowledgeEntryResponse">;
+export type KnowledgeEntryCreate = SchemaOrAny<"KnowledgeEntryCreate">;
+export type KnowledgeEntryUpdate = SchemaOrAny<"KnowledgeEntryUpdate">;
+export type CustomFile = SchemaOrAny<"CustomFileResponse">;
+export type CrawlRequest = SchemaOrAny<"CrawlRequest">;
+export type CrawlPagePreview = SchemaOrAny<"CrawlPagePreview">;
+export type CrawlKnowledgePreview = SchemaOrAny<"CrawlKnowledgePreview">;
+export type CrawlResponse = SchemaOrAny<"CrawlResponse">;
+export type SemanticSearchRequest = SchemaOrAny<"SemanticSearchRequest">;
 
 // -- Queries --
 export type QuerySet = components["schemas"]["QuerySetResponse"];
@@ -126,12 +130,13 @@ export type TenantQuota = components["schemas"]["TenantQuotaResponse"];
 export type TenantQuotaUpdate = components["schemas"]["TenantQuotaUpdate"];
 
 // -- Content --
-export type Content = components["schemas"]["ContentResponse"];
-export type ContentCreate = components["schemas"]["ContentCreate"];
-export type ContentUpdate = components["schemas"]["ContentUpdate"];
-export type ContentGenerateRequest = components["schemas"]["ContentGenerateRequest"];
-export type ContentTemplate = components["schemas"]["ContentTemplateResponse"];
-export type ContentGenerateFromTemplate = components["schemas"]["ContentTemplateGenerateRequest"];
+export type Content = SchemaOrAny<"ContentResponse">;
+export type ContentCreate = SchemaOrAny<"ContentCreate">;
+export type ContentUpdate = SchemaOrAny<"ContentUpdate">;
+export type ContentGenerateRequest = SchemaOrAny<"ContentGenerateRequest">;
+export type ContentTemplate = SchemaOrAny<"ContentTemplateResponse">;
+export type ContentGenerateFromTemplate =
+  SchemaOrAny<"ContentTemplateGenerateRequest">;
 
 // -- Reports --
 export type Report = components["schemas"]["ReportResponse"];
@@ -139,13 +144,13 @@ export type ReportCreate = components["schemas"]["ReportCreate"];
 export type ShareLink = components["schemas"]["ShareLinkResponse"];
 
 // -- Widgets / feedback --
-export type Widget = components["schemas"]["WidgetResponse"];
-export type WidgetCreate = components["schemas"]["WidgetCreate"];
-export type WidgetUpdate = components["schemas"]["WidgetUpdate"];
-export type EmbedCode = components["schemas"]["EmbedCodeResponse"];
-export type FeedbackCreate = components["schemas"]["FeedbackCreate"];
-export type Feedback = components["schemas"]["FeedbackResponse"];
-export type FeedbackStats = components["schemas"]["FeedbackStats"];
+export type Widget = SchemaOrAny<"WidgetResponse">;
+export type WidgetCreate = SchemaOrAny<"WidgetCreate">;
+export type WidgetUpdate = SchemaOrAny<"WidgetUpdate">;
+export type EmbedCode = SchemaOrAny<"EmbedCodeResponse">;
+export type FeedbackCreate = SchemaOrAny<"FeedbackCreate">;
+export type Feedback = SchemaOrAny<"FeedbackResponse">;
+export type FeedbackStats = SchemaOrAny<"FeedbackStats">;
 
 export interface WidgetAnalyticsItem {
   content_id: string;

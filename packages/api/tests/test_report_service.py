@@ -1,5 +1,5 @@
 import asyncio
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
 from sqlalchemy import text
@@ -53,7 +53,7 @@ async def _build_report_service_fixture():
                     project_id=project_id,
                     data_json={"summary": {"score_count": 3}},
                     shareable_token="share-active",
-                    expires_at=datetime.utcnow() + timedelta(days=2),
+                    expires_at=datetime.now(UTC) + timedelta(days=2),
                 ),
                 Report(
                     id=expired_report_id,
@@ -62,7 +62,7 @@ async def _build_report_service_fixture():
                     project_id=project_id,
                     data_json={"summary": {"score_count": 1}},
                     shareable_token="share-expired",
-                    expires_at=datetime.utcnow() - timedelta(days=1),
+                    expires_at=datetime.now(UTC) - timedelta(days=1),
                 ),
                 Report(
                     id=draft_report_id,
@@ -132,7 +132,13 @@ def test_report_service_creates_share_links_for_unshared_reports():
             )
 
             assert created.url.startswith("/shared/reports/")
-            assert created.expires_at > datetime.utcnow()
+            now = datetime.now(UTC)
+            exp = created.expires_at
+            assert exp is not None
+            if exp.tzinfo is None:
+                assert exp > now.replace(tzinfo=None)
+            else:
+                assert exp > now
 
             fetched = await service.get_share_link(
                 fixture["draft_report_id"],

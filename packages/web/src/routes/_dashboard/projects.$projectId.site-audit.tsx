@@ -1,4 +1,6 @@
+import { useEffect, useState } from "react";
 import { createFileRoute, useParams } from "@tanstack/react-router";
+import { useTranslation } from "react-i18next";
 import {
   AlertCircle,
   CheckCircle2,
@@ -596,12 +598,105 @@ function AuditSkeleton() {
   );
 }
 
+function formatRunningDuration(totalSeconds: number): string {
+  const h = Math.floor(totalSeconds / 3600);
+  const m = Math.floor((totalSeconds % 3600) / 60);
+  const s = totalSeconds % 60;
+  if (h > 0) {
+    return `${h}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+  }
+  return `${m}:${s.toString().padStart(2, "0")}`;
+}
+
+const SITE_AUDIT_PHASE_KEYS = [
+  "siteAudit.phase0",
+  "siteAudit.phase1",
+  "siteAudit.phase2",
+  "siteAudit.phase3",
+  "siteAudit.phase4",
+] as const;
+
+function elapsedSecondsFromAnchor(iso: string): number {
+  const ms = Date.parse(iso);
+  if (Number.isNaN(ms)) return 0;
+  return Math.max(0, Math.floor((Date.now() - ms) / 1000));
+}
+
+/** Illustrative stages — elapsed time is derived from `started_at` (or `created_at`) from the API. */
+function RunningAuditStatus({ startedAtIso }: { startedAtIso: string }) {
+  const { t } = useTranslation("projects");
+  const [elapsed, setElapsed] = useState(() =>
+    elapsedSecondsFromAnchor(startedAtIso),
+  );
+
+  useEffect(() => {
+    const tick = () => {
+      setElapsed(elapsedSecondsFromAnchor(startedAtIso));
+    };
+    tick();
+    const id = window.setInterval(tick, 1000);
+    return () => window.clearInterval(id);
+  }, [startedAtIso]);
+
+  const phaseSeconds = 180;
+  const phaseIndex = Math.min(
+    SITE_AUDIT_PHASE_KEYS.length - 1,
+    Math.floor(elapsed / phaseSeconds),
+  );
+  const activePhaseKey =
+    SITE_AUDIT_PHASE_KEYS[phaseIndex] ?? SITE_AUDIT_PHASE_KEYS[0];
+
+  return (
+    <div className="w-full space-y-3 border-t border-border pt-3">
+      <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+        <p className="text-sm font-medium text-foreground">
+          {t(activePhaseKey)}
+        </p>
+        <p className="shrink-0 text-xs text-muted-foreground tabular-nums sm:pt-0.5">
+          {t("siteAudit.runningFor", {
+            time: formatRunningDuration(elapsed),
+          })}
+        </p>
+      </div>
+      <ul className="space-y-1.5">
+        {SITE_AUDIT_PHASE_KEYS.map((key, i) => (
+          <li
+            key={key}
+            className={`flex items-center gap-2 text-xs ${
+              i === phaseIndex
+                ? "font-medium text-foreground"
+                : "text-muted-foreground/80"
+            }`}
+          >
+            {i === phaseIndex ? (
+              <Loader2
+                className="h-3.5 w-3.5 shrink-0 animate-spin text-primary"
+                aria-hidden
+              />
+            ) : (
+              <span
+                className="inline-block h-2 w-2 shrink-0 rounded-full bg-muted-foreground/25"
+                aria-hidden
+              />
+            )}
+            {t(key)}
+          </li>
+        ))}
+      </ul>
+      <p className="text-xs leading-snug text-muted-foreground">
+        {t("siteAudit.runningHint")}
+      </p>
+      <p className="text-[10px] text-muted-foreground/90">
+        {t("siteAudit.phasesNote")}
+      </p>
+    </div>
+  );
+}
+
 function NoAuditState({
-  projectId,
   onStart,
   isPending,
 }: {
-  projectId: string;
   onStart: () => void;
   isPending: boolean;
 }) {
@@ -708,34 +803,33 @@ function SiteAuditPage() {
 
       {/* Status bar */}
       {audit && (
-        <div className="flex items-center gap-3 p-3 rounded-lg border bg-background/60">
-          <StatusBadge status={audit.status} />
-          <span className="text-sm text-muted-foreground">
-            {audit.url}
-          </span>
-          {audit.status === "completed" && (
-            <span className="ml-auto text-sm font-semibold">
-              Audited:{" "}
-              {new Date(audit.created_at).toLocaleDateString("en-US", {
-                month: "short",
-                day: "numeric",
-                year: "numeric",
-              })}
+        <div className="rounded-lg border bg-background/60 p-3">
+          <div className="flex flex-wrap items-center gap-3">
+            <StatusBadge status={audit.status} />
+            <span className="min-w-0 flex-1 break-all text-sm text-muted-foreground">
+              {audit.url}
             </span>
-          )}
-          {isActive && (
-            <div className="ml-auto flex items-center gap-2">
-              <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
-              <span className="text-xs text-muted-foreground">
-                Analysing site — this takes about 30–60 seconds…
+            {audit.status === "completed" && (
+              <span className="ml-auto text-sm font-semibold">
+                Audited:{" "}
+                {new Date(audit.created_at).toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                })}
               </span>
-            </div>
-          )}
-          {audit.status === "failed" && audit.error_message && (
-            <span className="ml-auto text-xs text-destructive">
-              {audit.error_message}
-            </span>
-          )}
+            )}
+            {audit.status === "failed" && audit.error_message && (
+              <span className="ml-auto max-w-full text-xs text-destructive">
+                {audit.error_message}
+              </span>
+            )}
+          </div>
+          {isActive ? (
+            <RunningAuditStatus
+              startedAtIso={audit.started_at ?? audit.created_at}
+            />
+          ) : null}
         </div>
       )}
 
@@ -744,7 +838,6 @@ function SiteAuditPage() {
         <AuditSkeleton />
       ) : !audit ? (
         <NoAuditState
-          projectId={projectId}
           onStart={handleStart}
           isPending={startAudit.isPending}
         />

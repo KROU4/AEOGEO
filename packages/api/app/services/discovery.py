@@ -15,7 +15,7 @@ from redis.asyncio import Redis
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.config import Settings
+from app.config import get_settings
 from app.models.brand import Brand
 from app.models.competitor import Competitor
 from app.models.product import Product
@@ -117,7 +117,7 @@ class DiscoveryService:
         self.tenant_id = tenant_id
         self.user_id = user_id
         self.project_id = project_id
-        self.settings = Settings()
+        self.settings = get_settings()
         self.ai_client = AIClient(
             db=db,
             redis=redis,

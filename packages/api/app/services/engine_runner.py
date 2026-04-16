@@ -10,7 +10,7 @@ Responsibilities:
 from __future__ import annotations
 
 import logging
-from datetime import datetime
+from datetime import UTC, datetime
 from uuid import UUID
 
 from sqlalchemy import delete, func, select
@@ -266,7 +266,7 @@ class EngineRunnerService:
 
         if run.status in _TERMINAL_STATUSES:
             run.completed_at = (
-                derived_completed_at or run.completed_at or datetime.utcnow()
+                derived_completed_at or run.completed_at or datetime.now(UTC)
             )
         elif derived_completed_at is None:
             run.completed_at = None

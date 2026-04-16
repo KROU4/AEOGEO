@@ -87,6 +87,7 @@ export function StepCreateProject({ onContinue }: StepCreateProjectProps) {
         name: name.trim(),
         description: "",
         client_name: "",
+        content_locale: "en",
         domain: cleanDomain || undefined,
       });
       onContinue(project.id);
@@ -148,6 +149,7 @@ export function StepCreateProject({ onContinue }: StepCreateProjectProps) {
           <Label htmlFor="project-name">{t("createProject.nameLabel")}</Label>
           <Input
             id="project-name"
+            data-testid="funnel-project-name"
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder={t("createProject.namePlaceholder")}
@@ -163,6 +165,7 @@ export function StepCreateProject({ onContinue }: StepCreateProjectProps) {
             </span>
             <Input
               id="project-url"
+              data-testid="funnel-project-domain"
               value={domainRaw}
               onChange={(e) => setDomainRaw(e.target.value)}
               placeholder="example.com"
@@ -176,6 +179,7 @@ export function StepCreateProject({ onContinue }: StepCreateProjectProps) {
 
       <Button
         size="lg"
+        data-testid="funnel-create-project-submit"
         onClick={handleSubmit}
         disabled={!canSubmit}
       >

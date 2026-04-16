@@ -20,6 +20,7 @@
   "navGroups": {
     "platform": "Платформа",
     "manage": "Управление",
+    "projects": "Рабочая область",
     "analytics": "Аналитика",
     "intelligence": "Интеллект",
     "settings": "Настройки",
