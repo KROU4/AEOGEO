@@ -177,6 +177,7 @@ async def quick_start_run(
         db.add(QueryModel(
             query_set_id=qs.id,
             text=text,
+            category="brand_visibility",
             status="approved",
             priority=3,
         ))
