@@ -35,7 +35,6 @@ from app.routers import (
     scores,
     settings,
     site_audit,
-    tenant_ai_keys,
     usage,
 )
 
@@ -93,7 +92,6 @@ app.include_router(schedules.router, prefix="/api/v1")
 app.include_router(settings.router, prefix="/api/v1")
 app.include_router(roles.router, prefix="/api/v1")
 app.include_router(admin_keys.router, prefix="/api/v1")
-app.include_router(tenant_ai_keys.router, prefix="/api/v1")
 app.include_router(admin_usage.router, prefix="/api/v1")
 app.include_router(usage.router, prefix="/api/v1")
 app.include_router(recommendations.router, prefix="/api/v1")

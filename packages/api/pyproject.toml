@@ -22,18 +22,12 @@ dependencies = [
     "pymupdf",
     "reportlab",
     "python-docx",
-    "temporalio",
     "numpy",
     "python-multipart",
     "svix",
     "aeogeo-geo-audit",
 ]
 
-[project.optional-dependencies]
-crawl = [
-    "crawl4ai",
-    "playwright",
-]
 
 [tool.uv.sources]
 aeogeo-geo-audit = { path = "../geo-audit", editable = true }

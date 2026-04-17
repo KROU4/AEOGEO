@@ -1,14 +1,11 @@
 import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { useCurrentUser } from "@/hooks/use-auth";
 import { useLocale } from "@/hooks/use-locale";
 import { useProjects, useProject, useUpdateProject, useProjectMembers } from "@/hooks/use-projects";
 import { useBillingPlan } from "@/hooks/use-billing-plan";
-import { apiGet } from "@/lib/api-client";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { AIProviderKey } from "@/types/api";
 import {
   Card,
   CardContent,
@@ -38,9 +35,7 @@ import {
   Check,
   Users,
   CreditCard,
-  Key,
   Bell,
-  Copy,
   UserPlus,
 } from "lucide-react";
 
@@ -429,78 +424,6 @@ function BillingTab() {
   );
 }
 
-function ApiKeysTab() {
-  const { t } = useTranslation("settings");
-  const [copied, setCopied] = useState<string | null>(null);
-  const keysQuery = useQuery({
-    queryKey: ["ai-keys", "tenant"],
-    queryFn: () => apiGet<AIProviderKey[]>("/ai-keys/"),
-  });
-  const keys = keysQuery.data ?? [];
-
-  return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between flex-wrap gap-2">
-            <div>
-              <CardTitle>{t("tabs.apiKeys")}</CardTitle>
-              <CardDescription>{t("apiKeys.aiKeysDesc")}</CardDescription>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {keysQuery.isLoading ? (
-            <Skeleton className="h-32 w-full" />
-          ) : keys.length === 0 ? (
-            <p className="text-sm text-muted-foreground">{t("apiKeys.noneYet")}</p>
-          ) : (
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="text-xs text-muted-foreground uppercase tracking-wider border-b border-border">
-                  <th className="text-left pb-3">{t("apiKeys.colLabel")}</th>
-                  <th className="text-left pb-3">{t("apiKeys.colProvider")}</th>
-                  <th className="text-left pb-3">{t("apiKeys.colHint")}</th>
-                  <th className="pb-3" />
-                </tr>
-              </thead>
-              <tbody>
-                {keys.map((k) => (
-                  <tr key={k.id} className="border-b border-border/40">
-                    <td className="py-3 font-medium text-foreground">{k.label}</td>
-                    <td className="py-3 text-muted-foreground">{k.provider}</td>
-                    <td className="py-3 font-avop-mono text-muted-foreground text-xs">{k.key_hint}</td>
-                    <td className="py-3">
-                      <div className="flex items-center gap-1 justify-end">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-7 w-7 p-0"
-                          type="button"
-                          onClick={() => {
-                            void navigator.clipboard.writeText(k.key_hint);
-                            setCopied(k.id);
-                            setTimeout(() => setCopied(null), 2000);
-                          }}
-                        >
-                          {copied === k.id ? (
-                            <Check className="w-3.5 h-3.5 text-[#4ae176]" />
-                          ) : (
-                            <Copy className="w-3.5 h-3.5" />
-                          )}
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </CardContent>
-      </Card>
-    </div>
-  );
-}
 
 function NotificationsTab() {
   const { t } = useTranslation("settings");
@@ -574,10 +497,6 @@ function SettingsPage() {
               <CreditCard className="w-4 h-4" />
               {t("tabs.billing")}
             </TabsTrigger>
-            <TabsTrigger value="api" className="justify-start gap-2">
-              <Key className="w-4 h-4" />
-              {t("tabs.apiKeys")}
-            </TabsTrigger>
             <TabsTrigger value="notifications" className="justify-start gap-2">
               <Bell className="w-4 h-4" />
               {t("tabs.notifications")}
@@ -596,9 +515,6 @@ function SettingsPage() {
             </TabsContent>
             <TabsContent value="billing">
               <BillingTab />
-            </TabsContent>
-            <TabsContent value="api">
-              <ApiKeysTab />
             </TabsContent>
             <TabsContent value="notifications">
               <NotificationsTab />

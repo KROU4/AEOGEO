@@ -4,7 +4,7 @@ import warnings
 from binascii import Error as BinasciiError
 from functools import lru_cache
 
-from pydantic import AliasChoices, Field, field_validator
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 logger = logging.getLogger(__name__)
@@ -44,10 +44,6 @@ class Settings(BaseSettings):
     database_url: str = "postgresql+asyncpg://aeogeo:localdev@localhost:5432/aeogeo"
     redis_url: str = "redis://localhost:6379"
     secret_key: str = "change-me"
-    temporal_host: str = Field(
-        default="temporal:7233",
-        validation_alias=AliasChoices("TEMPORAL_HOST", "TEMPORAL_ADDRESS"),
-    )
     cors_origins: str = f"http://localhost:5173,{PRODUCTION_WEB_ORIGIN}"
     # Match any browser http(s) origin so deploy previews / custom domains work without
     # redeploying CORS_ORIGINS. Set CORS_ORIGIN_REGEX= to disable (then only cors_origins apply).

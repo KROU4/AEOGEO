@@ -11,7 +11,7 @@ RUN pip install --no-cache-dir uv
 COPY packages/api/pyproject.toml packages/api/uv.lock ./
 COPY packages/geo-audit ../geo-audit
 
-ARG INSTALL_CRAWL=1
+ARG INSTALL_CRAWL=0
 RUN set -eux; \
     if [ "$INSTALL_CRAWL" = "1" ]; then \
       uv sync --no-dev --extra crawl; \

@@ -3,9 +3,6 @@ name: aeogeo
 x-api-environment: &api-environment
   DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-aeogeo}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-aeogeo}
   REDIS_URL: redis://redis:6379/0
-  TEMPORAL_HOST: temporal:7233
-  TEMPORAL_NAMESPACE: ${TEMPORAL_NAMESPACE:-default}
-  TEMPORAL_TASK_QUEUE: ${TEMPORAL_TASK_QUEUE:-aeogeo-pipeline}
   CORS_ORIGINS: ${CORS_ORIGINS}
   CORS_ORIGIN_REGEX: ${CORS_ORIGIN_REGEX:-}
   SENTRY_DSN: ${SENTRY_DSN:-}
@@ -30,40 +27,14 @@ services:
       - redisdata:/data
     restart: unless-stopped
 
-  temporal:
-    image: temporalio/auto-setup:1.24
-    environment:
-      DB: postgres12
-      DB_PORT: 5432
-      LOG_LEVEL: error
-      SKIP_SCHEMA_SETUP: "true"
-      SKIP_DEFAULT_NAMESPACE_CREATION: "true"
-      SKIP_ADD_CUSTOM_SEARCH_ATTRIBUTES: "true"
-      POSTGRES_USER: ${POSTGRES_USER:-aeogeo}
-      POSTGRES_PWD: ${POSTGRES_PASSWORD}
-      POSTGRES_SEEDS: db
-    depends_on:
-      - db
-    restart: unless-stopped
-
-  temporal-ui:
-    image: ${TEMPORAL_UI_IMAGE:-temporalio/ui:2.48.2}
-    ports:
-      - "127.0.0.1:${TEMPORAL_UI_PORT:-8233}:8080"
-    environment:
-      TEMPORAL_ADDRESS: temporal:7233
-    depends_on:
-      - temporal
-    restart: unless-stopped
-
   api:
     build:
       context: .
       dockerfile: packages/api/Dockerfile
       args:
-        INSTALL_CRAWL: ${INSTALL_CRAWL:-0}
+        INSTALL_CRAWL: 0
     ports:
-      - "127.0.0.1:${API_PORT:-8020}:8000"
+      - "127.0.0.1:${API_PORT:-8020}:${PORT:-8000}"
     environment:
       <<: *api-environment
       SKIP_ALEMBIC: ${SKIP_ALEMBIC:-0}
@@ -72,7 +43,6 @@ services:
     depends_on:
       - db
       - redis
-      - temporal
     restart: unless-stopped
     command:
       - sh
@@ -81,24 +51,7 @@ services:
           if [ "$$SKIP_ALEMBIC" != "1" ]; then
             uv run alembic upgrade head
           fi
-          exec uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --no-access-log
-
-  temporal-worker:
-    build:
-      context: .
-      dockerfile: packages/api/Dockerfile
-      args:
-        INSTALL_CRAWL: ${INSTALL_CRAWL:-0}
-    environment:
-      <<: *api-environment
-    env_file:
-      - ./packages/api/.env
-    depends_on:
-      - db
-      - redis
-      - temporal
-    command: sh -lc "cd /work/packages/api && exec uv run python -m app.workflows.worker"
-    restart: unless-stopped
+          exec uv run uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000} --no-access-log
 
   web:
     build:

@@ -17,6 +17,7 @@ from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import inch, mm
 from reportlab.platypus import (
     HRFlowable,
+    PageBreak,
     Paragraph,
     SimpleDocTemplate,
     Spacer,
@@ -60,6 +61,48 @@ def _score_colour(score: float) -> Any:
 def _p(text: str, style: ParagraphStyle) -> Paragraph:
     safe = escape(str(text)).replace("\n", "<br/>")
     return Paragraph(safe, style)
+
+
+def _section_header(title: str) -> Table:
+    """Section header with teal-left-border background for visual hierarchy."""
+    styles = getSampleStyleSheet()
+    para = Paragraph(
+        f'<font color="white" size="10"><b>{escape(str(title))}</b></font>',
+        styles["Normal"],
+    )
+    t = Table([[para]], colWidths=[160 * mm])
+    t.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, -1), _TEAL),
+        ("TOPPADDING", (0, 0), (-1, -1), 5),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
+        ("LEFTPADDING", (0, 0), (-1, -1), 8),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 8),
+        ("ROWBACKGROUNDS", (0, 0), (-1, -1), [_TEAL]),
+    ]))
+    t.spaceBefore = 12
+    t.spaceAfter = 6
+    return t
+
+
+def _score_indicator(score: float) -> str:
+    """Return colored score string for inline use in a Paragraph."""
+    colour = _score_colour(score)
+    hex_col = "#" + colour.hexval()[2:]
+    return f'<font color="{hex_col}"><b>{score:.0f}</b></font>'
+
+
+def _draw_footer(canvas: Any, doc: Any) -> None:
+    """Draw page number and branding in the footer of every page."""
+    canvas.saveState()
+    canvas.setFont("Helvetica", 7)
+    canvas.setFillColor(colors.HexColor("#94a3b8"))
+    page_num = f"Page {doc.page}"
+    canvas.drawRightString(A4[0] - 18 * mm, 10 * mm, page_num)
+    canvas.drawString(18 * mm, 10 * mm, "AEOGEO · GEO Site Audit Report")
+    canvas.setStrokeColor(colors.HexColor("#e2e8f0"))
+    canvas.setLineWidth(0.5)
+    canvas.line(18 * mm, 13 * mm, A4[0] - 18 * mm, 13 * mm)
+    canvas.restoreState()
 
 
 def _make_table(
@@ -210,31 +253,85 @@ def _build_pdf(data: dict[str, Any]) -> bytes:
     geo_score = float(data.get("overall_geo_score", 0))
     generated = datetime.now().strftime("%Y-%m-%d %H:%M UTC")
 
-    # ---------------------------------------------------------------- Header
-    story.append(_p("GEO Site Audit Report", h1))
-    story.append(_p(f"URL: {url}", sub))
-    story.append(_p(f"Generated: {generated}", sub))
-    story.append(HRFlowable(width="100%", thickness=1, color=_TEAL, spaceAfter=8))
-
-    # ---------------------------------------------------------- Overall Score
-    score_colour = _score_colour(geo_score)
-    # ReportLab XML colour must be #RRGGBB; hexval() returns "0xRRGGBB"
-    score_hex = "#" + score_colour.hexval()[2:]
-    story.append(
-        _p(
-            f'Overall GEO Score: <font color="{score_hex}" size="22"><b>{geo_score:.0f}/100</b></font>',
-            ParagraphStyle(
-                "ScoreDisplay",
-                parent=styles["Normal"],
-                fontName="Helvetica-Bold",
-                fontSize=14,
-                spaceAfter=8,
-            ),
-        )
+    # ---------------------------------------------------------------- Cover Page
+    cover_title_style = ParagraphStyle(
+        "CoverTitle", parent=styles["Normal"],
+        fontName="Helvetica-Bold", fontSize=28,
+        textColor=colors.white, spaceAfter=6,
+    )
+    cover_sub_style = ParagraphStyle(
+        "CoverSub", parent=styles["Normal"],
+        fontName="Helvetica", fontSize=11,
+        textColor=colors.HexColor("#ccfbf1"), spaceAfter=4,
+    )
+    cover_score_style = ParagraphStyle(
+        "CoverScore", parent=styles["Normal"],
+        fontName="Helvetica-Bold", fontSize=52,
+        textColor=colors.white, spaceAfter=2,
+    )
+    cover_score_label_style = ParagraphStyle(
+        "CoverScoreLabel", parent=styles["Normal"],
+        fontName="Helvetica", fontSize=12,
+        textColor=colors.HexColor("#99f6e4"), spaceAfter=0,
     )
 
+    score_colour_val = _score_colour(geo_score)
+    score_hex_val = "#" + score_colour_val.hexval()[2:]
+
+    cover_block = Table(
+        [[
+            Paragraph("GEO Site Audit Report", cover_title_style),
+            Paragraph(""),
+        ]],
+        colWidths=[160 * mm],
+    )
+    cover_block.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, -1), _TEAL),
+        ("TOPPADDING", (0, 0), (-1, -1), 20),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 20),
+        ("LEFTPADDING", (0, 0), (-1, -1), 14),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 14),
+    ]))
+    story.append(cover_block)
+    story.append(Spacer(1, 12))
+
+    # Big score + meta info side by side
+    score_display = Table(
+        [[
+            Table(
+                [[Paragraph(f"{geo_score:.0f}", cover_score_style)],
+                 [Paragraph("/ 100 GEO Score", cover_score_label_style)]],
+                colWidths=[60 * mm],
+            ),
+            Table(
+                [[Paragraph(f"<b>Domain:</b>  {escape(url)}", body)],
+                 [Paragraph(f"<b>Generated:</b>  {generated}", body)],
+                 [Spacer(1, 6)],
+                 [Paragraph(
+                     f'Score interpretation: '
+                     f'<font color="{score_hex_val}"><b>{"Excellent" if geo_score >= 70 else "Needs Work" if geo_score >= 45 else "Poor"}</b></font>',
+                     body,
+                 )]],
+                colWidths=[100 * mm],
+            ),
+        ]],
+        colWidths=[60 * mm, 100 * mm],
+    )
+    score_display.setStyle(TableStyle([
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+        ("BACKGROUND", (0, 0), (0, 0), _TEAL_LIGHT),
+        ("LEFTPADDING", (0, 0), (-1, -1), 8),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 8),
+        ("TOPPADDING", (0, 0), (-1, -1), 10),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 10),
+        ("GRID", (0, 0), (-1, -1), 0.5, _BORDER),
+    ]))
+    story.append(score_display)
+    story.append(Spacer(1, 16))
+    story.append(HRFlowable(width="100%", thickness=1, color=_TEAL, spaceAfter=8))
+
     # ------------------------------------------------ Pillar Scores Summary
-    story.append(_p("Pillar Scores", h2))
+    story.append(_section_header("Pillar Scores"))
     pillar_rows: list[list[Any]] = [["Pillar", "Score", "Weight"]]
     citability = float(data.get("citability_score", 0))
     technical = data.get("technical") or {}
@@ -266,7 +363,7 @@ def _build_pdf(data: dict[str, Any]) -> bytes:
     story.append(Spacer(1, 6))
 
     # ------------------------------------------------ Platform Readiness
-    story.append(_p("Platform Readiness", h2))
+    story.append(_section_header("Platform Readiness"))
     platform_rows: list[list[Any]] = [["Platform", "Score"]]
     platform_map = {
         "Google AI Overviews": "google_aio",
@@ -281,7 +378,7 @@ def _build_pdf(data: dict[str, Any]) -> bytes:
     story.append(Spacer(1, 6))
 
     # ------------------------------------------------ AI Crawler Access
-    story.append(_p("AI Crawler Access (robots.txt)", h2))
+    story.append(_section_header("AI Crawler Access (robots.txt)"))
     crawler_access: dict[str, Any] = technical.get("ai_crawler_access") or {}
     if crawler_access:
         crow: list[list[str]] = [["Crawler", "Status"]]
@@ -293,7 +390,7 @@ def _build_pdf(data: dict[str, Any]) -> bytes:
     story.append(Spacer(1, 6))
 
     # ------------------------------------------------ Technical Details
-    story.append(_p("Technical Checks", h2))
+    story.append(_section_header("Technical Checks"))
     tech_checks: list[list[str]] = [["Check", "Result"]]
     bool_checks = [
         ("HTTPS", technical.get("is_https")),
@@ -319,7 +416,7 @@ def _build_pdf(data: dict[str, Any]) -> bytes:
     story.append(Spacer(1, 6))
 
     # ------------------------------------------------ Schema/JSON-LD
-    story.append(_p("Structured Data (JSON-LD)", h2))
+    story.append(_section_header("Structured Data (JSON-LD)"))
     schema_checks: list[list[str]] = [["Check", "Result"]]
     schema_bools = [
         ("Organization schema", schema.get("has_organization")),
@@ -343,7 +440,7 @@ def _build_pdf(data: dict[str, Any]) -> bytes:
     story.append(Spacer(1, 6))
 
     # ------------------------------------------------ Content Quality
-    story.append(_p("Content Quality (E-E-A-T)", h2))
+    story.append(_section_header("Content Quality (E-E-A-T)"))
     cq_checks: list[list[str]] = [["Metric", "Value"]]
     cq_metrics = [
         ("Word count", content.get("word_count")),
@@ -384,7 +481,7 @@ def _build_pdf(data: dict[str, Any]) -> bytes:
     story.append(Spacer(1, 6))
 
     # ------------------------------------------------ llms.txt
-    story.append(_p("llms.txt", h2))
+    story.append(_section_header("llms.txt"))
     llms_checks: list[list[str]] = [["Check", "Value"]]
     llms_metrics = [
         ("llms.txt present", llmstxt.get("has_llmstxt")),
@@ -411,7 +508,7 @@ def _build_pdf(data: dict[str, Any]) -> bytes:
     # ------------------------------------------------ Top Issues
     top_issues: list[dict[str, Any]] = data.get("top_issues") or []
     if top_issues:
-        story.append(_p("Top Issues", h2))
+        story.append(_section_header("Top Issues"))
         issue_rows: list[list[str]] = [["Severity", "Category", "Issue"]]
         for issue in top_issues[:10]:
             if not isinstance(issue, dict):
@@ -432,7 +529,7 @@ def _build_pdf(data: dict[str, Any]) -> bytes:
     # ------------------------------------------------ Top Recommendations
     top_recs: list[str] = data.get("top_recommendations") or []
     if top_recs:
-        story.append(_p("Top Recommendations", h2))
+        story.append(_section_header("Top Recommendations"))
         for i, rec in enumerate(top_recs[:5], 1):
             story.append(_p(f"{i}. {rec}", body))
         story.append(Spacer(1, 6))
@@ -446,7 +543,7 @@ def _build_pdf(data: dict[str, Any]) -> bytes:
         action_plan = ai_insights.get("action_plan") or {}
 
         story.append(HRFlowable(width="100%", thickness=0.5, color=_BORDER, spaceBefore=8, spaceAfter=8))
-        story.append(_p("AI-Powered Executive Summary", h2))
+        story.append(_section_header("AI-Powered Executive Summary"))
 
         if exec_summary:
             story.append(_p(exec_summary, body))
@@ -471,7 +568,7 @@ def _build_pdf(data: dict[str, Any]) -> bytes:
             )
 
         if critical_issues:
-            story.append(_p("Critical Issues", h2))
+            story.append(_section_header("Critical Issues"))
             crit_rows: list[list[str]] = [["ID", "Issue", "Fix"]]
             for issue in critical_issues[:6]:
                 if not isinstance(issue, dict):
@@ -485,7 +582,7 @@ def _build_pdf(data: dict[str, Any]) -> bytes:
             story.append(Spacer(1, 6))
 
         if action_plan:
-            story.append(_p("30-Day Action Plan", h2))
+            story.append(_section_header("30-Day Action Plan"))
             week_labels = {"week1": "Week 1", "week2": "Week 2", "week3": "Week 3", "week4": "Week 4"}
             for week_key, week_label in week_labels.items():
                 items = action_plan.get(week_key) or []
@@ -510,5 +607,5 @@ def _build_pdf(data: dict[str, Any]) -> bytes:
         )
     )
 
-    doc.build(story)
+    doc.build(story, onFirstPage=_draw_footer, onLaterPages=_draw_footer)
     return buf.getvalue()

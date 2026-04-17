@@ -5,16 +5,15 @@ import json
 import logging
 from collections.abc import AsyncGenerator
 from datetime import UTC
-from uuid import UUID, uuid4
+from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query
 from fastapi.responses import StreamingResponse
 from redis.asyncio import Redis
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.config import get_settings
 from app.dependencies import async_session, get_current_user, get_db, get_redis
 from app.models.answer import Answer
 from app.models.engine import Engine, ProjectEngine
@@ -87,21 +86,6 @@ async def _get_run(
     return run
 
 
-async def _start_pipeline_workflow(run_id: UUID, *, retry: bool = False) -> None:
-    from temporalio.client import Client as TemporalClient
-
-    temporal_client = await TemporalClient.connect(get_settings().temporal_host)
-    workflow_id = f"pipeline-{run_id}"
-    if retry:
-        workflow_id = f"{workflow_id}-retry-{uuid4()}"
-
-    await temporal_client.start_workflow(
-        "FullPipelineWorkflow",
-        {"engine_run_id": str(run_id)},
-        id=workflow_id,
-        task_queue="aeogeo-pipeline",
-    )
-
 
 async def _enforce_run_trigger_rate(redis: Redis, tenant_id: UUID) -> None:
     await enforce_rate_limit(
@@ -123,10 +107,13 @@ async def _enforce_run_trigger_rate(redis: Redis, tenant_id: UUID) -> None:
 async def trigger_run(
     project_id: UUID,
     body: EngineRunCreate,
+    background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_db),
     redis: Redis = Depends(get_redis),
     user: User = Depends(get_current_user),
 ) -> EngineRunResponse:
+    from app.services.pipeline import run_full_pipeline
+
     await _verify_project(project_id, user.tenant_id, db)
     await _enforce_run_trigger_rate(redis, user.tenant_id)
 
@@ -141,21 +128,10 @@ async def trigger_run(
     db.add(run)
     await db.flush()
     await db.refresh(run)
-
-    # Start Temporal workflow (best-effort — if Temporal is unavailable the
-    # run record still exists with status=pending so it can be retried).
-    try:
-        await _start_pipeline_workflow(run.id)
-    except Exception:
-        logger.warning(
-            "Failed to start Temporal workflow for run %s — "
-            "run saved with status=pending",
-            run.id,
-            exc_info=True,
-        )
-
     await db.commit()
     await db.refresh(run)
+
+    background_tasks.add_task(run_full_pipeline, str(run.id))
 
     return EngineRunResponse.model_validate(run)
 
@@ -521,9 +497,12 @@ async def stream_runs_progress(
 async def retry_run(
     project_id: UUID,
     run_id: UUID,
+    background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_db),
     user: User = Depends(get_current_user),
 ) -> EngineRunResponse:
+    from app.services.pipeline import run_full_pipeline
+
     await _verify_project(project_id, user.tenant_id, db)
     run = await _get_run(run_id, project_id, db)
 
@@ -533,43 +512,16 @@ async def retry_run(
             detail="Completed runs cannot be retried — use New Run instead",
         )
 
-    # Best-effort cancel of any active Temporal workflow for running/pending runs
-    if run.status in {"running", "pending"}:
-        try:
-            from temporalio.client import Client as TemporalClient
-
-            client = await TemporalClient.connect(get_settings().temporal_host)
-            handle = client.get_workflow_handle(f"pipeline-{run_id}")
-            await handle.cancel()
-        except Exception:
-            logger.warning(
-                "Failed to cancel Temporal workflow for run %s before retry",
-                run_id,
-                exc_info=True,
-            )
-
     service = EngineRunnerService(db)
     reset_run = await service.reset_run_for_retry(run_id)
     if reset_run is None:
         raise HTTPException(status_code=404, detail="Run not found")
 
-    try:
-        await _start_pipeline_workflow(run_id, retry=True)
-    except Exception as exc:
-        logger.warning(
-            "Failed to start retry workflow for run %s",
-            run_id,
-            exc_info=True,
-        )
-        await db.commit()
-        await db.refresh(reset_run)
-        raise HTTPException(
-            status_code=503,
-            detail=f"Retry reset the run, but Temporal start failed: {exc}",
-        ) from exc
-
     await db.commit()
     await db.refresh(reset_run)
+
+    background_tasks.add_task(run_full_pipeline, str(run_id))
+
     return EngineRunResponse.model_validate(reset_run)
 
 
@@ -589,32 +541,9 @@ async def cancel_run(
             detail="Only pending or running runs can be cancelled",
         )
 
-    temporal_cancel_failed = False
-    try:
-        from temporalio.client import Client as TemporalClient
-
-        client = await TemporalClient.connect(get_settings().temporal_host)
-        handle = client.get_workflow_handle(f"pipeline-{run_id}")
-        await handle.cancel()
-    except Exception:
-        temporal_cancel_failed = True
-        logger.warning(
-            "Temporal cancel failed for run %s before DB update — "
-            "will still mark cancelled in DB",
-            run_id,
-            exc_info=True,
-        )
-
     run.status = "cancelled"
     await db.commit()
     await db.refresh(run)
-
-    if temporal_cancel_failed:
-        logger.error(
-            "Run %s marked cancelled in DB but Temporal cancel did not succeed; "
-            "workflow may still be running until it observes cancellation.",
-            run_id,
-        )
 
     return EngineRunResponse.model_validate(run)
 

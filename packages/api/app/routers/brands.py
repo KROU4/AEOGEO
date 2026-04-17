@@ -43,7 +43,6 @@ from app.services.ai_client import (
 )
 from app.services.brand import BrandService
 from app.services.discovery import DiscoveryError, DiscoveryService
-from app.services.homepage_crawl import crawl_website_pages
 from app.utils.locale import locale_instruction
 
 logger = logging.getLogger(__name__)
@@ -220,7 +219,11 @@ async def autofill_brand(
     redis: Redis = Depends(get_redis),
     user: User = Depends(get_current_user),
 ) -> BrandAutofillResponse:
-    """Crawl a website homepage and use an LLM to extract brand profile data."""
+    """Fetch a website homepage with httpx and use an LLM to extract brand profile data."""
+    import html
+    import re as _re
+
+    import httpx
 
     # Normalize domain to a full URL
     domain = body.domain.strip()
@@ -229,40 +232,32 @@ async def autofill_brand(
     else:
         url = domain
 
-    # --- Step 1: Crawl homepage only ---
-    from app.crawl_availability import CrawlStackUnavailableError
-
+    # --- Step 1: Fetch homepage ---
     try:
-        crawl_result = await crawl_website_pages(
-            brand_id=user.id,  # used only for logging context
-            url=url,
-            max_pages=1,
-            max_depth=0,
-        )
-    except CrawlStackUnavailableError as e:
-        raise HTTPException(
-            status_code=503,
-            detail={"code": "crawl.not_installed", "message": str(e)},
-        ) from e
+        async with httpx.AsyncClient(
+            follow_redirects=True,
+            timeout=15,
+            headers={"User-Agent": "Mozilla/5.0 (compatible; AEOGEOBot/1.0)"},
+        ) as client:
+            response = await client.get(url)
+            response.raise_for_status()
+            raw_html = response.text
     except Exception as e:
-        logger.error("Autofill crawl failed for %s: %s", url, e)
+        logger.error("Autofill fetch failed for %s: %s", url, e)
         raise HTTPException(
             status_code=502,
-            detail=f"Failed to crawl website: {e}",
+            detail=f"Failed to fetch website: {e}",
         )
 
-    # Check we got content
-    successful_pages = [
-        p for p in crawl_result.get("pages", []) if p.get("status") == "success"
-    ]
-    if not successful_pages:
-        raise HTTPException(
-            status_code=502,
-            detail="Could not retrieve any content from the website.",
-        )
+    # Strip HTML tags to plain text
+    page_title_match = _re.search(r"<title[^>]*>(.*?)</title>", raw_html, _re.IGNORECASE | _re.DOTALL)
+    page_title = html.unescape(page_title_match.group(1).strip()) if page_title_match else ""
+    page_content = _re.sub(r"<style[^>]*>.*?</style>", " ", raw_html, flags=_re.DOTALL | _re.IGNORECASE)
+    page_content = _re.sub(r"<script[^>]*>.*?</script>", " ", page_content, flags=_re.DOTALL | _re.IGNORECASE)
+    page_content = _re.sub(r"<[^>]+>", " ", page_content)
+    page_content = html.unescape(page_content)
+    page_content = _re.sub(r"\s{2,}", " ", page_content).strip()
 
-    page_content = successful_pages[0].get("content", "")
-    page_title = successful_pages[0].get("title", "")
     if not page_content or len(page_content.strip()) < 50:
         raise HTTPException(
             status_code=502,

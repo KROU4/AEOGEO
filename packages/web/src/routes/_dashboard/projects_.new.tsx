@@ -1,8 +1,9 @@
-import { useState, type FormEvent } from "react";
+import { useCallback, useState, type FormEvent } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
+import { AnalysisProgress } from "@/components/projects/analysis-progress";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -46,11 +47,20 @@ function NewProjectSimple() {
   const navigate = useNavigate();
   const [name, setName] = useState("");
   const [website, setWebsite] = useState("");
-  const [errors, setErrors] = useState<{ name?: string; website?: string }>(
-    {},
-  );
+  const [errors, setErrors] = useState<{ name?: string; website?: string }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showProgress, setShowProgress] = useState(false);
+  const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
   const createProject = useCreateProject();
+
+  const handleProgressComplete = useCallback(async () => {
+    if (pendingNavigation) {
+      await navigate({
+        to: "/projects/$projectId/site-audit",
+        params: { projectId: pendingNavigation },
+      });
+    }
+  }, [navigate, pendingNavigation]);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -79,15 +89,21 @@ function NewProjectSimple() {
         url: parsed!.auditUrl,
       });
       toast.success(t("createFlow.auditStarted"));
-      await navigate({
-        to: "/projects/$projectId/site-audit",
-        params: { projectId: project.id },
-      });
+      setPendingNavigation(project.id);
+      setShowProgress(true);
     } catch {
       toast.error(t("createFlow.createFailed"));
-    } finally {
       setIsSubmitting(false);
     }
+  }
+
+  if (showProgress) {
+    return (
+      <AnalysisProgress
+        projectName={name.trim() || undefined}
+        onComplete={handleProgressComplete}
+      />
+    );
   }
 
   return (

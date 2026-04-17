@@ -219,5 +219,15 @@
     "phase2": "Content quality (E-E-A-T)",
     "phase3": "AI citability & platform readiness",
     "phase4": "Scores & recommendations"
+  },
+  "analysisProgress": {
+    "title": "Analyzing your project…",
+    "subtitle": "Setting up visibility tracking for {{name}}",
+    "step1": "Scanning website structure",
+    "step2": "Analyzing brand presence",
+    "step3": "Checking AI citations",
+    "step4": "Scoring content quality",
+    "step5": "Generating insights",
+    "hint": "This usually takes a few seconds"
   }
 }
