@@ -25,7 +25,7 @@ from app.utils.datetime_compat import naive_utc
 
 def _period_start(period: str) -> datetime:
     days = {"7d": 7, "30d": 30, "90d": 90}.get(period, 7)
-    return datetime.now(UTC) - timedelta(days=days)
+    return datetime.utcnow() - timedelta(days=days)
 
 
 async def _completed_runs_in_window(
@@ -141,7 +141,7 @@ async def build_project_dashboard(
             citation_rate=0.0,
             citation_rate_delta=0.0,
             sparklines={"score": [], "sov": []},
-            updated_at=datetime.now(UTC),
+            updated_at=datetime.utcnow(),
         )
 
     overall = await _avg_total_scaled(db, latest.id)

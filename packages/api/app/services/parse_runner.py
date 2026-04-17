@@ -12,7 +12,7 @@ import logging
 import os
 import uuid
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import datetime
 
 import httpx
 from redis.asyncio import Redis
@@ -178,7 +178,7 @@ class ParseRunnerService:
             logger.warning("Answer %s has empty raw_response, skipping", answer_id)
             answer.parse_status = "completed"
             answer.parse_error = None
-            answer.parsed_at = datetime.now(UTC)
+            answer.parsed_at = datetime.utcnow()
             answer.score_status = "pending"
             answer.score_error = None
             answer.scored_at = None
@@ -290,7 +290,7 @@ class ParseRunnerService:
             for answer in empty_answers:
                 answer.parse_status = "completed"
                 answer.parse_error = None
-                answer.parsed_at = datetime.now(UTC)
+                answer.parsed_at = datetime.utcnow()
                 answer.score_status = "pending"
                 answer.score_error = None
                 answer.scored_at = None
@@ -480,7 +480,7 @@ class ParseRunnerService:
 
         answer.parse_status = "completed"
         answer.parse_error = None
-        answer.parsed_at = datetime.now(UTC)
+        answer.parsed_at = datetime.utcnow()
         answer.score_status = "pending"
         answer.score_error = None
         answer.scored_at = None

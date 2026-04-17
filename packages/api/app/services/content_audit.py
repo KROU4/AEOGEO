@@ -112,7 +112,7 @@ class ContentAuditService:
         status: str,
     ) -> ContentPushEvent:
         await self._verify_project(project_id, tenant_id)
-        now = datetime.now(UTC)
+        now = datetime.utcnow()
         published = published_at or now
         baseline_run = await self._latest_completed_run(project_id, before_or_equal=published)
         baseline = await self._metrics_for_run(baseline_run.id if baseline_run else None)

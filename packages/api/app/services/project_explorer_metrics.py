@@ -53,7 +53,7 @@ def _domain_from_url(url: str) -> str:
 
 def _period_cutoff(period: str) -> datetime:
     days = {"7d": 7, "30d": 30, "90d": 90}.get(period, 7)
-    return datetime.now(UTC) - timedelta(days=days)
+    return datetime.utcnow() - timedelta(days=days)
 
 
 async def _run_ids_since(
@@ -136,7 +136,7 @@ async def build_sov(
         return ProjectSovResponse(
             brands=[],
             total_tracked_brands=0,
-            updated_at=datetime.now(UTC),
+            updated_at=datetime.utcnow(),
         )
 
     result = await db.execute(
@@ -152,7 +152,7 @@ async def build_sov(
         return ProjectSovResponse(
             brands=[],
             total_tracked_brands=0,
-            updated_at=datetime.now(UTC),
+            updated_at=datetime.utcnow(),
         )
 
     counts: dict[str, int] = defaultdict(int)
@@ -176,7 +176,7 @@ async def build_sov(
         .limit(1),
     )
     row = r2.first()
-    updated = datetime.now(UTC)
+    updated = datetime.utcnow()
     if row:
         u = row[0] or row[1] or row[2]
         if u:
@@ -194,7 +194,7 @@ def _week_ranges(num_weeks: int) -> list[tuple[datetime, datetime, str]]:
 
     Boundaries are naive UTC midnights to match TIMESTAMP WITHOUT TIME ZONE columns.
     """
-    today = datetime.now(UTC).date()
+    today = datetime.utcnow().date()
     monday = today - timedelta(days=today.weekday())
     ranges: list[tuple[datetime, datetime, str]] = []
     for i in range(num_weeks - 1, -1, -1):
@@ -276,7 +276,7 @@ async def build_trends(
             await _sov_pct_for_runs(db, project_id, run_ids, brand, project),
         )
 
-    updated = datetime.now(UTC)
+    updated = datetime.utcnow()
     return ProjectTrendsResponse(
         labels=labels,
         series={"sov": sov_s, "visibility": vis_s},
@@ -309,7 +309,7 @@ async def build_citations_list(
         return CitationsListResponse(
             total=0,
             citations=[],
-            updated_at=datetime.now(UTC),
+            updated_at=datetime.utcnow(),
         )
 
     q = (
@@ -386,7 +386,7 @@ async def build_citations_list(
     return CitationsListResponse(
         total=total,
         citations=page_items,
-        updated_at=datetime.now(UTC),
+        updated_at=datetime.utcnow(),
     )
 
 
@@ -437,7 +437,7 @@ async def build_competitors_comparison(
     if not run_ids:
         return CompetitorsComparisonResponse(
             brands=[],
-            updated_at=datetime.now(UTC),
+            updated_at=datetime.utcnow(),
             period=period,
         )
 
@@ -586,6 +586,6 @@ async def build_competitors_comparison(
 
     return CompetitorsComparisonResponse(
         brands=comparison,
-        updated_at=datetime.now(UTC),
+        updated_at=datetime.utcnow(),
         period=period,
     )
