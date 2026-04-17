@@ -6,7 +6,7 @@ import logging
 from datetime import UTC, datetime, timedelta
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from fastapi.responses import Response, StreamingResponse
 from pydantic import HttpUrl, TypeAdapter, ValidationError
 from redis.asyncio import Redis
@@ -75,19 +75,53 @@ async def _get_audit(
     return audit
 
 
-async def _start_site_audit_workflow(audit_id: UUID, url: str) -> str:
-    """Start a Temporal SiteAuditWorkflow and return its workflow ID."""
-    from temporalio.client import Client as TemporalClient
+async def _run_site_audit_bg(audit_id: UUID, url: str) -> None:
+    """Run the full GEO audit in a FastAPI background task (no Temporal required)."""
+    from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
-    temporal_client = await TemporalClient.connect(get_settings().temporal_host)
-    workflow_id = f"site-audit-{audit_id}"
-    await temporal_client.start_workflow(
-        "SiteAuditWorkflow",
-        {"audit_id": str(audit_id), "url": url},
-        id=workflow_id,
-        task_queue="aeogeo-pipeline",
-    )
-    return workflow_id
+    from geo_audit.full_audit import run_full_audit
+
+    settings = get_settings()
+    engine = create_async_engine(settings.database_url, echo=False)
+    session_factory = async_sessionmaker(engine, expire_on_commit=False)
+
+    try:
+        async with session_factory() as session:
+            audit = await session.get(SiteAudit, audit_id)
+            if audit is None:
+                return
+            audit.status = "running"
+            await session.commit()
+
+        openai_key: str | None = settings.openai_api_key or None
+        anthropic_key: str | None = settings.anthropic_api_key or None
+        result = await run_full_audit(
+            url,
+            openai_api_key=openai_key,
+            anthropic_api_key=anthropic_key,
+        )
+
+        async with session_factory() as session:
+            audit = await session.get(SiteAudit, audit_id)
+            if audit is not None:
+                audit.status = "completed"
+                audit.overall_geo_score = float(result.overall_geo_score)
+                audit.result_json = result.model_dump()
+                await session.commit()
+
+    except Exception as exc:
+        logger.exception("Background site audit failed for audit %s: %s", audit_id, exc)
+        try:
+            async with session_factory() as session:
+                audit = await session.get(SiteAudit, audit_id)
+                if audit is not None:
+                    audit.status = "failed"
+                    audit.error_message = str(exc)
+                    await session.commit()
+        except Exception:
+            pass
+    finally:
+        await engine.dispose()
 
 
 async def _enforce_site_audit_rate(redis: Redis, tenant_id: UUID) -> None:
@@ -163,6 +197,7 @@ async def _mark_stale_audits_failed(
 async def start_site_audit(
     project_id: UUID,
     body: SiteAuditStartRequest,
+    background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_db),
     redis: Redis = Depends(get_redis),
     user: User = Depends(get_current_user),
@@ -195,22 +230,7 @@ async def start_site_audit(
     await db.flush()
     await db.refresh(audit)
 
-    # Start Temporal workflow. If this fails, do not leave the frontend polling
-    # a pending audit that can never be picked up by a worker.
-    try:
-        workflow_id = await _start_site_audit_workflow(audit.id, url)
-        audit.temporal_workflow_id = workflow_id
-    except Exception as exc:
-        audit.status = "failed"
-        audit.error_message = (
-            "Failed to start Temporal SiteAuditWorkflow. "
-            "Check TEMPORAL_HOST and the aeogeo-pipeline worker service."
-        )
-        logger.exception(
-            "Failed to start Temporal SiteAuditWorkflow for audit %s: %s",
-            audit.id,
-            exc,
-        )
+    background_tasks.add_task(_run_site_audit_bg, audit.id, url)
 
     await db.commit()
     await db.refresh(audit)

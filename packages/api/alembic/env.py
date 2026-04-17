@@ -6,6 +6,7 @@ from alembic import context
 from sqlalchemy import pool
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
+from app.config import normalize_postgres_url_for_async
 from app.models.base import Base
 
 import app.models  # noqa: F401  — register all models with Base.metadata
@@ -17,7 +18,10 @@ if config.config_file_name is not None:
 
 # Use DATABASE_URL env var when set (e.g. in Docker), else fall back to alembic.ini
 if os.environ.get("DATABASE_URL"):
-    config.set_main_option("sqlalchemy.url", os.environ["DATABASE_URL"])
+    config.set_main_option(
+        "sqlalchemy.url",
+        normalize_postgres_url_for_async(os.environ["DATABASE_URL"]),
+    )
 
 target_metadata = Base.metadata
 

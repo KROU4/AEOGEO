@@ -1,3 +1,5 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.responses import PlainTextResponse
 
@@ -53,9 +55,23 @@ if app_settings.sentry_dsn:
             traces_sample_rate=0.1,
         )
 
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    """Bind DB engine after app import so uvicorn can listen even if startup work is slow."""
+    from app.dependencies import dispose_db_engine, init_db
+
+    init_db()
+    try:
+        yield
+    finally:
+        await dispose_db_engine()
+
+
 app = FastAPI(
     title="AEOGEO API",
     version="0.1.0",
+    lifespan=lifespan,
 )
 
 setup_cors(app, app_settings)

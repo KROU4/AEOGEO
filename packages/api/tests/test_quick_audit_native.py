@@ -64,7 +64,7 @@ def test_quick_audit_scores_ai_infrastructure_ready(monkeypatch) -> None:
 
         result = await run_quick_audit_native("https://example.com")
 
-        assert result.overall_geo_score == 40
+        assert result.overall_geo_score == 22
         assert result.readiness_label == "AI crawler ready"
         assert result.has_llms_txt is True
         assert result.has_sitemap is True

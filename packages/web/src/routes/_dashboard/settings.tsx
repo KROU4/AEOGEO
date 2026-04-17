@@ -1,18 +1,14 @@
 import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { useCurrentUser } from "@/hooks/use-auth";
 import { useLocale } from "@/hooks/use-locale";
-import { useTeamMembers } from "@/hooks/use-team";
-import { useProjects, useProject, useUpdateProject } from "@/hooks/use-projects";
+import { useProjects, useProject, useUpdateProject, useProjectMembers } from "@/hooks/use-projects";
 import { useBillingPlan } from "@/hooks/use-billing-plan";
-import {
-  useIntegrationSettings,
-  useNotificationPreferences,
-  useUpdateIntegrationSettings,
-  useUpdateNotificationPreferences,
-} from "@/hooks/use-settings";
-import { InviteMemberDialog } from "@/components/settings/invite-member-dialog";
+import { apiGet } from "@/lib/api-client";
+import { Skeleton } from "@/components/ui/skeleton";
+import type { AIProviderKey } from "@/types/api";
 import {
   Card,
   CardContent,
@@ -21,15 +17,13 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Slider } from "@/components/ui/slider";
+import { Switch } from "@/components/ui/switch";
+import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -38,30 +32,21 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Progress } from "@/components/ui/progress";
-import {
   User,
-  Users,
-  Bell,
-  Puzzle,
-  Plus,
   Globe,
   Sliders,
   Check,
+  Users,
   CreditCard,
+  Key,
+  Bell,
+  Copy,
+  UserPlus,
 } from "lucide-react";
 
 export const Route = createFileRoute("/_dashboard/settings")({
   component: SettingsPage,
 });
-
 
 function ProfileTab() {
   const { t } = useTranslation("settings");
@@ -86,19 +71,14 @@ function ProfileTab() {
           <CardDescription>{t("profile.subtitle")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Avatar */}
           <div className="flex items-center gap-4">
             <Avatar className="w-16 h-16">
-              <AvatarFallback className="bg-teal-600 text-white text-xl font-bold">
-                {initials}
-              </AvatarFallback>
+              <AvatarFallback className="bg-teal-600 text-white text-xl font-bold">{initials}</AvatarFallback>
             </Avatar>
             <div>
               <p className="text-sm font-medium text-foreground">{userName}</p>
-              <p className="text-xs text-muted-foreground">
-                {tc("roles.owner")}
-              </p>
-              <button className="text-xs text-primary hover:underline mt-1">
+              <p className="text-xs text-muted-foreground">{tc("roles.owner")}</p>
+              <button type="button" className="text-xs text-primary hover:underline mt-1">
                 {t("profile.changeAvatar")}
               </button>
             </div>
@@ -106,26 +86,21 @@ function ProfileTab() {
 
           <Separator />
 
-          {/* Name */}
           <div className="space-y-2">
             <Label htmlFor="full-name">{t("profile.fullName")}</Label>
             <Input id="full-name" defaultValue={userName} />
           </div>
 
-          {/* Email (disabled) */}
           <div className="space-y-2">
             <Label htmlFor="email-address">{t("profile.emailAddress")}</Label>
             <Input id="email-address" defaultValue={userEmail} disabled />
-            <p className="text-xs text-muted-foreground">
-              {t("profile.emailHelp")}
-            </p>
+            <p className="text-xs text-muted-foreground">{t("profile.emailHelp")}</p>
           </div>
 
           <Button>{tc("actions.save")}</Button>
         </CardContent>
       </Card>
 
-      {/* Language Preferences */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -137,40 +112,30 @@ function ProfileTab() {
         <CardContent>
           <div className="grid grid-cols-2 gap-3 max-w-sm">
             <button
+              type="button"
               onClick={() => setLocale("en")}
               className={`flex items-center justify-between gap-2 p-3 rounded-lg border transition-colors cursor-pointer ${
-                locale === "en"
-                  ? "border-primary bg-primary/5"
-                  : "border-border hover:bg-accent/50"
+                locale === "en" ? "border-primary bg-primary/5" : "border-border hover:bg-accent/50"
               }`}
             >
               <div className="flex items-center gap-2">
                 <span className="text-lg">EN</span>
-                <span className="text-sm font-medium text-foreground">
-                  English
-                </span>
+                <span className="text-sm font-medium text-foreground">English</span>
               </div>
-              {locale === "en" && (
-                <Check className="w-4 h-4 text-primary" />
-              )}
+              {locale === "en" && <Check className="w-4 h-4 text-primary" />}
             </button>
             <button
+              type="button"
               onClick={() => setLocale("ru")}
               className={`flex items-center justify-between gap-2 p-3 rounded-lg border transition-colors cursor-pointer ${
-                locale === "ru"
-                  ? "border-primary bg-primary/5"
-                  : "border-border hover:bg-accent/50"
+                locale === "ru" ? "border-primary bg-primary/5" : "border-border hover:bg-accent/50"
               }`}
             >
               <div className="flex items-center gap-2">
                 <span className="text-lg">RU</span>
-                <span className="text-sm font-medium text-foreground">
-                  Русский
-                </span>
+                <span className="text-sm font-medium text-foreground">Русский</span>
               </div>
-              {locale === "ru" && (
-                <Check className="w-4 h-4 text-primary" />
-              )}
+              {locale === "ru" && <Check className="w-4 h-4 text-primary" />}
             </button>
           </div>
         </CardContent>
@@ -178,14 +143,6 @@ function ProfileTab() {
     </div>
   );
 }
-
-const ALL_ENGINES = [
-  { id: "chatgpt", name: "ChatGPT" },
-  { id: "gemini", name: "Gemini" },
-  { id: "perplexity", name: "Perplexity" },
-  { id: "claude", name: "Claude" },
-  { id: "copilot", name: "Copilot" },
-];
 
 function ProjectSettingsTab() {
   const { t } = useTranslation("settings");
@@ -206,34 +163,11 @@ function ProjectSettingsTab() {
 
   const contentLocale = projectData?.content_locale ?? "en";
 
-  const [defaultEngines, setDefaultEngines] = useState<Set<string>>(
-    new Set(["chatgpt", "gemini", "perplexity"])
-  );
-  const [sampleCount, setSampleCount] = useState(5);
-
-  function toggleEngine(engineId: string) {
-    setDefaultEngines((prev) => {
-      const next = new Set(prev);
-      if (next.has(engineId)) {
-        next.delete(engineId);
-      } else {
-        next.add(engineId);
-      }
-      return next;
-    });
-  }
-
   return (
     <div className="space-y-6">
-      {/* Project Selector */}
       <div className="flex items-center gap-3">
-        <span className="text-sm font-medium text-foreground">
-          {t("projectSettings.selectProject")}
-        </span>
-        <Select
-          value={selectedProjectId ?? ""}
-          onValueChange={(value) => setSelectedProjectId(value)}
-        >
+        <span className="text-sm font-medium text-foreground">{t("projectSettings.selectProject")}</span>
+        <Select value={selectedProjectId ?? ""} onValueChange={(value) => setSelectedProjectId(value)}>
           <SelectTrigger className="w-[280px]">
             <SelectValue placeholder={t("projectSettings.selectProjectPlaceholder")} />
           </SelectTrigger>
@@ -248,124 +182,45 @@ function ProjectSettingsTab() {
       </div>
 
       {selectedProjectId && projectData && (
-        <>
-          {/* Content Language */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Globe className="w-4 h-4" />
-                {t("projectSettings.contentLocaleTitle")}
-              </CardTitle>
-              <CardDescription>{t("projectSettings.contentLocaleDesc")}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 gap-3 max-w-sm">
-                <button
-                  onClick={() => updateProject.mutate({ content_locale: "en" })}
-                  className={`flex items-center justify-between gap-2 p-3 rounded-lg border transition-colors cursor-pointer ${
-                    contentLocale === "en"
-                      ? "border-primary bg-primary/5"
-                      : "border-border hover:bg-accent/50"
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg">EN</span>
-                    <span className="text-sm font-medium text-foreground">
-                      English
-                    </span>
-                  </div>
-                  {contentLocale === "en" && (
-                    <Check className="w-4 h-4 text-primary" />
-                  )}
-                </button>
-                <button
-                  onClick={() => updateProject.mutate({ content_locale: "ru" })}
-                  className={`flex items-center justify-between gap-2 p-3 rounded-lg border transition-colors cursor-pointer ${
-                    contentLocale === "ru"
-                      ? "border-primary bg-primary/5"
-                      : "border-border hover:bg-accent/50"
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg">RU</span>
-                    <span className="text-sm font-medium text-foreground">
-                      Русский
-                    </span>
-                  </div>
-                  {contentLocale === "ru" && (
-                    <Check className="w-4 h-4 text-primary" />
-                  )}
-                </button>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Default Engines */}
-          <Card>
-            <CardHeader>
-              <CardTitle>{t("projectSettings.enginesTitle")}</CardTitle>
-              <CardDescription>
-                {t("projectSettings.enginesDesc")}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
-                {ALL_ENGINES.map((engine) => (
-                  <label
-                    key={engine.id}
-                    className="flex items-center gap-2.5 p-3 rounded-lg border border-border cursor-pointer hover:bg-accent/50 transition-colors has-[button[data-state=checked]]:border-primary has-[button[data-state=checked]]:bg-primary/5"
-                  >
-                    <Checkbox
-                      checked={defaultEngines.has(engine.id)}
-                      onCheckedChange={() => toggleEngine(engine.id)}
-                    />
-                    <span className="text-sm font-medium text-foreground">
-                      {engine.name}
-                    </span>
-                  </label>
-                ))}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                {t("projectSettings.enginesHint", {
-                  count: defaultEngines.size,
-                })}
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Default Sample Count */}
-          <Card>
-            <CardHeader>
-              <CardTitle>{t("projectSettings.sampleTitle")}</CardTitle>
-              <CardDescription>
-                {t("projectSettings.sampleDesc")}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="max-w-sm">
-                <div className="px-1">
-                  <Slider
-                    value={[sampleCount]}
-                    onValueChange={([v]) => setSampleCount(v ?? 5)}
-                    min={1}
-                    max={10}
-                    step={1}
-                  />
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Globe className="w-4 h-4" />
+              {t("projectSettings.contentLocaleTitle")}
+            </CardTitle>
+            <CardDescription>{t("projectSettings.contentLocaleDesc")}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 gap-3 max-w-sm">
+              <button
+                type="button"
+                onClick={() => updateProject.mutate({ content_locale: "en" })}
+                className={`flex items-center justify-between gap-2 p-3 rounded-lg border transition-colors cursor-pointer ${
+                  contentLocale === "en" ? "border-primary bg-primary/5" : "border-border hover:bg-accent/50"
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">EN</span>
+                  <span className="text-sm font-medium text-foreground">English</span>
                 </div>
-                <div className="flex items-center justify-between mt-2">
-                  <span className="text-xs text-muted-foreground">1</span>
-                  <span className="text-sm font-semibold text-foreground">
-                    {sampleCount}
-                  </span>
-                  <span className="text-xs text-muted-foreground">10</span>
+                {contentLocale === "en" && <Check className="w-4 h-4 text-primary" />}
+              </button>
+              <button
+                type="button"
+                onClick={() => updateProject.mutate({ content_locale: "ru" })}
+                className={`flex items-center justify-between gap-2 p-3 rounded-lg border transition-colors cursor-pointer ${
+                  contentLocale === "ru" ? "border-primary bg-primary/5" : "border-border hover:bg-accent/50"
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">RU</span>
+                  <span className="text-sm font-medium text-foreground">Русский</span>
                 </div>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                {t("projectSettings.sampleHint", { count: sampleCount })}
-              </p>
-            </CardContent>
-          </Card>
-        </>
+                {contentLocale === "ru" && <Check className="w-4 h-4 text-primary" />}
+              </button>
+            </div>
+          </CardContent>
+        </Card>
       )}
     </div>
   );
@@ -373,394 +228,200 @@ function ProjectSettingsTab() {
 
 function TeamTab() {
   const { t } = useTranslation("settings");
-  const { data: members = [], isLoading } = useTeamMembers();
-  const [inviteOpen, setInviteOpen] = useState(false);
+  const { data: projectsData } = useProjects();
+  const projects = projectsData?.items ?? [];
+  const [teamProjectId, setTeamProjectId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const first = projects[0];
+    if (!teamProjectId && first) {
+      setTeamProjectId(first.id);
+    }
+  }, [teamProjectId, projects]);
+
+  const membersQuery = useProjectMembers(teamProjectId ?? "");
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h3 className="text-lg font-semibold text-foreground">
-            {t("team.title")}
-          </h3>
-          <p className="text-sm text-muted-foreground mt-0.5">
-            {t("team.subtitle")}
-          </p>
-        </div>
-        <Button onClick={() => setInviteOpen(true)}>
-          <Plus className="w-4 h-4" />
-          {t("team.inviteMember")}
-        </Button>
+      <div className="flex items-center gap-3 flex-wrap">
+        <span className="text-sm font-medium text-foreground">{t("projectSettings.selectProject")}</span>
+        <Select value={teamProjectId ?? ""} onValueChange={(v) => setTeamProjectId(v)}>
+          <SelectTrigger className="w-[280px]">
+            <SelectValue placeholder={t("projectSettings.selectProjectPlaceholder")} />
+          </SelectTrigger>
+          <SelectContent>
+            {projects.map((project) => (
+              <SelectItem key={project.id} value={project.id}>
+                {project.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <Card>
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>{t("team.member")}</TableHead>
-                <TableHead>{t("team.status")}</TableHead>
-                <TableHead>{t("team.role")}</TableHead>
-                <TableHead>{t("team.projects")}</TableHead>
-                <TableHead className="text-right">{t("team.actions")}</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isLoading && (
-                <TableRow>
-                  <TableCell colSpan={5} className="py-8 text-center text-sm text-muted-foreground">
-                    {t("team.loading")}
-                  </TableCell>
-                </TableRow>
-              )}
-              {!isLoading &&
-                members.map((member) => {
-                  const initials = (member.name || member.email)
-                    .split(" ")
-                    .map((segment) => segment[0] || "")
-                    .join("")
-                    .toUpperCase()
-                    .slice(0, 2);
-
-                  return (
-                    <TableRow key={member.user_id}>
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          <Avatar>
-                            <AvatarFallback className="text-xs font-semibold bg-teal-600 text-white">
-                              {initials}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <p className="font-medium text-foreground">
-                              {member.name}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              {member.email}
-                            </p>
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant={
-                            member.status === "active" ? "default" : "secondary"
-                          }
-                        >
-                          {member.status === "active"
-                            ? t("team.activeStatus")
-                            : t("team.pendingStatus")}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex flex-wrap gap-1">
-                          {member.roles.length > 0 ? (
-                            member.roles.map((role) => (
-                              <Badge key={role} variant="outline">
-                                {role}
-                              </Badge>
-                            ))
-                          ) : (
-                            <span className="text-sm text-muted-foreground">
-                              {t("team.noRole")}
-                            </span>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        {member.projects.length > 0 ? (
-                          <div className="space-y-1">
-                            {member.projects.map((project) => (
-                              <div key={`${member.user_id}-${project.project_id}`} className="text-sm text-foreground">
-                                {project.project_name}
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <span className="text-sm text-muted-foreground">
-                            {t("team.noProjects")}
-                          </span>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <span className="text-xs text-muted-foreground">
-                          {member.is_current_user
-                            ? t("team.you")
-                            : member.status === "pending"
-                              ? t("team.pendingAction")
-                              : t("team.activeAction")}
-                        </span>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              {!isLoading && members.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={5} className="py-8 text-center text-sm text-muted-foreground">
-                    {t("team.empty")}
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+        <CardHeader>
+          <CardTitle>{t("team.title")}</CardTitle>
+          <CardDescription>{t("team.subtitle")}</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {membersQuery.isLoading ? (
+            <Skeleton className="h-24 w-full" />
+          ) : (membersQuery.data ?? []).length === 0 ? (
+            <p className="text-sm text-muted-foreground">{t("team.empty")}</p>
+          ) : (
+            (membersQuery.data ?? []).map((m) => {
+              const initials = m.name
+                .split(" ")
+                .map((x) => x[0])
+                .join("")
+                .toUpperCase()
+                .slice(0, 2);
+              return (
+            <div key={m.user_id} className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Avatar className="w-9 h-9">
+                  <AvatarFallback className="bg-accent text-accent-foreground text-sm">{initials}</AvatarFallback>
+                </Avatar>
+                <div>
+                  <p className="text-sm font-medium text-foreground">{m.name}</p>
+                  <p className="text-xs text-muted-foreground">{m.email}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Badge variant="outline" className="text-xs">
+                  {m.role}
+                </Badge>
+              </div>
+            </div>
+              );
+            })
+          )}
         </CardContent>
       </Card>
 
-      {/* Invite hint */}
-      <Card className="border-dashed">
-        <CardContent className="flex flex-col items-center justify-center py-10">
-          <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-4">
-            <Users className="w-6 h-6 text-muted-foreground" />
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <UserPlus className="w-4 h-4" />
+            {t("team.invite.title")}
+          </CardTitle>
+          <CardDescription>{t("team.invite.subtitle")}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex gap-3 flex-wrap">
+            <Input placeholder={t("team.invite.emailPlaceholder")} className="flex-1 min-w-[200px]" />
+            <Select defaultValue="editor">
+              <SelectTrigger className="w-[120px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="editor">Editor</SelectItem>
+                <SelectItem value="viewer">Viewer</SelectItem>
+                <SelectItem value="admin">Admin</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button type="button">{t("team.invite.submit")}</Button>
           </div>
-          <p className="text-sm font-medium text-foreground mb-1">
-            {t("team.inviteTitle")}
-          </p>
-          <p className="text-sm text-muted-foreground mb-4 text-center max-w-sm">
-            {t("team.inviteHint")}
-          </p>
-          <Button onClick={() => setInviteOpen(true)}>
-            <Plus className="w-4 h-4" />
-            {t("team.inviteMember")}
-          </Button>
         </CardContent>
       </Card>
-
-      <InviteMemberDialog open={inviteOpen} onOpenChange={setInviteOpen} />
     </div>
-  );
-}
-
-
-function NotificationsTab() {
-  const { t } = useTranslation("settings");
-  const { data: prefs } = useNotificationPreferences();
-  const updatePrefs = useUpdateNotificationPreferences();
-
-  const resolvedPrefs = {
-    weekly_reports: prefs?.weekly_reports ?? true,
-    citation_alerts: prefs?.citation_alerts ?? true,
-    competitor_movements: prefs?.competitor_movements ?? false,
-    content_published: prefs?.content_published ?? true,
-    team_activity: prefs?.team_activity ?? false,
-  };
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{t("notifications.title")}</CardTitle>
-        <CardDescription>
-          {t("notifications.subtitle")}
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm font-medium text-foreground">
-              {t("notifications.weeklyReports")}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              {t("notifications.weeklyReportsDesc")}
-            </p>
-          </div>
-          <Switch
-            checked={resolvedPrefs.weekly_reports}
-            disabled={updatePrefs.isPending}
-            onCheckedChange={(checked) =>
-              updatePrefs.mutate({ weekly_reports: checked })
-            }
-          />
-        </div>
-
-        <Separator />
-
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm font-medium text-foreground">
-              {t("notifications.citationAlerts")}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              {t("notifications.citationAlertsDesc")}
-            </p>
-          </div>
-          <Switch
-            checked={resolvedPrefs.citation_alerts}
-            disabled={updatePrefs.isPending}
-            onCheckedChange={(checked) =>
-              updatePrefs.mutate({ citation_alerts: checked })
-            }
-          />
-        </div>
-
-        <Separator />
-
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm font-medium text-foreground">
-              {t("notifications.competitorMovements")}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              {t("notifications.competitorMovementsDesc")}
-            </p>
-          </div>
-          <Switch
-            checked={resolvedPrefs.competitor_movements}
-            disabled={updatePrefs.isPending}
-            onCheckedChange={(checked) =>
-              updatePrefs.mutate({ competitor_movements: checked })
-            }
-          />
-        </div>
-
-        <Separator />
-
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm font-medium text-foreground">
-              {t("notifications.contentPublished")}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              {t("notifications.contentPublishedDesc")}
-            </p>
-          </div>
-          <Switch
-            checked={resolvedPrefs.content_published}
-            disabled={updatePrefs.isPending}
-            onCheckedChange={(checked) =>
-              updatePrefs.mutate({ content_published: checked })
-            }
-          />
-        </div>
-
-        <Separator />
-
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm font-medium text-foreground">
-              {t("notifications.teamActivity")}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              {t("notifications.teamActivityDesc")}
-            </p>
-          </div>
-          <Switch
-            checked={resolvedPrefs.team_activity}
-            disabled={updatePrefs.isPending}
-            onCheckedChange={(checked) =>
-              updatePrefs.mutate({ team_activity: checked })
-            }
-          />
-        </div>
-      </CardContent>
-    </Card>
   );
 }
 
 function BillingTab() {
   const { t } = useTranslation("settings");
-  const { data, isLoading, isError } = useBillingPlan();
-  const q = data?.quota;
-
-  if (isLoading) {
-    return (
-      <p className="text-sm text-muted-foreground py-6">{t("billing.loading")}</p>
-    );
-  }
-  if (isError || !data || !q) {
-    return (
-      <p className="text-sm text-destructive py-6">{t("billing.loadError")}</p>
-    );
-  }
-
-  const tokenPct =
-    q.tokens_pct != null ? Math.min(100, Math.round(q.tokens_pct)) : 0;
-  const costPct =
-    q.cost_pct != null ? Math.min(100, Math.round(q.cost_pct)) : 0;
+  const plan = useBillingPlan();
+  const q = plan.data?.quota;
 
   return (
     <div className="space-y-6">
-      <div>
-        <h3 className="text-lg font-semibold text-foreground">
-          {t("billing.title")}
-        </h3>
-        <p className="text-sm text-muted-foreground mt-0.5">
-          {t("billing.subtitle")}
-        </p>
-      </div>
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>{t("billing.planLabel")}</CardTitle>
+              <CardDescription>{t("billing.subtitle")}</CardDescription>
+            </div>
+            {plan.isLoading ? (
+              <Skeleton className="h-7 w-20" />
+            ) : (
+              <Badge className="bg-primary/10 text-primary border-primary/20 px-3 py-1 capitalize">
+                {plan.data?.plan ?? "—"}
+              </Badge>
+            )}
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {plan.isLoading ? (
+            <Skeleton className="h-32 w-full" />
+          ) : plan.error ? (
+            <p className="text-sm text-destructive">{t("billing.loadError")}</p>
+          ) : q ? (
+            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-muted-foreground">
+              <li className="flex items-center gap-2">
+                <Check className="w-3.5 h-3.5 text-[#4ae176] shrink-0" />
+                {t("billing.tokenBudget")}: {q.tokens_used.toLocaleString()}
+                {q.tokens_limit != null ? ` / ${q.tokens_limit.toLocaleString()}` : ` (${t("billing.unlimited")})`}
+              </li>
+              <li className="flex items-center gap-2">
+                <Check className="w-3.5 h-3.5 text-[#4ae176] shrink-0" />
+                {t("billing.requestsToday")}: {q.requests_today}
+                {q.requests_day_limit != null ? ` / ${q.requests_day_limit}` : ""}
+              </li>
+              <li className="flex items-center gap-2">
+                <Check className="w-3.5 h-3.5 text-[#4ae176] shrink-0" />
+                {t("billing.requestsThisMonth")}: {q.requests_this_month}
+              </li>
+              {q.limit_reached ? (
+                <li className="col-span-full text-destructive text-xs">{t("billing.limitReached")}</li>
+              ) : null}
+            </ul>
+          ) : null}
+        </CardContent>
+      </Card>
 
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-base">{t("billing.planLabel")}</CardTitle>
-          <Badge variant="secondary" className="capitalize">
-            {data.plan}
-          </Badge>
+        <CardHeader>
+          <CardTitle>{t("billing.title")}</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">{t("billing.tokenBudget")}</span>
-              <span className="font-medium tabular-nums">
-                {q.tokens_limit != null
-                  ? t("billing.xOfY", {
-                      current: q.tokens_used.toLocaleString(),
-                      max: q.tokens_limit.toLocaleString(),
-                    })
-                  : t("billing.unlimited")}
-              </span>
-            </div>
-            {q.tokens_limit != null && (
-              <Progress value={tokenPct} className="h-2" />
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">{t("billing.costBudget")}</span>
-              <span className="font-medium tabular-nums">
-                {q.cost_limit != null
-                  ? t("billing.xOfY", {
-                      current: q.cost_used.toFixed(2),
-                      max: q.cost_limit.toFixed(2),
-                    })
-                  : t("billing.unlimited")}
-              </span>
-            </div>
-            {q.cost_limit != null && q.cost_limit > 0 && (
-              <Progress value={costPct} className="h-2" />
-            )}
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-border">
-            <div>
-              <p className="text-xs text-muted-foreground">{t("billing.requestsToday")}</p>
-              <p className="text-lg font-semibold tabular-nums">
-                {q.requests_today}
-                {q.requests_day_limit != null && (
-                  <span className="text-sm font-normal text-muted-foreground">
-                    {" "}
-                    / {q.requests_day_limit}
+        <CardContent className="space-y-4">
+          {plan.isLoading || !q ? (
+            <Skeleton className="h-16 w-full" />
+          ) : (
+            <>
+              <div>
+                <div className="flex justify-between text-sm mb-1.5">
+                  <span className="text-muted-foreground">{t("billing.tokenBudget")}</span>
+                  <span className="font-avop-mono text-foreground">
+                    {q.tokens_used.toLocaleString()}
+                    {q.tokens_limit != null ? ` / ${q.tokens_limit.toLocaleString()}` : ""}
                   </span>
-                )}
-              </p>
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground">
-                {t("billing.requestsThisMonth")}
-              </p>
-              <p className="text-lg font-semibold tabular-nums">
-                {q.requests_this_month}
-              </p>
-            </div>
-          </div>
-
-          {q.limit_reached && (
-            <div className="rounded-lg border border-destructive/40 bg-destructive/5 p-3 text-sm text-destructive">
-              {t("billing.limitReached")}
-            </div>
-          )}
-          {q.warning_active && !q.limit_reached && (
-            <div className="rounded-lg border border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950 p-3 text-sm text-amber-900 dark:text-amber-200">
-              {t("billing.warningMessage")}
-            </div>
+                </div>
+                <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-primary transition-all"
+                    style={{ width: `${Math.min(100, q.tokens_pct ?? 0)}%` }}
+                  />
+                </div>
+              </div>
+              {q.cost_limit != null ? (
+                <div>
+                  <div className="flex justify-between text-sm mb-1.5">
+                    <span className="text-muted-foreground">{t("billing.costBudget")}</span>
+                    <span className="font-avop-mono text-foreground">
+                      {q.cost_used.toFixed(2)} / {q.cost_limit.toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
+                    <div
+                      className="h-full rounded-full bg-primary transition-all"
+                      style={{ width: `${Math.min(100, q.cost_pct ?? 0)}%` }}
+                    />
+                  </div>
+                </div>
+              ) : null}
+            </>
           )}
         </CardContent>
       </Card>
@@ -768,80 +429,119 @@ function BillingTab() {
   );
 }
 
-function IntegrationsTab() {
+function ApiKeysTab() {
   const { t } = useTranslation("settings");
-  const { data } = useIntegrationSettings();
-  const updateIntegrations = useUpdateIntegrationSettings();
-
-  const [genericWebhookUrl, setGenericWebhookUrl] = useState("");
-  const [slackWebhookUrl, setSlackWebhookUrl] = useState("");
-  const [slackEnabled, setSlackEnabled] = useState(false);
-
-  useEffect(() => {
-    setGenericWebhookUrl(data?.generic_webhook_url ?? "");
-    setSlackWebhookUrl(data?.slack_webhook_url ?? "");
-    setSlackEnabled(data?.slack_enabled ?? false);
-  }, [data]);
-
-  function saveIntegrations() {
-    updateIntegrations.mutate({
-      generic_webhook_url: genericWebhookUrl.trim() || null,
-      slack_webhook_url: slackWebhookUrl.trim() || null,
-      slack_enabled: slackEnabled,
-    });
-  }
+  const [copied, setCopied] = useState<string | null>(null);
+  const keysQuery = useQuery({
+    queryKey: ["ai-keys", "tenant"],
+    queryFn: () => apiGet<AIProviderKey[]>("/ai-keys/"),
+  });
+  const keys = keysQuery.data ?? [];
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{t("integrations.title")}</CardTitle>
-        <CardDescription>{t("integrations.subtitle")}</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="space-y-2">
-          <Label htmlFor="generic-webhook-url">Webhook URL</Label>
-          <Input
-            id="generic-webhook-url"
-            value={genericWebhookUrl}
-            onChange={(event) => setGenericWebhookUrl(event.target.value)}
-            placeholder="https://example.com/webhooks/aeogeo"
-          />
-          <p className="text-xs text-muted-foreground">
-            Send run/report events to your automation stack (Zapier/Make/custom).
-          </p>
-        </div>
-
-        <Separator />
-
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between flex-wrap gap-2">
             <div>
-              <p className="text-sm font-medium text-foreground">
-                Slack Notifications
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Post project updates to a Slack incoming webhook.
-              </p>
+              <CardTitle>{t("tabs.apiKeys")}</CardTitle>
+              <CardDescription>{t("apiKeys.aiKeysDesc")}</CardDescription>
             </div>
-            <Switch
-              checked={slackEnabled}
-              onCheckedChange={setSlackEnabled}
-              disabled={updateIntegrations.isPending}
-            />
           </div>
-          <Input
-            value={slackWebhookUrl}
-            onChange={(event) => setSlackWebhookUrl(event.target.value)}
-            placeholder="https://hooks.slack.com/services/..."
-            disabled={!slackEnabled}
-          />
-        </div>
+        </CardHeader>
+        <CardContent>
+          {keysQuery.isLoading ? (
+            <Skeleton className="h-32 w-full" />
+          ) : keys.length === 0 ? (
+            <p className="text-sm text-muted-foreground">{t("apiKeys.noneYet")}</p>
+          ) : (
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-xs text-muted-foreground uppercase tracking-wider border-b border-border">
+                  <th className="text-left pb-3">{t("apiKeys.colLabel")}</th>
+                  <th className="text-left pb-3">{t("apiKeys.colProvider")}</th>
+                  <th className="text-left pb-3">{t("apiKeys.colHint")}</th>
+                  <th className="pb-3" />
+                </tr>
+              </thead>
+              <tbody>
+                {keys.map((k) => (
+                  <tr key={k.id} className="border-b border-border/40">
+                    <td className="py-3 font-medium text-foreground">{k.label}</td>
+                    <td className="py-3 text-muted-foreground">{k.provider}</td>
+                    <td className="py-3 font-avop-mono text-muted-foreground text-xs">{k.key_hint}</td>
+                    <td className="py-3">
+                      <div className="flex items-center gap-1 justify-end">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 w-7 p-0"
+                          type="button"
+                          onClick={() => {
+                            void navigator.clipboard.writeText(k.key_hint);
+                            setCopied(k.id);
+                            setTimeout(() => setCopied(null), 2000);
+                          }}
+                        >
+                          {copied === k.id ? (
+                            <Check className="w-3.5 h-3.5 text-[#4ae176]" />
+                          ) : (
+                            <Copy className="w-3.5 h-3.5" />
+                          )}
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
 
-        <Button onClick={saveIntegrations} disabled={updateIntegrations.isPending}>
-          Save integrations
-        </Button>
-      </CardContent>
-    </Card>
+function NotificationsTab() {
+  const { t } = useTranslation("settings");
+  const [prefs, setPrefs] = useState({
+    weeklyDigest: true,
+    citationAlerts: true,
+    competitorMovement: false,
+    scoreDrops: true,
+  });
+
+  const items = [
+    { key: "weeklyDigest" as const, label: t("notifications.weeklyReports"), desc: t("notifications.weeklyReportsDesc") },
+    { key: "citationAlerts" as const, label: t("notifications.citationAlerts"), desc: t("notifications.citationAlertsDesc") },
+    { key: "competitorMovement" as const, label: t("notifications.competitorMovements"), desc: t("notifications.competitorMovementsDesc") },
+    {
+      key: "scoreDrops" as const,
+      label: "Score Drops",
+      desc: "Alert when visibility score drops more than 5 points",
+    },
+  ];
+
+  return (
+    <div className="space-y-4">
+      <Card>
+        <CardHeader>
+          <CardTitle>{t("notifications.title")}</CardTitle>
+          <CardDescription>{t("notifications.subtitle")}</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-5">
+          {items.map((item) => (
+            <div key={item.key} className="flex items-center justify-between gap-4">
+              <div>
+                <p className="text-sm font-medium text-foreground">{item.label}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">{item.desc}</p>
+              </div>
+              <Switch checked={prefs[item.key]} onCheckedChange={(v) => setPrefs((p) => ({ ...p, [item.key]: v }))} />
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+    </div>
   );
 }
 
@@ -850,22 +550,14 @@ function SettingsPage() {
 
   return (
     <div className="space-y-8">
-      {/* Header */}
       <div>
         <h2 className="text-2xl font-bold text-foreground">{t("title")}</h2>
-        <p className="text-sm text-muted-foreground mt-1">
-          {t("subtitle")}
-        </p>
+        <p className="text-sm text-muted-foreground mt-1">{t("subtitle")}</p>
       </div>
 
-      {/* Vertical tabs layout using flex */}
       <Tabs defaultValue="profile" orientation="vertical">
         <div className="flex gap-6">
-          {/* Left: Vertical tab list */}
-          <TabsList
-            variant="line"
-            className="flex-col w-56 shrink-0 items-stretch h-auto"
-          >
+          <TabsList variant="line" className="flex-col w-56 shrink-0 items-stretch h-auto">
             <TabsTrigger value="profile" className="justify-start gap-2">
               <User className="w-4 h-4" />
               {t("tabs.profile")}
@@ -882,23 +574,16 @@ function SettingsPage() {
               <CreditCard className="w-4 h-4" />
               {t("tabs.billing")}
             </TabsTrigger>
-            <TabsTrigger
-              value="notifications"
-              className="justify-start gap-2"
-            >
+            <TabsTrigger value="api" className="justify-start gap-2">
+              <Key className="w-4 h-4" />
+              {t("tabs.apiKeys")}
+            </TabsTrigger>
+            <TabsTrigger value="notifications" className="justify-start gap-2">
               <Bell className="w-4 h-4" />
               {t("tabs.notifications")}
             </TabsTrigger>
-            <TabsTrigger
-              value="integrations"
-              className="justify-start gap-2"
-            >
-              <Puzzle className="w-4 h-4" />
-              {t("tabs.integrations")}
-            </TabsTrigger>
           </TabsList>
 
-          {/* Right: Content area */}
           <div className="flex-1 min-w-0">
             <TabsContent value="profile">
               <ProfileTab />
@@ -912,11 +597,11 @@ function SettingsPage() {
             <TabsContent value="billing">
               <BillingTab />
             </TabsContent>
+            <TabsContent value="api">
+              <ApiKeysTab />
+            </TabsContent>
             <TabsContent value="notifications">
               <NotificationsTab />
-            </TabsContent>
-            <TabsContent value="integrations">
-              <IntegrationsTab />
             </TabsContent>
           </div>
         </div>

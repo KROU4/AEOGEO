@@ -1,6 +1,6 @@
 import { clearTokenCache, getAccessToken } from "@/lib/auth";
 
-const BASE_URL = import.meta.env.VITE_API_URL || "";
+const BASE_URL = (import.meta.env.VITE_API_URL || "").replace(/\/+$/, "");
 const API_PREFIX = "/api/v1";
 
 export class ApiError extends Error {

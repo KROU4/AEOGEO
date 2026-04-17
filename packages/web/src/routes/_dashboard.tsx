@@ -35,14 +35,14 @@ export const Route = createFileRoute("/_dashboard")({
 
 const segmentToNavKey: Record<string, string> = {
   overview: "nav.projects",
-  visibility: "nav.projects",
+  visibility: "nav.visibility",
+  competitors: "nav.competitors",
+  citations: "nav.citations",
+  assistant: "nav.assistant",
+  platforms: "nav.platforms",
   reports: "nav.reports",
   projects: "nav.projects",
   settings: "nav.settings",
-  citations: "nav.projects",
-  competitors: "nav.projects",
-  platforms: "nav.projects",
-  assistant: "nav.projects",
 };
 
 const UUID_SEGMENT_RE =
@@ -131,11 +131,16 @@ function DashboardLayout() {
     return <Navigate to="/projects/new" replace />;
   }
 
-  /** Empty workspace: force first project creation, but allow Reports/Settings so nav is usable. */
+  /** Empty workspace: force first project creation, but allow Reports, Settings, and Analytics stubs so nav is usable. */
   const allowedPathWhenNoProjects =
     location.pathname === "/projects/new" ||
     location.pathname.startsWith("/reports") ||
-    location.pathname.startsWith("/settings");
+    location.pathname.startsWith("/settings") ||
+    location.pathname.startsWith("/visibility") ||
+    location.pathname.startsWith("/competitors") ||
+    location.pathname.startsWith("/citations") ||
+    location.pathname.startsWith("/assistant") ||
+    location.pathname.startsWith("/platforms");
 
   if (
     currentUserQuery.data &&

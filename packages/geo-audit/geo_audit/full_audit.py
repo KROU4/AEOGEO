@@ -8,6 +8,8 @@ from urllib.parse import urlparse
 
 import httpx
 
+from geo_audit.ai_summary import generate_ai_insights
+from geo_audit.brand_authority import run_brand_authority_audit
 from geo_audit.citability_core import analyze_html_citability
 from geo_audit.content_quality import run_content_quality_audit
 from geo_audit.llmstxt_full import run_llmstxt_audit
@@ -42,21 +44,7 @@ _MODULE_TIMEOUTS = {
     "citability": 5.0,
     "brand": 5.0,
 }
-_PLATFORM_SIGNALS = {
-    "wikipedia.org": 25.0,
-    "wikidata.org": 20.0,
-    "linkedin.com": 15.0,
-    "youtube.com": 15.0,
-    "reddit.com": 10.0,
-    "twitter.com": 7.5,
-    "x.com": 7.5,
-    "facebook.com": 5.0,
-    "instagram.com": 5.0,
-    "github.com": 5.0,
-    "g2.com": 7.5,
-    "trustpilot.com": 7.5,
-    "capterra.com": 7.5,
-}
+_SITEMAP_PAGE_LIMIT = 15  # max additional pages to fetch for multi-page analysis
 
 
 def _normalize_url(url: str) -> str:
@@ -91,10 +79,6 @@ async def _with_timeout(coro, timeout: float, fallback):
         return fallback(f"timed out after {timeout:.0f}s")
 
 
-def _page_text_for_brand(html: str) -> str:
-    return html[:250_000].lower()
-
-
 def _extract_likely_brand_name(html: str, netloc: str) -> str:
     title_match = re.search(
         r"<title[^>]*>(.*?)</title>", html, re.IGNORECASE | re.DOTALL
@@ -110,30 +94,53 @@ def _extract_likely_brand_name(html: str, netloc: str) -> str:
     return domain.split(".", 1)[0].replace("-", " ").title()
 
 
-def _run_brand_authority_audit(html: str, normalized_url: str) -> float:
-    """Bounded brand authority check based on page/schema platform signals."""
-    parsed = urlparse(normalized_url)
-    text = _page_text_for_brand(html)
-    brand = _extract_likely_brand_name(html, parsed.netloc)
-    score = 0.0
+async def _fetch_sitemap_pages(
+    base_url: str,
+    client: httpx.AsyncClient,
+    limit: int = _SITEMAP_PAGE_LIMIT,
+) -> tuple[list[str], int]:
+    """Fetch HTML content from sitemap URLs (up to limit).
 
-    if brand and brand.lower() in text:
-        score += 10.0
+    Returns (list_of_html_strings, pages_fetched_count).
+    Only fetches pages on the same domain as base_url.
+    """
+    parsed_base = urlparse(base_url)
+    base_netloc = parsed_base.netloc
 
-    for host, points in _PLATFORM_SIGNALS.items():
-        if host in text:
-            score += points
+    # Try to get sitemap
+    sitemap_url = f"{parsed_base.scheme}://{base_netloc}/sitemap.xml"
+    try:
+        r = await asyncio.wait_for(client.get(sitemap_url), timeout=8.0)
+        if r.status_code != 200:
+            return [], 0
+        sitemap_text = r.text
+    except Exception:
+        return [], 0
 
-    # sameAs links are especially useful for entity recognition.
-    if "sameas" in text:
-        score += 10.0
+    # Extract URLs from sitemap
+    urls = re.findall(r"<loc>\s*(https?://[^\s<]+)\s*</loc>", sitemap_text)
+    # Filter to same domain, exclude homepage
+    same_domain_urls = [
+        u for u in urls
+        if urlparse(u).netloc == base_netloc and u.rstrip("/") != base_url.rstrip("/")
+    ][:limit]
 
-    if any(
-        marker in text for marker in ("organization", "localbusiness", "corporation")
-    ):
-        score += 10.0
+    if not same_domain_urls:
+        return [], 0
 
-    return round(min(score, 100.0), 1)
+    # Fetch pages concurrently
+    async def _fetch_one(url: str) -> str:
+        try:
+            r = await asyncio.wait_for(client.get(url), timeout=8.0)
+            if r.status_code == 200:
+                return r.text
+        except Exception:
+            pass
+        return ""
+
+    results = await asyncio.gather(*[_fetch_one(u) for u in same_domain_urls])
+    pages_html = [h for h in results if h]
+    return pages_html, len(pages_html)
 
 
 def _make_failed_technical(error: str) -> TechnicalAuditResult:
@@ -246,11 +253,15 @@ def _make_failed_content(error: str) -> ContentQualityResult:
 async def run_full_audit(
     url: str,
     openai_api_key: str | None = None,
+    anthropic_api_key: str | None = None,
 ) -> FullSiteAuditResult:
     """Run all GEO audit modules in parallel and return a composite result."""
     normalized_url = _normalize_url(url)
     if not normalized_url:
         raise ValueError("url is required")
+
+    parsed_url = urlparse(normalized_url)
+    domain = parsed_url.netloc.removeprefix("www.")
 
     html = ""
     client = httpx.AsyncClient(
@@ -265,6 +276,25 @@ async def run_full_audit(
         fetch_error = str(exc)
     else:
         fetch_error = None
+
+    # Multi-page crawl: fetch additional pages from sitemap in parallel
+    extra_pages_html: list[str] = []
+    pages_fetched = 0
+    if html:
+        try:
+            extra_pages_html, pages_fetched = await asyncio.wait_for(
+                _fetch_sitemap_pages(normalized_url, client),
+                timeout=20.0,
+            )
+        except Exception:
+            extra_pages_html, pages_fetched = [], 0
+
+    # Combine all HTML for content analysis (homepage + extra pages)
+    all_html = html
+    if extra_pages_html:
+        all_html = html + "\n\n".join(extra_pages_html)
+
+    brand_name = _extract_likely_brand_name(html, parsed_url.netloc)
 
     async def _run_technical() -> TechnicalAuditResult:
         try:
@@ -290,7 +320,7 @@ async def run_full_audit(
         try:
             return await run_content_quality_audit(
                 normalized_url,
-                html=html or None,
+                html=all_html or None,
                 openai_api_key=openai_api_key,
                 client=client,
             )
@@ -300,17 +330,17 @@ async def run_full_audit(
     async def _run_citability() -> float:
         try:
             result = (
-                analyze_html_citability(html)
-                if html
+                analyze_html_citability(all_html)
+                if all_html
                 else {"average_citability_score": 0.0}
             )
             return float(result.get("average_citability_score", 0.0))
         except Exception:
             return 0.0
 
-    async def _run_brand_authority() -> float:
+    async def _run_brand() -> float:
         try:
-            return _run_brand_authority_audit(html, normalized_url) if html else 0.0
+            return await run_brand_authority_audit(brand_name, domain)
         except Exception:
             return 0.0
 
@@ -340,8 +370,8 @@ async def run_full_audit(
             lambda _error: 0.0,
         ),
         _with_timeout(
-            _run_brand_authority(),
-            _MODULE_TIMEOUTS["brand"],
+            _run_brand(),
+            30.0,  # brand checks hit external APIs, give more time
             lambda _error: 0.0,
         ),
     )
@@ -390,7 +420,7 @@ async def run_full_audit(
     top_issues = _sort_issues(all_issues)[:10]
     top_recommendations = _derive_recommendations(top_issues)
 
-    return FullSiteAuditResult(
+    result = FullSiteAuditResult(
         url=normalized_url,
         overall_geo_score=overall_geo_score,
         citability_score=round(min(citability_score, 100.0), 1),
@@ -402,4 +432,14 @@ async def run_full_audit(
         brand_authority=brand_authority,
         top_issues=top_issues,
         top_recommendations=top_recommendations,
+        pages_analyzed=1 + pages_fetched,
     )
+
+    # AI-powered insights (optional — requires anthropic_api_key)
+    if anthropic_api_key:
+        result.ai_insights = await generate_ai_insights(
+            result.model_dump(),
+            anthropic_api_key=anthropic_api_key,
+        )
+
+    return result

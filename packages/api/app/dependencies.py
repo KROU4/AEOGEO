@@ -1,10 +1,16 @@
+import logging
 from collections.abc import AsyncGenerator
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from redis.asyncio import Redis
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.ext.asyncio import (
+    AsyncEngine,
+    AsyncSession,
+    async_sessionmaker,
+    create_async_engine,
+)
 
 from app.config import get_settings
 from app.models.role import Role, UserRole
@@ -18,10 +24,48 @@ from app.services.clerk import (
     ClerkTokenVerificationError,
 )
 
+logger = logging.getLogger(__name__)
+
 settings = get_settings()
 
-engine = create_async_engine(settings.database_url, echo=settings.debug)
-async_session = async_sessionmaker(engine, expire_on_commit=False)
+_engine: AsyncEngine | None = None
+_async_session_factory: async_sessionmaker[AsyncSession] | None = None
+
+
+class _AsyncSessionMakerProxy:
+    """Lazy session factory so imports keep one object; init_db() wires the real engine."""
+
+    def __call__(self, *args: object, **kwargs: object) -> AsyncSession:
+        if _async_session_factory is None:
+            raise RuntimeError(
+                "Database engine not initialized; init_db() must run before handling requests "
+                "(FastAPI lifespan or Temporal worker startup)."
+            )
+        # async_sessionmaker is callable; one call yields a new AsyncSession (do not double-call).
+        return _async_session_factory(*args, **kwargs)
+
+
+async_session = _AsyncSessionMakerProxy()
+
+
+def init_db() -> None:
+    """Create the async engine and session factory. Idempotent; safe to call from API lifespan or worker."""
+    global _engine, _async_session_factory
+    if _engine is not None:
+        return
+    scheme = settings.database_url.split("://", 1)[0]
+    logger.info("Initializing SQLAlchemy async engine (url_scheme=%s)", scheme)
+    _engine = create_async_engine(settings.database_url, echo=settings.debug)
+    _async_session_factory = async_sessionmaker(_engine, expire_on_commit=False)
+
+
+async def dispose_db_engine() -> None:
+    """Dispose engine on shutdown (API lifespan)."""
+    global _engine, _async_session_factory
+    if _engine is not None:
+        await _engine.dispose()
+        _engine = None
+        _async_session_factory = None
 
 bearer_scheme = HTTPBearer(auto_error=False)
 

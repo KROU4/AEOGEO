@@ -93,6 +93,20 @@ export interface PlatformScores {
   average: number;
 }
 
+export interface CriticalIssue {
+  id: string;
+  title: string;
+  detail: string;
+  fix: string;
+}
+
+export interface AiInsights {
+  executive_summary: string;
+  root_cause: string;
+  critical_issues: CriticalIssue[];
+  action_plan: Record<string, string[]>;
+}
+
 export interface FullSiteAuditResult {
   url: string;
   overall_geo_score: number;
@@ -105,6 +119,8 @@ export interface FullSiteAuditResult {
   brand_authority: number;
   top_issues: AuditIssue[];
   top_recommendations: string[];
+  pages_analyzed: number;
+  ai_insights?: AiInsights | null;
 }
 
 export type SiteAuditStatus = "pending" | "running" | "completed" | "failed";

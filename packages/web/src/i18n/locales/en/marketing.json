@@ -30,6 +30,53 @@
   "auditEmailSave": "Send",
   "auditEmailSaved": "Saved — we’ll follow up at that address.",
   "auditEmailError": "Could not save email. Check the address and try again.",
+  "auditModalTitle": "Quick AI crawler audit",
+  "auditModalDescription": "A fast public check of llms.txt, robots.txt and sitemap.xml.",
+  "auditModalLoadingKicker": "Scanning public files",
+  "auditModalLoadingTitle": "Checking how AI crawlers see your site",
+  "auditModalLoadingBody": "We are looking for llms.txt, robots.txt rules and sitemap discovery signals. This quick check is intentionally strict.",
+  "auditScanProgress": "Scan pipeline",
+  "auditScanStepResolve": "Resolving domain and homepage response",
+  "auditScanStepRobots": "Reading robots.txt crawler rules",
+  "auditScanStepLlms": "Looking for a structured llms.txt brief",
+  "auditScanStepSitemap": "Testing sitemap discovery paths",
+  "auditScanStepBots": "Checking GPTBot, ClaudeBot and PerplexityBot access",
+  "auditScanStepScore": "Compressing signals into a conservative score",
+  "auditModalErrorTitle": "Quick audit failed",
+  "auditModalClose": "Close",
+  "auditModalKicker": "AI crawler scan",
+  "auditModalReadyKicker": "Core files found",
+  "auditModalWeakKicker": "Missing crawler signals",
+  "auditModalReadyTitle": "The basics are visible. Now run the full GEO audit.",
+  "auditModalWeakTitle": "AI crawlers may miss your site before content quality even matters.",
+  "auditModalBody": "This quick check only covers the three public files AI crawlers look for first. The full audit checks content, schema, citations, competitors and platform readiness.",
+  "auditScoreScale": "/ {{max}}",
+  "auditCheckMax": "This lead-magnet check can earn only 22 of 40 points. We deliberately keep the score low until the full GEO audit reviews content, schema and authority.",
+  "auditCheckScore": "+{{score}}",
+  "auditSitemapUrls": "{{count}} sitemap URLs",
+  "auditReadiness": {
+    "ready": "Crawler-ready foundation",
+    "good": "Good, but incomplete",
+    "partial": "Partial setup",
+    "blind": "Mostly invisible"
+  },
+  "auditCheck": {
+    "llms_txt": {
+      "label": "llms.txt AI brief",
+      "pass": "Found a structured llms.txt with a title, sections and key links.",
+      "fail": "Missing or incomplete llms.txt. AI systems do not get a concise site briefing."
+    },
+    "robots_txt": {
+      "label": "AI crawler access",
+      "pass": "robots.txt allows key AI crawlers and points them to a sitemap.",
+      "fail": "robots.txt should allow GPTBot, ClaudeBot and PerplexityBot, plus include a Sitemap directive."
+    },
+    "sitemap": {
+      "label": "Sitemap discovery",
+      "pass": "Found a valid XML sitemap with {{count}} discoverable URLs.",
+      "fail": "No valid XML sitemap found at the standard locations."
+    }
+  },
   "landing": {
     "logo": "AVOP",
     "navProduct": "Product",

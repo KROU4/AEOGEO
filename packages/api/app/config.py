@@ -1,4 +1,5 @@
 import base64
+import logging
 import warnings
 from binascii import Error as BinasciiError
 from functools import lru_cache
@@ -6,7 +7,37 @@ from functools import lru_cache
 from pydantic import AliasChoices, Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+logger = logging.getLogger(__name__)
+
 PRODUCTION_WEB_ORIGIN = "https://avop.up.railway.app"
+
+
+def normalize_postgres_url_for_async(url: str) -> str:
+    """Ensure SQLAlchemy async engine URLs use an async driver.
+
+    Railway/Postgres plugins often expose ``postgresql://`` or ``postgres://``.
+    ``create_async_engine`` requires e.g. ``postgresql+asyncpg://`` or it fails
+    at import time (API never binds; edge returns 502).
+    """
+    u = url.strip()
+    if "://" not in u:
+        return u
+    scheme, rest = u.split("://", 1)
+    if "+" in scheme:
+        return u
+    if scheme == "postgresql":
+        logger.info(
+            "DATABASE_URL uses postgresql:// without an async driver; "
+            "normalizing to postgresql+asyncpg:// for SQLAlchemy asyncio"
+        )
+        return f"postgresql+asyncpg://{rest}"
+    if scheme == "postgres":
+        logger.info(
+            "DATABASE_URL uses postgres:// without an async driver; "
+            "normalizing to postgresql+asyncpg:// for SQLAlchemy asyncio"
+        )
+        return f"postgresql+asyncpg://{rest}"
+    return u
 
 
 class Settings(BaseSettings):
@@ -18,9 +49,9 @@ class Settings(BaseSettings):
         validation_alias=AliasChoices("TEMPORAL_HOST", "TEMPORAL_ADDRESS"),
     )
     cors_origins: str = f"http://localhost:5173,{PRODUCTION_WEB_ORIGIN}"
-    # Optional: single regex (e.g. https://.*\\.up\\.railway\\.app) when the web URL
-    # changes per deploy.
-    cors_origin_regex: str = ""
+    # Match any browser http(s) origin so deploy previews / custom domains work without
+    # redeploying CORS_ORIGINS. Set CORS_ORIGIN_REGEX= to disable (then only cors_origins apply).
+    cors_origin_regex: str = r"^https?://[^\s]+$"
     debug: bool = False
     access_token_expire_minutes: int = 30
     refresh_token_expire_days: int = 7
@@ -68,6 +99,11 @@ class Settings(BaseSettings):
             if lowered in {"dev", "debug", "development"}:
                 return True
         return value
+
+    @field_validator("database_url", mode="after")
+    @classmethod
+    def database_url_async_driver(cls, value: str) -> str:
+        return normalize_postgres_url_for_async(value)
 
     @property
     def cors_origins_list(self) -> list[str]:

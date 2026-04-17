@@ -65,11 +65,11 @@ def _llms_quality(content: str) -> tuple[bool, str]:
 
 
 def _readiness_label(score: float) -> str:
-    if score >= 34:
+    if score >= 20:
         return "AI crawler ready"
-    if score >= 24:
+    if score >= 14:
         return "Good foundation"
-    if score >= 12:
+    if score >= 7:
         return "Partial setup"
     return "AI crawlers are mostly blind"
 
@@ -199,15 +199,15 @@ async def run_quick_audit_native(url: str) -> QuickAuditResult:
             bots_bool[name] = status_implies_crawl_allowed(status)
 
     crawler_allowed = all(bots_bool.values())
-    llms_score = 14.0 if has_llms and llms_well_formed else 7.0 if has_llms else 0.0
+    llms_score = 7.0 if has_llms and llms_well_formed else 3.0 if has_llms else 0.0
     robots_score = (
-        14.0
+        9.0
         if robots_exists and crawler_allowed and robots_has_sitemap
-        else 9.0
+        else 4.0
         if robots_exists and crawler_allowed
         else 0.0
     )
-    sitemap_score = 12.0 if has_sitemap else 0.0
+    sitemap_score = 6.0 if has_sitemap else 0.0
     overall = round(llms_score + robots_score + sitemap_score, 1)
 
     infrastructure_checks = [

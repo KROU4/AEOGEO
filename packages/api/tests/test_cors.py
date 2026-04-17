@@ -40,13 +40,14 @@ def test_auth_me_preflight_allows_production_origin() -> None:
     assert response.headers["access-control-allow-origin"] == PROD_ORIGIN
 
 
-def test_preflight_rejects_unknown_origin() -> None:
+def test_preflight_rejects_non_http_origin() -> None:
+    """http(s) origins are broadly allowed; extension / file schemes are not."""
     client = TestClient(app)
 
     response = client.options(
         "/api/v1/projects/",
         headers={
-            "Origin": "https://evil.example",
+            "Origin": "chrome-extension://abcdefghijklmnop",
             "Access-Control-Request-Method": "GET",
             "Access-Control-Request-Headers": "authorization",
         },

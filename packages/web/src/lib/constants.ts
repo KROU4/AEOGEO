@@ -1,7 +1,9 @@
 import {
-  FileText,
   FolderOpen,
   Settings,
+  Eye,
+  Swords,
+  Quote,
   type LucideIcon,
 } from "lucide-react";
 
@@ -11,29 +13,22 @@ export interface NavItem {
   icon: LucideIcon;
 }
 
-/** Primary app navigation (legacy export) */
-export const mainNavItems: NavItem[] = [
-  { labelKey: "nav.projects", href: "/projects", icon: FolderOpen },
-  { labelKey: "nav.reports", href: "/reports", icon: FileText },
-];
-
-/** Workspace — project list + reports (GEO audit workflow) */
 export const projectsNavItems: NavItem[] = [
   { labelKey: "nav.projects", href: "/projects", icon: FolderOpen },
-  { labelKey: "nav.reports", href: "/reports", icon: FileText },
 ];
 
-/** @deprecated Use projectsNavItems */
-export const analyticsNavItems = projectsNavItems;
-
-/** @deprecated Use projectsNavItems */
-export const intelligenceNavItems: NavItem[] = [];
+export const analyticsNavItems: NavItem[] = [
+  { labelKey: "nav.visibility", href: "/visibility", icon: Eye },
+  { labelKey: "nav.competitors", href: "/competitors", icon: Swords },
+  { labelKey: "nav.citations", href: "/citations", icon: Quote },
+];
 
 export const systemNavItems: NavItem[] = [
   { labelKey: "nav.settings", href: "/settings", icon: Settings },
 ];
 
-/** @deprecated narrow slices — kept for any legacy imports */
+export const mainNavItems = projectsNavItems;
+export const intelligenceNavItems: NavItem[] = [];
 export const monitorNavItems = projectsNavItems;
 export const adminNavItems: NavItem[] = [];
 

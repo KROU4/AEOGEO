@@ -105,5 +105,81 @@
     "subtitle": "Up to 7 completed runs in the selected window ({{period}})",
     "seriesScore": "Score (0–100)",
     "seriesSov": "Share of voice %"
+  },
+  "analyticsProject": {
+    "label": "Project",
+    "placeholder": "Select a project",
+    "empty": "Create a project to load analytics from your workspace."
+  },
+  "stitch": {
+    "visibility": {
+      "trendTitle": "Visibility Trend — {{count}} weeks",
+      "platformBreakdown": "Platform Breakdown",
+      "recentSection": "Recent citation sources",
+      "colSource": "Source",
+      "colEngine": "Engine",
+      "colPreview": "Preview",
+      "colCites": "Cites",
+      "chartVisibilityPct": "Visibility %",
+      "barTooltipVisibility": "Visibility"
+    },
+    "competitors": {
+      "title": "Market Share Dynamics",
+      "subtitle": "Live Real-Time Index · {{period}}",
+      "emptyCompetitors": "No competitor data for this period yet.",
+      "sovByPlatform": "Share of voice by platform",
+      "weeklyTrajectory": "Weekly SoV trajectory",
+      "noTrend": "No trend data.",
+      "colBrand": "Brand",
+      "colOverallSov": "Overall SoV",
+      "youSuffix": " (you)"
+    },
+    "citations": {
+      "statTotal": "Total citation rows",
+      "statTotalHint": "Unique domains in explorer",
+      "statTop": "Top engine (by cites)",
+      "statTopHint": "Aggregated from current page sample",
+      "statFiltered": "Domains listed",
+      "statFilteredHint": "After search filter",
+      "searchPlaceholder": "Search domain or preview...",
+      "allEngines": "All engines",
+      "noMatch": "No citations match your filter.",
+      "pieTitle": "Platform distribution",
+      "pieEmpty": "No data.",
+      "citesSuffix": "cites",
+      "yourDomain": "Your domain"
+    },
+    "platforms": {
+      "emptyEngines": "No engine scores for this project yet.",
+      "deepDiveTitle": "{{name}} — Deep Dive",
+      "topQueries": "Top queries",
+      "queryMeta": "Rank {{rank}} · {{mention}} · citations {{citations}}",
+      "mentioned": "mentioned",
+      "notMentioned": "not mentioned",
+      "noQueriesYet": "No queries for this engine yet.",
+      "visibilitySov": "Visibility & SoV",
+      "metricVisibility": "Visibility %",
+      "metricSov": "Share of voice %",
+      "metricRank": "Avg rank (1–10)",
+      "runs": "Runs",
+      "runsHint": "Completed runs including this engine",
+      "cardSubtitle": "{{runs}} runs · rank avg {{rank}}",
+      "clickHint": "Click to expand details"
+    },
+    "assistant": {
+      "suggested1": "How visible is my brand on ChatGPT?",
+      "suggested2": "Compare my citations vs competitors",
+      "suggested3": "What topics am I missing from AI responses?",
+      "suggested4": "Show sentiment trends for last 30 days",
+      "conv1": "Brand visibility analysis",
+      "conv2": "Competitor citation check",
+      "conv3": "Perplexity performance deep dive",
+      "welcome": "Hello! I'm your AI visibility intelligence assistant. Ask about this project's presence across AI engines, citations, and competitors.",
+      "newChat": "New conversation",
+      "recent": "Recent",
+      "placeholder": "Ask about your AI visibility…",
+      "footer": "Model: project assistant API · Enter to send, Shift+Enter for new line",
+      "toastUnreachable": "Could not reach assistant."
+    }
   }
 }

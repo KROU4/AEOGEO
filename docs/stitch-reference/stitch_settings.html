@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=Bricolage+Grotesque:wght@700;800&amp;family=JetBrains+Mono:wght@400;500&amp;family=Space+Grotesk:wght@700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "secondary-container": "#454555",
+                    "on-tertiary-fixed": "#002109",
+                    "secondary-fixed": "#e2e0f4",
+                    "surface-variant": "#343536",
+                    "on-primary-container": "#00424f",
+                    "tertiary-fixed-dim": "#4ae176",
+                    "on-primary-fixed-variant": "#004e5c",
+                    "tertiary-fixed": "#6bff8f",
+                    "surface-dim": "#121315",
+                    "secondary-fixed-dim": "#c6c5d7",
+                    "background": "#121315",
+                    "surface-container": "#1f2021",
+                    "primary-fixed-dim": "#4cd7f6",
+                    "tertiary": "#4ae176",
+                    "surface-container-lowest": "#0d0e0f",
+                    "on-error": "#690005",
+                    "outline-variant": "#3d494c",
+                    "on-tertiary-container": "#00461b",
+                    "on-primary-fixed": "#001f26",
+                    "on-secondary": "#2f2f3e",
+                    "error-container": "#93000a",
+                    "surface-container-high": "#292a2b",
+                    "primary": "#4cd7f6",
+                    "primary-fixed": "#acedff",
+                    "surface-tint": "#4cd7f6",
+                    "on-error-container": "#ffdad6",
+                    "on-secondary-container": "#b4b3c6",
+                    "primary-container": "#06b6d4",
+                    "on-surface-variant": "#bcc9cd",
+                    "tertiary-container": "#14bf59",
+                    "on-tertiary-fixed-variant": "#005321",
+                    "secondary": "#c6c5d7",
+                    "surface-bright": "#38393a",
+                    "inverse-on-surface": "#303032",
+                    "outline": "#869397",
+                    "on-background": "#e3e2e3",
+                    "on-primary": "#003640",
+                    "error": "#ffb4ab",
+                    "on-secondary-fixed": "#1a1a28",
+                    "surface": "#121315",
+                    "on-surface": "#e3e2e3",
+                    "inverse-surface": "#e3e2e3",
+                    "on-secondary-fixed-variant": "#454555",
+                    "on-tertiary": "#003915",
+                    "inverse-primary": "#00687a",
+                    "surface-container-highest": "#343536",
+                    "surface-container-low": "#1b1c1d"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "fontFamily": {
+                    "headline": ["Space Grotesk"],
+                    "body": ["Plus Jakarta Sans"],
+                    "label": ["Plus Jakarta Sans"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-surface-container-lowest text-on-surface font-body selection:bg-primary-container selection:text-on-primary-container">
+<!-- SideNavBar (Execution from JSON) -->
+<aside class="fixed left-0 h-full w-[220px] bg-[#0D0E0F] flex flex-col py-6 px-4 gap-2 z-50">
+<div class="mb-8 px-2">
+<span class="text-xl font-['Bricolage_Grotesque'] font-bold text-white">AVOP Internal</span>
+<p class="text-[10px] text-neutral-500 font-medium tracking-widest uppercase mt-1">Analytics Engine</p>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 text-neutral-500 font-['Plus_Jakarta_Sans'] font-medium text-sm transition-all duration-150 ease-in-out hover:bg-neutral-800/50 hover:text-neutral-200 group" href="#">
+<span class="material-symbols-outlined text-lg">dashboard</span>
+<span>Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-neutral-500 font-['Plus_Jakarta_Sans'] font-medium text-sm transition-all duration-150 ease-in-out hover:bg-neutral-800/50 hover:text-neutral-200 group" href="#">
+<span class="material-symbols-outlined text-lg">monitoring</span>
+<span>Analytics</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-neutral-500 font-['Plus_Jakarta_Sans'] font-medium text-sm transition-all duration-150 ease-in-out hover:bg-neutral-800/50 hover:text-neutral-200 group" href="#">
+<span class="material-symbols-outlined text-lg">construction</span>
+<span>Tools</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-neutral-500 font-['Plus_Jakarta_Sans'] font-medium text-sm transition-all duration-150 ease-in-out hover:bg-neutral-800/50 hover:text-neutral-200 group" href="#">
+<span class="material-symbols-outlined text-lg">folder_managed</span>
+<span>Projects</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-neutral-500 font-['Plus_Jakarta_Sans'] font-medium text-sm transition-all duration-150 ease-in-out hover:bg-neutral-800/50 hover:text-neutral-200 group" href="#">
+<span class="material-symbols-outlined text-lg">description</span>
+<span>Reports</span>
+</a>
+<!-- Active State Logic: Settings is the current page -->
+<a class="flex items-center gap-3 px-3 py-2 text-cyan-400 bg-neutral-900/50 border-l-2 border-cyan-500 font-['Plus_Jakarta_Sans'] font-medium text-sm transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined text-lg">settings</span>
+<span>Settings</span>
+</a>
+</nav>
+<div class="mt-auto pt-6 border-t border-white/5 flex flex-col gap-1">
+<a class="flex items-center gap-3 px-3 py-2 text-neutral-500 text-sm hover:text-neutral-200" href="#">
+<span class="material-symbols-outlined text-lg">help</span>
+<span>Support</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-neutral-500 text-sm hover:text-neutral-200" href="#">
+<span class="material-symbols-outlined text-lg">menu_book</span>
+<span>Documentation</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Shell -->
+<main class="ml-[220px] min-h-screen flex flex-col">
+<!-- TopAppBar (Execution from JSON) -->
+<header class="sticky top-0 h-[52px] z-40 bg-[#0D0E0F]/80 backdrop-blur-md border-b border-white/5 flex justify-between items-center px-6 w-full">
+<div class="flex items-center gap-4">
+<span class="text-lg font-['Bricolage_Grotesque'] font-bold text-white">Analytics</span>
+<span class="text-neutral-600">/</span>
+<span class="font-['Plus_Jakarta_Sans'] font-semibold text-base text-neutral-400">Settings</span>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-4 text-neutral-400">
+<span class="material-symbols-outlined cursor-pointer hover:text-white transition-colors">calendar_today</span>
+<span class="material-symbols-outlined cursor-pointer hover:text-white transition-colors">notifications</span>
+</div>
+<div class="h-8 w-8 rounded-full overflow-hidden border border-white/10">
+<img class="w-full h-full object-cover" data-alt="close-up portrait of a professional analyst with a neutral expression against a dark studio background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC7QwkBR0mMQgs_D4aMohbS3psVZREy6XzejAgdJydjAPoO91SsfdO0t-XCzQDSUKiC5FpEEaNiYBEftxrfHhWKIXH8WDBGtjYbFD0wYTTIzjKwZSNfj4sgOF7hvYZuu4ssY-KnW3GF0W8wDOCJKqRWW8T0fDggsiw32ZG-Ps4lSlDDOHofY8OOa7BxaJy9UsdXAEX5nzpXvuPCjVJJjH9cTmmvctXYIbxCmEdQHdXOXnwOvi2MBplcpAV5p63CSD2f1kXevXaYiEU"/>
+</div>
+<button class="bg-gradient-to-br from-primary to-primary-container text-on-primary px-4 py-1.5 rounded-lg font-['Plus_Jakarta_Sans'] font-semibold text-sm transition-transform active:scale-95">Run Analysis</button>
+</div>
+</header>
+<!-- Settings Content -->
+<div class="flex-1 flex overflow-hidden">
+<!-- Internal Settings Sidebar -->
+<nav class="w-64 bg-surface-container-low p-8 flex flex-col gap-6">
+<h2 class="text-xs font-['Plus_Jakarta_Sans'] font-bold uppercase tracking-[0.2em] text-neutral-500 mb-2">Configuration</h2>
+<div class="flex flex-col gap-1">
+<a class="flex items-center justify-between group px-3 py-2 rounded-lg bg-surface-container-highest text-primary font-medium text-sm" href="#account">
+<span>Account</span>
+<span class="material-symbols-outlined text-xs">chevron_right</span>
+</a>
+<a class="flex items-center justify-between group px-3 py-2 rounded-lg hover:bg-white/5 text-neutral-400 hover:text-on-surface font-medium text-sm transition-colors" href="#project">
+<span>Project</span>
+<span class="material-symbols-outlined text-xs opacity-0 group-hover:opacity-100">chevron_right</span>
+</a>
+<a class="flex items-center justify-between group px-3 py-2 rounded-lg hover:bg-white/5 text-neutral-400 hover:text-on-surface font-medium text-sm transition-colors" href="#team">
+<span>Team</span>
+<span class="material-symbols-outlined text-xs opacity-0 group-hover:opacity-100">chevron_right</span>
+</a>
+<a class="flex items-center justify-between group px-3 py-2 rounded-lg hover:bg-white/5 text-neutral-400 hover:text-on-surface font-medium text-sm transition-colors" href="#billing">
+<span>Billing</span>
+<span class="material-symbols-outlined text-xs opacity-0 group-hover:opacity-100">chevron_right</span>
+</a>
+<a class="flex items-center justify-between group px-3 py-2 rounded-lg hover:bg-white/5 text-neutral-400 hover:text-on-surface font-medium text-sm transition-colors" href="#api">
+<span>API</span>
+<span class="material-symbols-outlined text-xs opacity-0 group-hover:opacity-100">chevron_right</span>
+</a>
+</div>
+</nav>
+<!-- Scrollable Forms Area -->
+<div class="flex-1 overflow-y-auto p-12 max-w-5xl">
+<!-- Section: Account -->
+<section class="mb-20" id="account">
+<div class="mb-8">
+<h1 class="text-3xl font-['Bricolage_Grotesque'] font-bold text-white mb-2">Account Profile</h1>
+<p class="text-neutral-500 text-sm">Manage your personal information and how others see you.</p>
+</div>
+<div class="grid grid-cols-12 gap-8">
+<div class="col-span-8 space-y-8">
+<div class="space-y-4">
+<label class="block text-xs font-bold uppercase tracking-widest text-neutral-500">Full Name</label>
+<input class="w-full bg-surface-container-low border-b border-white/10 focus:border-primary outline-none py-3 text-on-surface transition-all" type="text" value="Alexander Vance"/>
+</div>
+<div class="space-y-4">
+<label class="block text-xs font-bold uppercase tracking-widest text-neutral-500">Email Address</label>
+<input class="w-full bg-surface-container-low border-b border-white/10 focus:border-primary outline-none py-3 text-on-surface transition-all" type="email" value="vance@avop.analytics"/>
+</div>
+<div class="grid grid-cols-2 gap-6">
+<div class="space-y-4">
+<label class="block text-xs font-bold uppercase tracking-widest text-neutral-500">Role</label>
+<input class="w-full bg-surface-container-low border-b border-white/10 focus:border-primary outline-none py-3 text-on-surface transition-all" type="text" value="Lead Analyst"/>
+</div>
+<div class="space-y-4">
+<label class="block text-xs font-bold uppercase tracking-widest text-neutral-500">Timezone</label>
+<select class="w-full bg-surface-container-low border-b border-white/10 focus:border-primary outline-none py-3 text-on-surface transition-all appearance-none">
+<option>UTC-05:00 Eastern Time</option>
+<option>UTC+00:00 GMT</option>
+</select>
+</div>
+</div>
+</div>
+<div class="col-span-4">
+<div class="aspect-square bg-surface-container-low rounded-xl flex flex-col items-center justify-center border border-white/5 border-dashed group cursor-pointer hover:bg-surface-container-high transition-colors overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="professional headshot of a man with clean grooming and a sharp dark blazer in high-contrast cinematic lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB2Pp7wMZcA3ibJeGGsIbjWR2DZrepLSJDag5phrorslXIxGoXKG5TlzPGkAZwULPrixdMiraCxmtDMq7I84zEHJ9RmIQbtBCesKHjk5DV1_IPX-_wqzXsuOw9c4vBHZFvsB1dT__YuYeEliTUYfPUeissY1wjY1zzJ4xiKHj8prBJ02AGcYYndjFy6i944aIokK3AvKRV3TTj4LKE1BPiGr_xKuFOR4ieFzYtpM-Dv4Kv9-IL54xaAQi5Wu7XZQlnLPx6OnAo0yJE"/>
+<div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity backdrop-blur-sm">
+<span class="material-symbols-outlined text-white text-3xl">upload</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Section: Project Branding -->
+<section class="mb-20 pt-12 border-t border-white/5" id="project">
+<div class="mb-8">
+<h2 class="text-2xl font-['Bricolage_Grotesque'] font-bold text-white mb-2">Project Branding</h2>
+<p class="text-neutral-500 text-sm">Customize how your analytics environment appears to stakeholders.</p>
+</div>
+<div class="space-y-12">
+<div class="flex items-start gap-8">
+<div class="w-32 h-32 bg-surface-container-low rounded-lg border border-white/5 flex items-center justify-center overflow-hidden">
+<span class="text-2xl font-['Bricolage_Grotesque'] font-extrabold text-primary">AVOP</span>
+</div>
+<div class="flex-1">
+<p class="text-on-surface font-semibold mb-2">Internal Branding Logo</p>
+<p class="text-neutral-500 text-xs mb-4">Upload a high-resolution SVG or PNG (min 400x400px)</p>
+<button class="px-4 py-2 bg-surface-container-highest rounded-lg text-sm font-medium hover:bg-neutral-700 transition-colors">Replace Logo</button>
+</div>
+</div>
+<div class="space-y-6">
+<h3 class="text-sm font-bold uppercase tracking-widest text-neutral-500">Competitor List Management</h3>
+<div class="space-y-2">
+<div class="flex items-center justify-between p-4 bg-surface-container-low rounded-lg border border-white/5 group">
+<div class="flex items-center gap-4">
+<div class="h-8 w-8 bg-neutral-800 rounded flex items-center justify-center">
+<span class="text-[10px] font-bold">XN</span>
+</div>
+<span class="font-medium text-sm">Xenon Analytics</span>
+</div>
+<button class="text-neutral-500 hover:text-error transition-colors">
+<span class="material-symbols-outlined text-sm">delete</span>
+</button>
+</div>
+<div class="flex items-center justify-between p-4 bg-surface-container-low rounded-lg border border-white/5 group">
+<div class="flex items-center gap-4">
+<div class="h-8 w-8 bg-neutral-800 rounded flex items-center justify-center">
+<span class="text-[10px] font-bold">DT</span>
+</div>
+<span class="font-medium text-sm">Delta Tech</span>
+</div>
+<button class="text-neutral-500 hover:text-error transition-colors">
+<span class="material-symbols-outlined text-sm">delete</span>
+</button>
+</div>
+<button class="w-full py-4 border border-dashed border-white/10 rounded-lg text-neutral-500 text-sm flex items-center justify-center gap-2 hover:border-primary/50 hover:text-primary transition-all">
+<span class="material-symbols-outlined text-sm">add</span>
+<span>Add Competitor Domain</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Section: Team Member Table -->
+<section class="mb-20 pt-12 border-t border-white/5" id="team">
+<div class="flex justify-between items-end mb-8">
+<div>
+<h2 class="text-2xl font-['Bricolage_Grotesque'] font-bold text-white mb-2">Team Governance</h2>
+<p class="text-neutral-500 text-sm">Control access levels and collaborator permissions.</p>
+</div>
+<button class="bg-primary text-on-primary px-4 py-2 rounded font-bold text-xs uppercase tracking-widest">Invite Member</button>
+</div>
+<div class="overflow-hidden rounded-xl bg-surface-container-low border border-white/5">
+<table class="w-full text-left text-sm">
+<thead>
+<tr class="bg-surface-container-high/50 text-neutral-500 font-bold uppercase text-[10px] tracking-widest">
+<th class="px-6 py-4">User</th>
+<th class="px-6 py-4">Access Level</th>
+<th class="px-6 py-4">Status</th>
+<th class="px-6 py-4 text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-white/5">
+<tr class="hover:bg-white/[0.02] transition-colors">
+<td class="px-6 py-4 flex items-center gap-3">
+<div class="h-8 w-8 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-bold text-xs">SV</div>
+<div>
+<p class="font-semibold">Sarah Vance</p>
+<p class="text-xs text-neutral-500">sarah@avop.analytics</p>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="px-2 py-1 bg-surface-container-highest text-cyan-400 rounded text-xs font-bold border border-cyan-500/20">Admin</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<div class="h-1.5 w-1.5 rounded-full bg-tertiary"></div>
+<span class="text-xs text-neutral-300">Active</span>
+</div>
+</td>
+<td class="px-6 py-4 text-right">
+<span class="material-symbols-outlined text-neutral-500 cursor-pointer hover:text-white">more_vert</span>
+</td>
+</tr>
+<tr class="hover:bg-white/[0.02] transition-colors">
+<td class="px-6 py-4 flex items-center gap-3">
+<div class="h-8 w-8 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center font-bold text-xs">JM</div>
+<div>
+<p class="font-semibold">Julian Maes</p>
+<p class="text-xs text-neutral-500">jmaes@avop.analytics</p>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="px-2 py-1 bg-surface-container-highest text-neutral-400 rounded text-xs font-bold border border-white/5">Analyst</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<div class="h-1.5 w-1.5 rounded-full bg-tertiary"></div>
+<span class="text-xs text-neutral-300">Active</span>
+</div>
+</td>
+<td class="px-6 py-4 text-right">
+<span class="material-symbols-outlined text-neutral-500 cursor-pointer hover:text-white">more_vert</span>
+</td>
+</tr>
+<tr class="hover:bg-white/[0.02] transition-colors">
+<td class="px-6 py-4 flex items-center gap-3 opacity-60">
+<div class="h-8 w-8 rounded-full bg-neutral-800 text-neutral-400 flex items-center justify-center font-bold text-xs">EL</div>
+<div>
+<p class="font-semibold">Eva Low</p>
+<p class="text-xs text-neutral-500">eva@partner.com</p>
+</div>
+</td>
+<td class="px-6 py-4 opacity-60">
+<span class="px-2 py-1 bg-surface-container-highest text-neutral-400 rounded text-xs font-bold">Viewer</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<div class="h-1.5 w-1.5 rounded-full bg-neutral-600"></div>
+<span class="text-xs text-neutral-500">Pending</span>
+</div>
+</td>
+<td class="px-6 py-4 text-right">
+<span class="material-symbols-outlined text-neutral-500 cursor-pointer hover:text-white">close</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<!-- Section: Billing & Plans -->
+<section class="mb-20 pt-12 border-t border-white/5" id="billing">
+<div class="mb-8">
+<h2 class="text-2xl font-['Bricolage_Grotesque'] font-bold text-white mb-2">Billing &amp; Usage</h2>
+<p class="text-neutral-500 text-sm">Manage your subscription and monitor compute allocation.</p>
+</div>
+<div class="grid grid-cols-2 gap-8 mb-12">
+<!-- Plan Card -->
+<div class="p-8 bg-gradient-to-br from-surface-container-high to-surface-container-low rounded-xl border border-primary/20 relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-4">
+<span class="bg-primary/10 text-primary px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-tighter">Current Plan</span>
+</div>
+<h3 class="text-neutral-400 text-xs font-bold uppercase tracking-widest mb-4">Enterprise Plus</h3>
+<div class="flex items-baseline gap-2 mb-8">
+<span class="text-4xl font-['Bricolage_Grotesque'] font-extrabold text-white">$1,250</span>
+<span class="text-neutral-500 text-sm">/ month</span>
+</div>
+<div class="space-y-4">
+<div class="flex items-center gap-2 text-sm text-neutral-300">
+<span class="material-symbols-outlined text-primary text-lg" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                                    Unlimited API Requests
+                                </div>
+<div class="flex items-center gap-2 text-sm text-neutral-300">
+<span class="material-symbols-outlined text-primary text-lg" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                                    Dedicated Compute Cluster
+                                </div>
+</div>
+</div>
+<!-- Usage Stats -->
+<div class="p-8 bg-surface-container-low rounded-xl border border-white/5 space-y-8">
+<div>
+<div class="flex justify-between items-end mb-2">
+<span class="text-xs font-bold uppercase tracking-widest text-neutral-500">Monthly Tokens</span>
+<span class="font-mono text-sm text-on-surface">4.2M / 10M</span>
+</div>
+<div class="h-2 w-full bg-neutral-800 rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full" style="width: 42%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between items-end mb-2">
+<span class="text-xs font-bold uppercase tracking-widest text-neutral-500">Storage</span>
+<span class="font-mono text-sm text-on-surface">12.5GB / 50GB</span>
+</div>
+<div class="h-2 w-full bg-neutral-800 rounded-full overflow-hidden">
+<div class="h-full bg-cyan-600 rounded-full" style="width: 25%"></div>
+</div>
+</div>
+<button class="w-full py-2 bg-white/5 rounded-lg text-sm font-semibold hover:bg-white/10 transition-colors">Increase Limits</button>
+</div>
+</div>
+</section>
+<!-- Section: API Management -->
+<section class="mb-20 pt-12 border-t border-white/5" id="api">
+<div class="mb-8">
+<h2 class="text-2xl font-['Bricolage_Grotesque'] font-bold text-white mb-2">API Infrastructure</h2>
+<p class="text-neutral-500 text-sm">Programmatic access to the AVOP Analytics engine.</p>
+</div>
+<div class="space-y-8">
+<div class="p-6 bg-surface-container-low rounded-xl border border-white/5">
+<div class="flex justify-between items-center mb-4">
+<span class="text-xs font-bold uppercase tracking-widest text-neutral-500">Primary API Key</span>
+<span class="text-[10px] text-neutral-600 font-mono">ID: AV_PROD_8812</span>
+</div>
+<div class="flex items-center gap-4">
+<input class="flex-1 bg-surface-container-lowest border border-white/5 px-4 py-3 rounded font-mono text-sm text-primary" readonly="" type="password" value="sk-avop-9x2kL-88Msh-20vQ1-Xp99"/>
+<button class="p-3 bg-surface-container-high rounded border border-white/5 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-lg">content_copy</span>
+</button>
+<button class="p-3 bg-surface-container-high rounded border border-white/5 hover:text-error transition-colors">
+<span class="material-symbols-outlined text-lg">refresh</span>
+</button>
+</div>
+</div>
+<div class="space-y-4">
+<h3 class="text-sm font-bold uppercase tracking-widest text-neutral-500">Implementation Guides</h3>
+<div class="bg-[#080808] rounded-xl overflow-hidden border border-white/5">
+<div class="flex border-b border-white/5 bg-surface-container-high/30 px-4">
+<button class="px-4 py-3 text-xs font-bold text-cyan-400 border-b-2 border-cyan-500">Python</button>
+<button class="px-4 py-3 text-xs font-bold text-neutral-500 hover:text-neutral-300">cURL</button>
+<button class="px-4 py-3 text-xs font-bold text-neutral-500 hover:text-neutral-300">Node.js</button>
+</div>
+<div class="p-6 font-mono text-sm leading-relaxed text-neutral-400 overflow-x-auto no-scrollbar">
+<pre><code><span class="text-cyan-500">import</span> avop_analytics <span class="text-cyan-500">as</span> avop
+
+<span class="text-neutral-600"># Initialize engine</span>
+client = avop.Client(api_key=<span class="text-tertiary">"sk-avop-..."</span>)
+
+<span class="text-neutral-600"># Run deep sentiment analysis</span>
+analysis = client.analyze(
+    project_id=<span class="text-tertiary">"AV_ALPHA"</span>,
+    target=<span class="text-tertiary">"market_trends"</span>,
+    depth=<span class="text-primary">"sovereign"</span>
+)
+
+<span class="text-cyan-500">print</span>(analysis.insights)</code></pre>
+</div>
+</div>
+</div>
+</div>
+</section>
+<div class="flex justify-end gap-4 pb-20">
+<button class="px-6 py-3 text-neutral-400 font-bold text-xs uppercase tracking-widest hover:text-white transition-colors">Discard Changes</button>
+<button class="px-10 py-3 bg-gradient-to-br from-primary to-primary-container text-on-primary font-bold text-xs uppercase tracking-widest rounded-lg shadow-lg shadow-primary/10">Save Configuration</button>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer (Execution from JSON) -->
+<footer class="ml-[220px] w-auto py-16 bg-[#0D0E0F] border-t border-white/5">
+<div class="grid grid-cols-4 gap-8 px-12 max-w-7xl mx-auto">
+<div class="col-span-1">
+<span class="text-xl font-['Bricolage_Grotesque'] font-bold text-white">AVOP</span>
+<p class="mt-4 text-neutral-600 font-['Plus_Jakarta_Sans'] text-xs uppercase tracking-wider leading-relaxed">
+                    © 2024 AVOP Analytics. All rights reserved.
+                </p>
+</div>
+<div class="flex flex-col gap-3">
+<h4 class="text-neutral-400 font-bold text-[10px] uppercase tracking-[0.2em] mb-2">Product</h4>
+<a class="text-neutral-600 font-['Plus_Jakarta_Sans'] text-xs uppercase tracking-wider hover:text-white transition-opacity duration-300" href="#">Features</a>
+<a class="text-neutral-600 font-['Plus_Jakarta_Sans'] text-xs uppercase tracking-wider hover:text-white transition-opacity duration-300" href="#">Security</a>
+<a class="text-neutral-600 font-['Plus_Jakarta_Sans'] text-xs uppercase tracking-wider hover:text-white transition-opacity duration-300" href="#">API Docs</a>
+</div>
+<div class="flex flex-col gap-3">
+<h4 class="text-neutral-400 font-bold text-[10px] uppercase tracking-[0.2em] mb-2">Company</h4>
+<a class="text-neutral-600 font-['Plus_Jakarta_Sans'] text-xs uppercase tracking-wider hover:text-white transition-opacity duration-300" href="#">About</a>
+<a class="text-neutral-600 font-['Plus_Jakarta_Sans'] text-xs uppercase tracking-wider hover:text-white transition-opacity duration-300" href="#">Privacy</a>
+<a class="text-neutral-600 font-['Plus_Jakarta_Sans'] text-xs uppercase tracking-wider hover:text-white transition-opacity duration-300" href="#">Terms</a>
+</div>
+<div class="flex flex-col gap-3">
+<h4 class="text-neutral-400 font-bold text-[10px] uppercase tracking-[0.2em] mb-2">Support</h4>
+<a class="text-neutral-600 font-['Plus_Jakarta_Sans'] text-xs uppercase tracking-wider hover:text-white transition-opacity duration-300" href="#">Status</a>
+<a class="text-neutral-600 font-['Plus_Jakarta_Sans'] text-xs uppercase tracking-wider hover:text-white transition-opacity duration-300" href="#">Help Center</a>
+<a class="text-neutral-600 font-['Plus_Jakarta_Sans'] text-xs uppercase tracking-wider hover:text-white transition-opacity duration-300" href="#">Contact</a>
+</div>
+</div>
+</footer>
+</body></html>

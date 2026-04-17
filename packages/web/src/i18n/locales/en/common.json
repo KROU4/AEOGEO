@@ -4,7 +4,7 @@
   },
   "nav": {
     "overview": "Overview",
-    "visibility": "AI Visibility",
+    "visibility": "Visibility",
     "reports": "Reports",
     "content": "Content",
     "widgets": "Widgets",
@@ -15,7 +15,7 @@
     "citations": "Citations",
     "competitors": "Competitors",
     "platforms": "Platforms",
-    "assistant": "AI Assistant"
+    "assistant": "Assistant"
   },
   "navGroups": {
     "platform": "Platform",

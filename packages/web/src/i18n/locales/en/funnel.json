@@ -1,4 +1,48 @@
 {
+  "quickOnboarding": {
+    "step1": {
+      "title": "Name your project",
+      "subtitle": "What brand or product are you tracking?",
+      "nameLabel": "Project name *",
+      "namePlaceholder": "e.g. AVOP Platform",
+      "urlLabel": "Website URL",
+      "urlPlaceholder": "https://yourdomain.com"
+    },
+    "step2": {
+      "title": "Add competitors",
+      "subtitle": "Which brands compete with you in AI responses?",
+      "competitorPlaceholder": "https://competitor{{n}}.com",
+      "addCompetitor": "+ Add competitor"
+    },
+    "step3": {
+      "title": "Target queries",
+      "subtitle": "What questions should AI mention you for?",
+      "queryPlaceholder": "e.g. best AI visibility platform",
+      "addQuery": "+ Add query"
+    },
+    "step4": {
+      "title": "Content language",
+      "subtitle": "Primary language of your content and audience",
+      "langEn": "English",
+      "langRu": "Русский"
+    },
+    "step5": {
+      "title": "Review & Create",
+      "subtitle": "Confirm your project settings before we start tracking",
+      "labelName": "Project name",
+      "labelWebsite": "Website",
+      "labelCompetitors": "Competitors",
+      "labelQueries": "Target queries",
+      "labelLanguage": "Language",
+      "dash": "—"
+    },
+    "nav": {
+      "back": "Back",
+      "continue": "Continue",
+      "creating": "Creating project…",
+      "create": "Create Project"
+    }
+  },
   "title": "Set Up Your Project",
   "steps": {
     "createProject": "Create Project",

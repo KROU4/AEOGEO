@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Competitors | AVOP Analytics</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&amp;family=Bricolage+Grotesque:wght@700;800&amp;family=JetBrains+Mono:wght@400;500&amp;family=Space+Grotesk:wght@500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "secondary-container": "#454555",
+                    "on-tertiary-fixed": "#002109",
+                    "secondary-fixed": "#e2e0f4",
+                    "surface-variant": "#343536",
+                    "on-primary-container": "#00424f",
+                    "tertiary-fixed-dim": "#4ae176",
+                    "on-primary-fixed-variant": "#004e5c",
+                    "tertiary-fixed": "#6bff8f",
+                    "surface-dim": "#121315",
+                    "secondary-fixed-dim": "#c6c5d7",
+                    "background": "#121315",
+                    "surface-container": "#1f2021",
+                    "primary-fixed-dim": "#4cd7f6",
+                    "tertiary": "#4ae176",
+                    "surface-container-lowest": "#0d0e0f",
+                    "on-error": "#690005",
+                    "outline-variant": "#3d494c",
+                    "on-tertiary-container": "#00461b",
+                    "on-primary-fixed": "#001f26",
+                    "on-secondary": "#2f2f3e",
+                    "error-container": "#93000a",
+                    "surface-container-high": "#292a2b",
+                    "primary": "#4cd7f6",
+                    "primary-fixed": "#acedff",
+                    "surface-tint": "#4cd7f6",
+                    "on-error-container": "#ffdad6",
+                    "on-secondary-container": "#b4b3c6",
+                    "primary-container": "#06b6d4",
+                    "on-surface-variant": "#bcc9cd",
+                    "tertiary-container": "#14bf59",
+                    "on-tertiary-fixed-variant": "#005321",
+                    "secondary": "#c6c5d7",
+                    "surface-bright": "#38393a",
+                    "inverse-on-surface": "#303032",
+                    "outline": "#869397",
+                    "on-background": "#e3e2e3",
+                    "on-primary": "#003640",
+                    "error": "#ffb4ab",
+                    "on-secondary-fixed": "#1a1a28",
+                    "surface": "#121315",
+                    "on-surface": "#e3e2e3",
+                    "inverse-surface": "#e3e2e3",
+                    "on-secondary-fixed-variant": "#454555",
+                    "on-tertiary": "#003915",
+                    "inverse-primary": "#00687a",
+                    "surface-container-highest": "#343536",
+                    "surface-container-low": "#1b1c1d"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "fontFamily": {
+                    "headline": ["Space Grotesk"],
+                    "body": ["Plus Jakarta Sans"],
+                    "label": ["Plus Jakarta Sans"],
+                    "mono": ["JetBrains Mono"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 200, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-panel {
+            background: rgba(31, 32, 33, 0.7);
+            backdrop-filter: blur(12px);
+        }
+        .primary-gradient {
+            background: linear-gradient(135deg, #4CD7F6 0%, #06B6D4 100%);
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="bg-surface-container-lowest text-on-background font-body selection:bg-primary selection:text-on-primary">
+<!-- SideNavBar -->
+<aside class="fixed left-0 h-full w-[220px] bg-[#0D0E0F] flex flex-col py-6 px-4 gap-2 z-50">
+<div class="px-2 mb-8">
+<span class="text-xl font-['Bricolage_Grotesque'] font-bold text-white block">AVOP Internal</span>
+<span class="text-[10px] uppercase tracking-widest text-neutral-500 font-bold">Analytics Engine</span>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 text-neutral-500 font-medium text-sm hover:bg-neutral-800/50 hover:text-neutral-200 transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="dashboard">dashboard</span>
+                Dashboard
+            </a>
+<a class="flex items-center gap-3 px-3 py-2 text-cyan-400 bg-neutral-900/50 border-l-2 border-cyan-500 font-medium text-sm transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="monitoring">monitoring</span>
+                Analytics
+            </a>
+<a class="flex items-center gap-3 px-3 py-2 text-neutral-500 font-medium text-sm hover:bg-neutral-800/50 hover:text-neutral-200 transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="construction">construction</span>
+                Tools
+            </a>
+<a class="flex items-center gap-3 px-3 py-2 text-neutral-500 font-medium text-sm hover:bg-neutral-800/50 hover:text-neutral-200 transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="folder_managed">folder_managed</span>
+                Projects
+            </a>
+<a class="flex items-center gap-3 px-3 py-2 text-neutral-500 font-medium text-sm hover:bg-neutral-800/50 hover:text-neutral-200 transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="description">description</span>
+                Reports
+            </a>
+<a class="flex items-center gap-3 px-3 py-2 text-neutral-500 font-medium text-sm hover:bg-neutral-800/50 hover:text-neutral-200 transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="settings">settings</span>
+                Settings
+            </a>
+</nav>
+<div class="mt-auto pt-6 border-t border-white/5 space-y-1">
+<button class="w-full primary-gradient text-on-primary py-2 px-4 rounded-lg text-xs font-bold uppercase tracking-tight mb-4 active:scale-95 transition-transform">
+                New Analysis
+            </button>
+<a class="flex items-center gap-3 px-3 py-2 text-neutral-500 font-medium text-sm hover:text-white transition-colors" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="help">help</span>
+                Support
+            </a>
+<a class="flex items-center gap-3 px-3 py-2 text-neutral-500 font-medium text-sm hover:text-white transition-colors" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="menu_book">menu_book</span>
+                Docs
+            </a>
+</div>
+</aside>
+<!-- TopAppBar -->
+<header class="sticky top-0 h-[52px] z-40 bg-[#0D0E0F]/80 backdrop-blur-md border-b border-white/5 flex justify-between items-center px-6 w-full ml-[220px] transition-all duration-300">
+<div class="flex items-center gap-4">
+<h1 class="text-lg font-['Bricolage_Grotesque'] font-bold text-white">Analytics</h1>
+<span class="h-4 w-px bg-white/10"></span>
+<div class="flex gap-2">
+<span class="px-2 py-0.5 rounded bg-surface-container-highest text-[10px] font-mono text-primary uppercase tracking-tighter">Competitors</span>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center bg-surface-container-low px-3 py-1 rounded border border-white/5">
+<span class="material-symbols-outlined text-neutral-500 text-sm" data-icon="search">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-xs text-neutral-300 w-48 placeholder:text-neutral-600" placeholder="Search metrics..." type="text"/>
+</div>
+<div class="flex items-center gap-4 text-neutral-400">
+<button class="hover:bg-white/5 p-1 transition-colors duration-150"><span class="material-symbols-outlined text-lg" data-icon="calendar_today">calendar_today</span></button>
+<button class="hover:bg-white/5 p-1 transition-colors duration-150"><span class="material-symbols-outlined text-lg" data-icon="notifications">notifications</span></button>
+<button class="h-7 w-7 rounded-full overflow-hidden border border-primary/20">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="close-up professional headshot of a data analyst in a dark minimal office with soft cyan ambient light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAK-UcX-WkuJAN7jzUQTnH6KpJUuHXhV34KmusSazzRWhv9d957EUcBEKo7N7uzl8P2tX7LU0qMhsfCZ_K1XsHu3F1iWfpVOdtu-qNOTj9X-qUqyaiRlPvYd34QXykBERbqz1ICTUOY6IoeBGSzp5DiBcC3wwKHEsoz0Blvq2z5mDN-ni8oS2UmbqwSOkv7bOcEDO6XlCxbwoGlf0IB2lpC4kGqbXcSrETxeLacfg9eCjsLDW_kebHM-VzHoWdM6oTIuzEcBtsoB_Y"/>
+</button>
+</div>
+</div>
+</header>
+<main class="ml-[220px] p-8 max-w-[1400px]">
+<!-- Comparison Header: Brand Multi-Select -->
+<section class="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
+<div>
+<h2 class="text-3xl font-['Bricolage_Grotesque'] font-extrabold text-white tracking-tighter mb-2">Market Share Dynamics</h2>
+<p class="text-neutral-500 text-sm max-w-xl">Deep-dive comparative analysis of Share of Voice (SoV) and platform penetration across key market participants.</p>
+</div>
+<div class="flex flex-wrap gap-2 items-center bg-surface-container-low p-2 rounded-xl">
+<span class="text-[10px] text-neutral-500 uppercase font-bold px-2">Comparing:</span>
+<button class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary/10 text-primary border border-primary/20 text-xs font-semibold">
+<span class="w-2 h-2 rounded-full bg-primary"></span> AVOP
+                    <span class="material-symbols-outlined text-[14px]" data-icon="close">close</span>
+</button>
+<button class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 text-neutral-300 border border-white/5 text-xs font-semibold">
+<span class="w-2 h-2 rounded-full bg-neutral-400"></span> Nexus Systems
+                    <span class="material-symbols-outlined text-[14px]" data-icon="close">close</span>
+</button>
+<button class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 text-neutral-300 border border-white/5 text-xs font-semibold">
+<span class="w-2 h-2 rounded-full bg-neutral-600"></span> Oracle Core
+                    <span class="material-symbols-outlined text-[14px]" data-icon="close">close</span>
+</button>
+<button class="p-1.5 hover:bg-white/10 text-neutral-500 rounded-lg transition-colors">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+</button>
+</div>
+</section>
+<div class="grid grid-cols-12 gap-6">
+<!-- Main Visual: Race Chart (Horizontal Bars) -->
+<div class="col-span-12 lg:col-span-8 bg-surface-container-low p-6 rounded-sm">
+<div class="flex justify-between items-center mb-8">
+<div>
+<h3 class="text-sm font-bold text-white uppercase tracking-widest">Share of Voice (SoV)</h3>
+<p class="text-xs text-neutral-500 font-mono">LIVE REAL-TIME INDEX</p>
+</div>
+<div class="flex items-center gap-4 text-[10px] font-mono">
+<span class="flex items-center gap-1.5"><span class="w-2 h-2 bg-primary"></span> AVOP</span>
+<span class="flex items-center gap-1.5"><span class="w-2 h-2 bg-neutral-600"></span> OTHERS</span>
+</div>
+</div>
+<div class="space-y-6">
+<!-- AVOP (Cyan) -->
+<div class="space-y-2">
+<div class="flex justify-between text-[11px] font-mono text-neutral-400">
+<span>AVOP (YOU)</span>
+<span class="text-primary font-bold">42.8%</span>
+</div>
+<div class="h-6 w-full bg-surface-container-lowest overflow-hidden">
+<div class="h-full primary-gradient" style="width: 42.8%"></div>
+</div>
+</div>
+<!-- Competitor 1 -->
+<div class="space-y-2">
+<div class="flex justify-between text-[11px] font-mono text-neutral-400">
+<span>NEXUS SYSTEMS</span>
+<span>24.2%</span>
+</div>
+<div class="h-6 w-full bg-surface-container-lowest overflow-hidden">
+<div class="h-full bg-neutral-600" style="width: 24.2%"></div>
+</div>
+</div>
+<!-- Competitor 2 -->
+<div class="space-y-2">
+<div class="flex justify-between text-[11px] font-mono text-neutral-400">
+<span>ORACLE CORE</span>
+<span>18.5%</span>
+</div>
+<div class="h-6 w-full bg-surface-container-lowest overflow-hidden">
+<div class="h-full bg-neutral-700" style="width: 18.5%"></div>
+</div>
+</div>
+<!-- Competitor 3 -->
+<div class="space-y-2">
+<div class="flex justify-between text-[11px] font-mono text-neutral-400">
+<span>VELOCITY AI</span>
+<span>14.5%</span>
+</div>
+<div class="h-6 w-full bg-surface-container-lowest overflow-hidden">
+<div class="h-full bg-neutral-800" style="width: 14.5%"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Insights Panel -->
+<div class="col-span-12 lg:col-span-4 glass-panel p-6 border border-white/5 relative overflow-hidden">
+<div class="absolute -right-8 -top-8 text-primary/5 select-none">
+<span class="material-symbols-outlined text-[160px]" data-icon="lightbulb">lightbulb</span>
+</div>
+<div class="relative z-10">
+<div class="flex items-center gap-3 mb-6">
+<span class="material-symbols-outlined text-primary" data-icon="lightbulb" data-weight="fill">lightbulb</span>
+<h3 class="text-sm font-bold text-white uppercase tracking-widest">Competitive Intelligence</h3>
+</div>
+<div class="space-y-6">
+<div class="space-y-2">
+<h4 class="text-xs font-bold text-primary uppercase">Dominance Strategy</h4>
+<p class="text-sm text-neutral-300 leading-relaxed">AVOP leads in <span class="font-bold text-white">Cloud Infrastructure</span> sentiment by +14% compared to Nexus Systems. This is driving the current SoV rally.</p>
+</div>
+<div class="space-y-2">
+<h4 class="text-xs font-bold text-neutral-500 uppercase">Risk Exposure</h4>
+<p class="text-sm text-neutral-300 leading-relaxed">Velocity AI has gained <span class="font-bold text-white">4.2 points</span> in mobile search penetration over the last 14 days. Monitor their pricing adjustments.</p>
+</div>
+<button class="w-full text-[10px] font-bold text-neutral-500 border border-neutral-800 py-2 hover:bg-white/5 transition-all uppercase tracking-widest">Generate Full Threat Audit</button>
+</div>
+</div>
+</div>
+<!-- Platform Comparison Grid: Matrix Table -->
+<div class="col-span-12 bg-surface-container-low overflow-hidden">
+<div class="p-6 border-b border-white/5">
+<h3 class="text-sm font-bold text-white uppercase tracking-widest">Feature Matrix &amp; Performance Score</h3>
+</div>
+<div class="overflow-x-auto no-scrollbar">
+<table class="w-full text-left font-mono">
+<thead>
+<tr class="bg-surface-container-lowest text-[10px] text-neutral-500 uppercase tracking-widest">
+<th class="px-6 py-4 font-bold border-r border-white/5">Platform Entity</th>
+<th class="px-6 py-4 font-bold">Latency (ms)</th>
+<th class="px-6 py-4 font-bold">API Reliability</th>
+<th class="px-6 py-4 font-bold">Data Fidelity</th>
+<th class="px-6 py-4 font-bold">Cost/Query</th>
+<th class="px-6 py-4 font-bold text-right">Aggregate Score</th>
+</tr>
+</thead>
+<tbody class="text-xs divide-y divide-white/5">
+<tr class="hover:bg-white/5 transition-colors">
+<td class="px-6 py-5 font-bold text-white border-r border-white/5 flex items-center gap-2">
+<span class="w-2 h-2 bg-primary"></span> AVOP
+                                </td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-2">
+<span class="text-tertiary">14ms</span>
+<div class="w-12 h-1 bg-tertiary/20 overflow-hidden"><div class="h-full bg-tertiary w-full"></div></div>
+</div>
+</td>
+<td class="px-6 py-5 text-tertiary">99.98%</td>
+<td class="px-6 py-5 text-tertiary">Superior</td>
+<td class="px-6 py-5 text-neutral-400">$0.002</td>
+<td class="px-6 py-5 text-right"><span class="px-2 py-1 bg-tertiary/10 text-tertiary rounded text-[10px] font-bold uppercase">Leading</span></td>
+</tr>
+<tr class="bg-surface-container-lowest/30 hover:bg-white/5 transition-colors">
+<td class="px-6 py-5 font-bold text-neutral-400 border-r border-white/5 flex items-center gap-2">
+<span class="w-2 h-2 bg-neutral-600"></span> Nexus
+                                </td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-2">
+<span class="text-error">89ms</span>
+<div class="w-12 h-1 bg-error/20 overflow-hidden"><div class="h-full bg-error w-1/4"></div></div>
+</div>
+</td>
+<td class="px-6 py-5 text-neutral-300">96.20%</td>
+<td class="px-6 py-5 text-neutral-500">Standard</td>
+<td class="px-6 py-5 text-neutral-400">$0.008</td>
+<td class="px-6 py-5 text-right"><span class="px-2 py-1 bg-error/10 text-error rounded text-[10px] font-bold uppercase">Laggard</span></td>
+</tr>
+<tr class="hover:bg-white/5 transition-colors">
+<td class="px-6 py-5 font-bold text-neutral-400 border-r border-white/5 flex items-center gap-2">
+<span class="w-2 h-2 bg-neutral-700"></span> Oracle
+                                </td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-2">
+<span class="text-neutral-300">42ms</span>
+<div class="w-12 h-1 bg-neutral-600 overflow-hidden"><div class="h-full bg-neutral-400 w-2/3"></div></div>
+</div>
+</td>
+<td class="px-6 py-5 text-neutral-300">98.12%</td>
+<td class="px-6 py-5 text-neutral-300">High</td>
+<td class="px-6 py-5 text-neutral-400">$0.015</td>
+<td class="px-6 py-5 text-right"><span class="px-2 py-1 bg-neutral-500/10 text-neutral-500 rounded text-[10px] font-bold uppercase">Parity</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Trend Comparison: LineChart -->
+<div class="col-span-12 bg-surface-container-low p-6">
+<div class="flex justify-between items-center mb-10">
+<div>
+<h3 class="text-sm font-bold text-white uppercase tracking-widest">Quarterly Trajectory</h3>
+<p class="text-[10px] text-neutral-500 font-mono">AVOP VS. MARKET AGGREGATE</p>
+</div>
+<div class="flex gap-4">
+<button class="text-[10px] px-3 py-1 bg-surface-container-highest text-white rounded">Q1 - Q2</button>
+<button class="text-[10px] px-3 py-1 text-neutral-500 hover:text-white transition-colors">12 MONTHS</button>
+</div>
+</div>
+<div class="h-[300px] w-full relative flex items-end gap-1">
+<!-- Chart Simulation -->
+<div class="absolute inset-0 flex flex-col justify-between pointer-events-none">
+<div class="border-t border-white/5 w-full"></div>
+<div class="border-t border-white/5 w-full"></div>
+<div class="border-t border-white/5 w-full"></div>
+<div class="border-t border-white/5 w-full"></div>
+</div>
+<!-- Line Simulation SVG -->
+<svg class="absolute inset-0 w-full h-full overflow-visible" preserveaspectratio="none">
+<!-- Market Agg (Neutral) -->
+<path d="M0 240 Q100 220 200 230 T400 210 T600 200 T800 220 T1000 190" fill="none" stroke="#343536" stroke-width="2"></path>
+<!-- AVOP (Primary) -->
+<path d="M0 260 Q100 230 200 180 T400 140 T600 160 T800 100 T1000 40" fill="none" stroke="#4CD7F6" stroke-width="3"></path>
+<circle cx="1000" cy="40" fill="#4CD7F6" r="4"></circle>
+</svg>
+<!-- Labels -->
+<div class="absolute bottom-0 w-full flex justify-between px-2 pt-4 transform translate-y-full text-[10px] font-mono text-neutral-600">
+<span>JAN</span><span>FEB</span><span>MAR</span><span>APR</span><span>MAY</span><span>JUN</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="w-full py-16 bg-[#0D0E0F] border-t border-white/5 mt-20 ml-[220px] max-w-[calc(100%-220px)]">
+<div class="grid grid-cols-4 gap-8 px-12 max-w-7xl mx-auto">
+<div class="col-span-1">
+<span class="text-xl font-['Bricolage_Grotesque'] font-bold text-white block mb-4">AVOP</span>
+<p class="text-neutral-600 text-xs leading-loose font-body">The sovereign platform for high-precision analytical intelligence. Precision at scale.</p>
+</div>
+<div class="flex flex-col gap-4">
+<span class="font-['Plus_Jakarta_Sans'] text-xs uppercase tracking-wider text-primary font-bold">Product</span>
+<a class="text-neutral-600 text-xs uppercase tracking-wider hover:text-white transition-opacity duration-300" href="#">Features</a>
+<a class="text-neutral-600 text-xs uppercase tracking-wider hover:text-white transition-opacity duration-300" href="#">Integrations</a>
+<a class="text-neutral-600 text-xs uppercase tracking-wider hover:text-white transition-opacity duration-300" href="#">Security</a>
+</div>
+<div class="flex flex-col gap-4">
+<span class="font-['Plus_Jakarta_Sans'] text-xs uppercase tracking-wider text-primary font-bold">Legal</span>
+<a class="text-neutral-600 text-xs uppercase tracking-wider hover:text-white transition-opacity duration-300" href="#">Privacy</a>
+<a class="text-neutral-600 text-xs uppercase tracking-wider hover:text-white transition-opacity duration-300" href="#">Terms</a>
+<a class="text-neutral-600 text-xs uppercase tracking-wider hover:text-white transition-opacity duration-300" href="#">Cookies</a>
+</div>
+<div class="flex flex-col gap-4">
+<span class="font-['Plus_Jakarta_Sans'] text-xs uppercase tracking-wider text-primary font-bold">Language</span>
+<select class="bg-transparent border-none text-neutral-600 text-xs uppercase tracking-wider focus:ring-0 cursor-pointer">
+<option>English (US)</option>
+<option>German (DE)</option>
+<option>Japanese (JP)</option>
+</select>
+</div>
+</div>
+<div class="mt-16 px-12 max-w-7xl mx-auto flex justify-between items-center border-t border-white/5 pt-8">
+<p class="text-neutral-600 text-[10px] font-mono">© 2024 AVOP Analytics. All rights reserved.</p>
+<div class="flex gap-4">
+<div class="h-6 w-6 rounded bg-neutral-900 flex items-center justify-center hover:bg-primary/20 transition-colors cursor-pointer">
+<img alt="Social" data-alt="minimalist monochrome social media icon for X twitter platform in a dark aesthetic" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDcdeOJkKNFMpdGe3G97JrNAwU8JS2fOSAFGVBMsQf_1b0FnADhfGlHSoftegr3Ve7BP_aoStEgey6eKHLOEZ7N8GQrNurUwB2YnOgtgUpb4OLBWYCQGYSMZzRTvuM7D75K34Vf2r4gXkud_bX4iFmAGonvG2FlnTt4-5jUBXirKgR3F6fStQiPTM5q5Zv2AFz-ewi8WUzP5unhAKhnp6eI6CckxKe2pRY6gvK80irKlq7yILNaaUpXNr4j_wTmpjV9s55xsOucNlQ"/>
+</div>
+</div>
+</div>
+</footer>
+</body></html>

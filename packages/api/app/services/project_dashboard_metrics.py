@@ -20,6 +20,7 @@ from app.schemas.project_dashboard_contract import (
     DashboardPlatformsResponse,
     ProjectDashboardResponse,
 )
+from app.utils.datetime_compat import naive_utc
 
 
 def _period_start(period: str) -> datetime:
@@ -35,6 +36,7 @@ async def _completed_runs_in_window(
     desc: bool,
     limit: int,
 ) -> list[EngineRun]:
+    since = naive_utc(since)
     order = EngineRun.created_at.desc() if desc else EngineRun.created_at.asc()
     result = await db.execute(
         select(EngineRun)

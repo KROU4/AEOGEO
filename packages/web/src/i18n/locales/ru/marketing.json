@@ -30,6 +30,53 @@
   "auditEmailSave": "Отправить",
   "auditEmailSaved": "Сохранено — напишем на этот адрес.",
   "auditEmailError": "Не удалось сохранить email. Проверьте адрес и попробуйте снова.",
+  "auditModalTitle": "Быстрый аудит для AI-краулеров",
+  "auditModalDescription": "Быстрая публичная проверка llms.txt, robots.txt и sitemap.xml.",
+  "auditModalLoadingKicker": "Сканируем публичные файлы",
+  "auditModalLoadingTitle": "Проверяем, как AI-краулеры видят ваш сайт",
+  "auditModalLoadingBody": "Ищем llms.txt, правила robots.txt и sitemap для обнаружения страниц. Быстрая проверка специально оценивает строго.",
+  "auditScanProgress": "Ход сканирования",
+  "auditScanStepResolve": "Определяем домен и ответ главной страницы",
+  "auditScanStepRobots": "Читаем правила robots.txt для краулеров",
+  "auditScanStepLlms": "Ищем структурированный llms.txt для AI",
+  "auditScanStepSitemap": "Проверяем стандартные пути sitemap",
+  "auditScanStepBots": "Проверяем доступ GPTBot, ClaudeBot и PerplexityBot",
+  "auditScanStepScore": "Сжимаем сигналы в осторожную оценку",
+  "auditModalErrorTitle": "Быстрый аудит не удался",
+  "auditModalClose": "Закрыть",
+  "auditModalKicker": "AI crawler scan",
+  "auditModalReadyKicker": "Базовые файлы найдены",
+  "auditModalWeakKicker": "Не хватает сигналов для краулеров",
+  "auditModalReadyTitle": "База видна. Теперь стоит запустить полный GEO-аудит.",
+  "auditModalWeakTitle": "AI-краулеры могут не увидеть сайт ещё до оценки контента.",
+  "auditModalBody": "Эта быстрая проверка смотрит только три публичных файла, которые AI-краулеры ищут в первую очередь. Полный аудит проверяет контент, schema, цитирования, конкурентов и готовность к платформам.",
+  "auditScoreScale": "/ {{max}}",
+  "auditCheckMax": "Быстрый лид-чек может набрать только 22 из 40 баллов. Мы специально держим оценку низкой до полного GEO-аудита контента, schema и авторитетности.",
+  "auditCheckScore": "+{{score}}",
+  "auditSitemapUrls": "{{count}} URL в sitemap",
+  "auditReadiness": {
+    "ready": "База готова для краулеров",
+    "good": "Хорошо, но неполно",
+    "partial": "Настроено частично",
+    "blind": "Почти невидим для AI"
+  },
+  "auditCheck": {
+    "llms_txt": {
+      "label": "llms.txt для AI",
+      "pass": "Нашли структурированный llms.txt с заголовком, секциями и ключевыми ссылками.",
+      "fail": "llms.txt отсутствует или неполный. AI-системы не получают краткое описание сайта."
+    },
+    "robots_txt": {
+      "label": "Доступ AI-краулеров",
+      "pass": "robots.txt разрешает ключевых AI-краулеров и ведёт их к sitemap.",
+      "fail": "robots.txt должен разрешать GPTBot, ClaudeBot и PerplexityBot, а также содержать директиву Sitemap."
+    },
+    "sitemap": {
+      "label": "Обнаружение sitemap",
+      "pass": "Нашли валидный XML sitemap с {{count}} URL.",
+      "fail": "В стандартных местах не найден валидный XML sitemap."
+    }
+  },
   "landing": {
     "logo": "AVOP",
     "navProduct": "Продукт",

@@ -105,5 +105,81 @@
     "subtitle": "До 7 завершённых запусков в выбранном окне ({{period}})",
     "seriesScore": "Оценка (0–100)",
     "seriesSov": "Доля голоса %"
+  },
+  "analyticsProject": {
+    "label": "Проект",
+    "placeholder": "Выберите проект",
+    "empty": "Создайте проект, чтобы загрузить аналитику из рабочей области."
+  },
+  "stitch": {
+    "visibility": {
+      "trendTitle": "Тренд видимости — {{count}} нед.",
+      "platformBreakdown": "Распределение по платформам",
+      "recentSection": "Источники недавних цитирований",
+      "colSource": "Источник",
+      "colEngine": "Движок",
+      "colPreview": "Фрагмент",
+      "colCites": "Цитаты",
+      "chartVisibilityPct": "Видимость %",
+      "barTooltipVisibility": "Видимость"
+    },
+    "competitors": {
+      "title": "Динамика доли рынка",
+      "subtitle": "Индекс в реальном времени · {{period}}",
+      "emptyCompetitors": "Пока нет данных по конкурентам за этот период.",
+      "sovByPlatform": "Доля голоса по платформам",
+      "weeklyTrajectory": "Недельная траектория SoV",
+      "noTrend": "Нет данных тренда.",
+      "colBrand": "Бренд",
+      "colOverallSov": "SoV всего",
+      "youSuffix": " (вы)"
+    },
+    "citations": {
+      "statTotal": "Всего строк цитирований",
+      "statTotalHint": "Уникальные домены в обозревателе",
+      "statTop": "Топ движка (по цитатам)",
+      "statTopHint": "Собрано из текущей выборки",
+      "statFiltered": "Доменов в списке",
+      "statFilteredHint": "После фильтра поиска",
+      "searchPlaceholder": "Поиск по домену или фрагменту…",
+      "allEngines": "Все движки",
+      "noMatch": "Нет цитирований по фильтру.",
+      "pieTitle": "Распределение по платформам",
+      "pieEmpty": "Нет данных.",
+      "citesSuffix": "цит.",
+      "yourDomain": "Ваш домен"
+    },
+    "platforms": {
+      "emptyEngines": "Пока нет оценок движков для проекта.",
+      "deepDiveTitle": "{{name}} — подробно",
+      "topQueries": "Топ запросов",
+      "queryMeta": "Ранг {{rank}} · {{mention}} · цитирований {{citations}}",
+      "mentioned": "упомянут",
+      "notMentioned": "не упомянут",
+      "noQueriesYet": "Пока нет запросов по этому движку.",
+      "visibilitySov": "Видимость и SoV",
+      "metricVisibility": "Видимость %",
+      "metricSov": "Доля голоса %",
+      "metricRank": "Сред. ранг (1–10)",
+      "runs": "Запуски",
+      "runsHint": "Завершённые запуски с этим движком",
+      "cardSubtitle": "{{runs}} запусков · ср. ранг {{rank}}",
+      "clickHint": "Нажмите, чтобы развернуть детали"
+    },
+    "assistant": {
+      "suggested1": "Насколько мой бренд виден в ChatGPT?",
+      "suggested2": "Сравни мои цитирования с конкурентами",
+      "suggested3": "Какие темы я упускаю в ответах AI?",
+      "suggested4": "Покажи тренды тональности за 30 дней",
+      "conv1": "Анализ видимости бренда",
+      "conv2": "Проверка цитирований конкурентов",
+      "conv3": "Углублённо по Perplexity",
+      "welcome": "Здравствуйте! Я ассистент по видимости в AI. Спрашивайте о присутствии проекта в движках, цитированиях и конкурентах.",
+      "newChat": "Новый диалог",
+      "recent": "Недавние",
+      "placeholder": "Спросите о видимости в AI…",
+      "footer": "Модель: API ассистента проекта · Enter — отправить, Shift+Enter — новая строка",
+      "toastUnreachable": "Не удалось связаться с ассистентом."
+    }
   }
 }

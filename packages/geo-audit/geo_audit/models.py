@@ -132,6 +132,20 @@ class PlatformScores(BaseModel):
     average: float = Field(ge=0, le=100)
 
 
+class CriticalIssue(BaseModel):
+    id: str  # e.g. "CRIT-01"
+    title: str
+    detail: str
+    fix: str
+
+
+class AiInsights(BaseModel):
+    executive_summary: str = ""
+    root_cause: str = ""
+    critical_issues: list[CriticalIssue] = Field(default_factory=list)
+    action_plan: dict[str, list[str]] = Field(default_factory=dict)
+
+
 class FullSiteAuditResult(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
@@ -146,3 +160,5 @@ class FullSiteAuditResult(BaseModel):
     brand_authority: float = Field(default=0.0, ge=0, le=100)
     top_issues: list[AuditIssue]  # top 10, sorted by severity
     top_recommendations: list[str]  # top 5 actionable recommendations
+    pages_analyzed: int = 1
+    ai_insights: AiInsights | None = None

@@ -14,6 +14,7 @@ from temporalio.client import Client
 from temporalio.worker import Worker
 
 from app.config import get_settings
+from app.dependencies import init_db
 from app.workflows.activities import (
     dispatch_run_completed_event_activity,
     score_run_activity,
@@ -49,6 +50,8 @@ def _signal_handler() -> None:
 async def main() -> None:
     """Start the Temporal worker and block until a shutdown signal is received."""
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s %(message)s")
+
+    init_db()
 
     temporal_host = get_settings().temporal_host
     logger.info("Connecting to Temporal at %s", temporal_host)

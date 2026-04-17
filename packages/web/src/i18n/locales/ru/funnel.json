@@ -1,4 +1,48 @@
 {
+  "quickOnboarding": {
+    "step1": {
+      "title": "Назовите проект",
+      "subtitle": "Какой бренд или продукт вы отслеживаете?",
+      "nameLabel": "Название проекта *",
+      "namePlaceholder": "напр. AVOP Platform",
+      "urlLabel": "URL сайта",
+      "urlPlaceholder": "https://yourdomain.com"
+    },
+    "step2": {
+      "title": "Конкуренты",
+      "subtitle": "С какими брендами вы конкурируете в ответах AI?",
+      "competitorPlaceholder": "https://competitor{{n}}.com",
+      "addCompetitor": "+ Добавить конкурента"
+    },
+    "step3": {
+      "title": "Целевые запросы",
+      "subtitle": "По каким вопросам вас должны упоминать в AI?",
+      "queryPlaceholder": "напр. лучшая платформа GEO-аналитики",
+      "addQuery": "+ Добавить запрос"
+    },
+    "step4": {
+      "title": "Язык контента",
+      "subtitle": "Основной язык контента и аудитории",
+      "langEn": "English",
+      "langRu": "Русский"
+    },
+    "step5": {
+      "title": "Проверка и создание",
+      "subtitle": "Подтвердите настройки перед началом отслеживания",
+      "labelName": "Название проекта",
+      "labelWebsite": "Сайт",
+      "labelCompetitors": "Конкуренты",
+      "labelQueries": "Целевые запросы",
+      "labelLanguage": "Язык",
+      "dash": "—"
+    },
+    "nav": {
+      "back": "Назад",
+      "continue": "Далее",
+      "creating": "Создаём проект…",
+      "create": "Создать проект"
+    }
+  },
   "title": "Настройка проекта",
   "steps": {
     "createProject": "Создать проект",

@@ -96,10 +96,11 @@ def _score_bar_row(label: str, score: float, max_width: float = 200) -> Table:
     bar_empty = max_width - bar_width
     colour = _score_colour(score)
 
+    colour_hex = "#" + colour.hexval()[2:]
     bar_table_data = [
         [
             Paragraph(
-                f'<font color="{colour.hexval()}" size="9"><b>{score:.0f}</b></font>',
+                f'<font color="{colour_hex}" size="9"><b>{score:.0f}</b></font>',
                 getSampleStyleSheet()["Normal"],
             ),
         ]
@@ -217,9 +218,11 @@ def _build_pdf(data: dict[str, Any]) -> bytes:
 
     # ---------------------------------------------------------- Overall Score
     score_colour = _score_colour(geo_score)
+    # ReportLab XML colour must be #RRGGBB; hexval() returns "0xRRGGBB"
+    score_hex = "#" + score_colour.hexval()[2:]
     story.append(
         _p(
-            f'Overall GEO Score: <font color="{score_colour.hexval()}" size="22"><b>{geo_score:.0f}/100</b></font>',
+            f'Overall GEO Score: <font color="{score_hex}" size="22"><b>{geo_score:.0f}/100</b></font>',
             ParagraphStyle(
                 "ScoreDisplay",
                 parent=styles["Normal"],
@@ -433,6 +436,70 @@ def _build_pdf(data: dict[str, Any]) -> bytes:
         for i, rec in enumerate(top_recs[:5], 1):
             story.append(_p(f"{i}. {rec}", body))
         story.append(Spacer(1, 6))
+
+    # ------------------------------------------------ AI Insights (optional)
+    ai_insights = data.get("ai_insights") or {}
+    if ai_insights and isinstance(ai_insights, dict):
+        exec_summary = ai_insights.get("executive_summary", "")
+        root_cause = ai_insights.get("root_cause", "")
+        critical_issues = ai_insights.get("critical_issues") or []
+        action_plan = ai_insights.get("action_plan") or {}
+
+        story.append(HRFlowable(width="100%", thickness=0.5, color=_BORDER, spaceBefore=8, spaceAfter=8))
+        story.append(_p("AI-Powered Executive Summary", h2))
+
+        if exec_summary:
+            story.append(_p(exec_summary, body))
+            story.append(Spacer(1, 4))
+
+        if root_cause:
+            story.append(
+                _p(
+                    f"<b>Root Cause:</b> {escape(root_cause)}",
+                    ParagraphStyle(
+                        "RootCause",
+                        parent=body,
+                        fontName="Helvetica",
+                        fontSize=9,
+                        leading=13,
+                        backColor=colors.HexColor("#fef3c7"),
+                        spaceAfter=6,
+                        leftIndent=6,
+                        rightIndent=6,
+                    ),
+                )
+            )
+
+        if critical_issues:
+            story.append(_p("Critical Issues", h2))
+            crit_rows: list[list[str]] = [["ID", "Issue", "Fix"]]
+            for issue in critical_issues[:6]:
+                if not isinstance(issue, dict):
+                    continue
+                crit_rows.append([
+                    str(issue.get("id", "—")),
+                    str(issue.get("title", "—")) + "\n" + str(issue.get("detail", "")),
+                    str(issue.get("fix", "—")),
+                ])
+            story.append(_make_table(crit_rows, col_widths=[0.7 * inch, 2.8 * inch, 2.5 * inch]))
+            story.append(Spacer(1, 6))
+
+        if action_plan:
+            story.append(_p("30-Day Action Plan", h2))
+            week_labels = {"week1": "Week 1", "week2": "Week 2", "week3": "Week 3", "week4": "Week 4"}
+            for week_key, week_label in week_labels.items():
+                items = action_plan.get(week_key) or []
+                if not items:
+                    continue
+                story.append(
+                    _p(
+                        f"<b>{week_label}</b>",
+                        ParagraphStyle("WkLabel", parent=body, spaceAfter=2, spaceBefore=6),
+                    )
+                )
+                for item in items:
+                    story.append(_p(f"\u2022 {item}", body))
+            story.append(Spacer(1, 6))
 
     # ---------------------------------------------------------------- Footer
     story.append(HRFlowable(width="100%", thickness=0.5, color=_BORDER, spaceBefore=12))

@@ -32,6 +32,7 @@ from app.schemas.project_explorer import (
     ProjectTrendsResponse,
     SovBrandEntry,
 )
+from app.utils.datetime_compat import naive_utc
 
 
 def _domain_from_url(url: str) -> str:
@@ -60,6 +61,7 @@ async def _run_ids_since(
     project_id: UUID,
     since: datetime,
 ) -> list[UUID]:
+    since = naive_utc(since)
     r = await db.execute(
         select(EngineRun.id).where(
             EngineRun.project_id == project_id,
@@ -188,15 +190,18 @@ async def build_sov(
 
 
 def _week_ranges(num_weeks: int) -> list[tuple[datetime, datetime, str]]:
-    """UTC week windows: (start, end, label) for the last num_weeks weeks."""
+    """UTC week windows: (start, end, label) for the last num_weeks weeks.
+
+    Boundaries are naive UTC midnights to match TIMESTAMP WITHOUT TIME ZONE columns.
+    """
     today = datetime.now(UTC).date()
     monday = today - timedelta(days=today.weekday())
     ranges: list[tuple[datetime, datetime, str]] = []
     for i in range(num_weeks - 1, -1, -1):
         start_d = monday - timedelta(weeks=i)
         end_d = start_d + timedelta(days=7)
-        start_dt = datetime(start_d.year, start_d.month, start_d.day, tzinfo=UTC)
-        end_dt = datetime(end_d.year, end_d.month, end_d.day, tzinfo=UTC)
+        start_dt = datetime(start_d.year, start_d.month, start_d.day)
+        end_dt = datetime(end_d.year, end_d.month, end_d.day)
         label = start_d.strftime("%b %d")
         ranges.append((start_dt, end_dt, label))
     return ranges

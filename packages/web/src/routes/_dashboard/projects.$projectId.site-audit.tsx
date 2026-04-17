@@ -38,6 +38,7 @@ import {
 import {
   useLatestSiteAudit,
   useStartSiteAudit,
+  type AiInsights,
   type AuditIssue,
   type FullSiteAuditResult,
   type SiteAuditStatus,
@@ -60,11 +61,6 @@ function scoreColour(score: number): string {
   return "text-red-600 dark:text-red-400";
 }
 
-function scoreBg(score: number): string {
-  if (score >= 70) return "bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800";
-  if (score >= 45) return "bg-amber-50 dark:bg-amber-950 border-amber-200 dark:border-amber-800";
-  return "bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800";
-}
 
 function severityBadge(severity: string) {
   switch (severity) {
@@ -127,20 +123,21 @@ function ScoreGauge({
   label: string;
   size?: "lg" | "sm";
 }) {
-  const r = size === "lg" ? 44 : 28;
-  const cx = size === "lg" ? 52 : 34;
-  const cy = size === "lg" ? 52 : 34;
+  const r = size === "lg" ? 52 : 28;
+  const cx = size === "lg" ? 60 : 34;
+  const cy = size === "lg" ? 60 : 34;
   const circumference = 2 * Math.PI * r;
   const offset = circumference - (score / 100) * circumference;
   const strokeColour =
     score >= 70 ? "#16a34a" : score >= 45 ? "#f59e0b" : "#dc2626";
-  const viewBox =
-    size === "lg" ? "0 0 104 104" : "0 0 68 68";
-  const textSize = size === "lg" ? "text-xl" : "text-sm";
-  const svgSize = size === "lg" ? 104 : 68;
+  const glowColour =
+    score >= 70 ? "#bbf7d0" : score >= 45 ? "#fde68a" : "#fecaca";
+  const viewBox = size === "lg" ? "0 0 120 120" : "0 0 68 68";
+  const textSize = size === "lg" ? "text-3xl" : "text-sm";
+  const svgSize = size === "lg" ? 120 : 68;
 
   return (
-    <div className="flex flex-col items-center gap-1">
+    <div className="flex flex-col items-center gap-2">
       <div className="relative">
         <svg
           width={svgSize}
@@ -148,6 +145,19 @@ function ScoreGauge({
           viewBox={viewBox}
           className="-rotate-90"
         >
+          {/* Glow effect */}
+          {size === "lg" && (
+            <circle
+              cx={cx}
+              cy={cy}
+              r={r + 6}
+              fill="none"
+              stroke={glowColour}
+              strokeWidth={4}
+              opacity={0.4}
+            />
+          )}
+          {/* Track */}
           <circle
             cx={cx}
             cy={cy}
@@ -155,29 +165,31 @@ function ScoreGauge({
             fill="none"
             stroke="currentColor"
             className="text-muted"
-            strokeWidth={size === "lg" ? 8 : 6}
+            strokeWidth={size === "lg" ? 10 : 6}
           />
+          {/* Progress */}
           <circle
             cx={cx}
             cy={cy}
             r={r}
             fill="none"
             stroke={strokeColour}
-            strokeWidth={size === "lg" ? 8 : 6}
+            strokeWidth={size === "lg" ? 10 : 6}
             strokeDasharray={circumference}
             strokeDashoffset={offset}
             strokeLinecap="round"
           />
         </svg>
-        <div className="absolute inset-0 flex items-center justify-center">
-          <span
-            className={`${textSize} font-bold ${scoreColour(score)}`}
-          >
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
+          <span className={`${textSize} font-bold ${scoreColour(score)} leading-none`}>
             {score.toFixed(0)}
           </span>
+          {size === "lg" && (
+            <span className="text-xs text-muted-foreground font-medium">/100</span>
+          )}
         </div>
       </div>
-      <p className="text-xs text-muted-foreground text-center leading-tight">{label}</p>
+      <p className="text-xs text-muted-foreground text-center leading-tight font-medium">{label}</p>
     </div>
   );
 }
@@ -197,25 +209,35 @@ function PillarCard({
   score: number;
   description: string;
 }) {
+  const label =
+    score >= 70 ? "Good" : score >= 45 ? "Fair" : "Poor";
+  const labelCls =
+    score >= 70
+      ? "text-green-700 bg-green-100 dark:text-green-300 dark:bg-green-950"
+      : score >= 45
+      ? "text-amber-700 bg-amber-100 dark:text-amber-300 dark:bg-amber-950"
+      : "text-red-700 bg-red-100 dark:text-red-300 dark:bg-red-950";
+
   return (
-    <Card className={`border ${scoreBg(score)}`}>
-      <CardContent className="pt-4 pb-3">
-        <div className="flex items-start justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <div className="p-1.5 rounded-md bg-background/60">{icon}</div>
-            <div>
-              <p className="text-sm font-semibold text-foreground">{title}</p>
-              <p className="text-xs text-muted-foreground">{description}</p>
-            </div>
+    <Card className="border hover:shadow-md transition-shadow">
+      <CardContent className="pt-4 pb-4">
+        <div className="flex items-center gap-2 mb-3">
+          <div className="p-1.5 rounded-md bg-muted/60">{icon}</div>
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-semibold text-foreground truncate">{title}</p>
+            <p className="text-[10px] text-muted-foreground">{description}</p>
           </div>
-          <span className={`text-2xl font-bold ${scoreColour(score)}`}>
-            {score.toFixed(0)}
+          <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${labelCls}`}>
+            {label}
           </span>
         </div>
-        <Progress
-          value={score}
-          className="mt-3 h-1.5"
-        />
+        <div className="flex items-end justify-between mb-1.5">
+          <span className={`text-2xl font-bold tabular-nums ${scoreColour(score)}`}>
+            {score.toFixed(0)}
+          </span>
+          <span className="text-xs text-muted-foreground">/100</span>
+        </div>
+        <Progress value={score} className="h-1.5" />
       </CardContent>
     </Card>
   );
@@ -228,17 +250,27 @@ function PillarCard({
 function IssuesList({ issues }: { issues: AuditIssue[] }) {
   if (!issues.length)
     return (
-      <p className="text-sm text-muted-foreground">No issues detected.</p>
+      <div className="flex items-center gap-2 text-sm text-green-700 dark:text-green-400 py-2">
+        <CheckCircle2 className="w-4 h-4" />
+        No issues detected.
+      </div>
     );
+
+  const borderCls = (severity: string) =>
+    severity === "critical"
+      ? "border-l-red-500"
+      : severity === "warning"
+      ? "border-l-amber-400"
+      : "border-l-teal-400";
 
   return (
     <div className="space-y-2">
       {issues.map((issue, i) => (
         <div
           key={i}
-          className="flex items-start gap-3 rounded-lg border bg-background/60 p-3"
+          className={`flex items-start gap-3 rounded-lg border border-l-4 bg-background/60 p-3 ${borderCls(issue.severity)}`}
         >
-          <div className="mt-0.5">{severityBadge(issue.severity)}</div>
+          <div className="mt-0.5 shrink-0">{severityBadge(issue.severity)}</div>
           <div className="flex-1 min-w-0">
             <p className="text-sm text-foreground">{issue.message}</p>
             {issue.recommendation && (
@@ -247,7 +279,7 @@ function IssuesList({ issues }: { issues: AuditIssue[] }) {
               </p>
             )}
           </div>
-          <Badge variant="outline" className="text-[10px] shrink-0">
+          <Badge variant="outline" className="text-[10px] shrink-0 capitalize">
             {issue.category}
           </Badge>
         </div>
@@ -325,6 +357,7 @@ function CrawlerTable({
       <TableBody>
         {entries.map(([bot, status]) => {
           const isBlocked = status.includes("BLOCKED");
+          const isExplicit = status === "ALLOWED_EXPLICIT";
           return (
             <TableRow key={bot}>
               <TableCell className="font-mono text-xs">{bot}</TableCell>
@@ -332,12 +365,14 @@ function CrawlerTable({
                 <Badge
                   variant={isBlocked ? "destructive" : "outline"}
                   className={
-                    !isBlocked
-                      ? "bg-green-50 text-green-800 border-green-200 dark:bg-green-950 dark:text-green-300"
-                      : ""
+                    isBlocked
+                      ? ""
+                      : isExplicit
+                      ? "bg-teal-50 text-teal-800 border-teal-200 dark:bg-teal-950 dark:text-teal-300"
+                      : "bg-green-50 text-green-800 border-green-200 dark:bg-green-950 dark:text-green-300"
                   }
                 >
-                  {status}
+                  {isBlocked ? "Blocked" : isExplicit ? "Allowed (explicit)" : "Allowed"}
                 </Badge>
               </TableCell>
             </TableRow>
@@ -356,55 +391,61 @@ function AuditResults({ result }: { result: FullSiteAuditResult }) {
   return (
     <div className="space-y-8">
       {/* Overall Score + Pillar overview */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card className="lg:col-span-1 flex flex-col items-center justify-center py-8">
-          <ScoreGauge
-            score={result.overall_geo_score}
-            label="Overall GEO Score"
-            size="lg"
-          />
-          <p className="text-xs text-muted-foreground mt-3 text-center px-4">
-            Composite across citability, content, technical,<br />schema, platforms &amp; brand
-          </p>
-        </Card>
+      <div className="rounded-xl border bg-gradient-to-br from-background to-muted/30 p-6">
+        <div className="grid grid-cols-1 lg:grid-cols-[auto_1fr] gap-8">
+          {/* Left: big gauge */}
+          <div className="flex flex-col items-center justify-center gap-4 lg:pr-8 lg:border-r border-border">
+            <ScoreGauge
+              score={result.overall_geo_score}
+              label="Overall GEO Score"
+              size="lg"
+            />
+            <div className="text-center space-y-1">
+              <p className="text-xs font-medium text-muted-foreground max-w-[160px] leading-snug">
+                Composite across citability, content, technical, schema, platforms &amp; brand
+              </p>
+            </div>
+          </div>
 
-        <div className="lg:col-span-2 grid grid-cols-2 sm:grid-cols-3 gap-3">
-          <PillarCard
-            icon={<BarChart3 className="w-4 h-4 text-teal-600" />}
-            title="AI Citability"
-            score={result.citability_score}
-            description="25% weight"
-          />
-          <PillarCard
-            icon={<FileText className="w-4 h-4 text-blue-600" />}
-            title="Content E-E-A-T"
-            score={result.content.score}
-            description="20% weight"
-          />
-          <PillarCard
-            icon={<Shield className="w-4 h-4 text-violet-600" />}
-            title="Technical SEO"
-            score={result.technical.score}
-            description="15% weight"
-          />
-          <PillarCard
-            icon={<Code2 className="w-4 h-4 text-orange-600" />}
-            title="Structured Data"
-            score={result.schema.score}
-            description="10% weight"
-          />
-          <PillarCard
-            icon={<Globe className="w-4 h-4 text-pink-600" />}
-            title="Platforms"
-            score={result.platforms.average}
-            description="10% weight"
-          />
-          <PillarCard
-            icon={<Layers className="w-4 h-4 text-slate-600" />}
-            title="llms.txt"
-            score={result.llmstxt.score}
-            description="llms.txt quality"
-          />
+          {/* Right: pillar grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <PillarCard
+              icon={<BarChart3 className="w-4 h-4 text-teal-600" />}
+              title="AI Citability"
+              score={result.citability_score}
+              description="25% weight"
+            />
+            <PillarCard
+              icon={<FileText className="w-4 h-4 text-blue-600" />}
+              title="Content E-E-A-T"
+              score={result.content.score}
+              description="20% weight"
+            />
+            <PillarCard
+              icon={<Shield className="w-4 h-4 text-violet-600" />}
+              title="Technical SEO"
+              score={result.technical.score}
+              description="15% weight"
+            />
+            <PillarCard
+              icon={<Code2 className="w-4 h-4 text-orange-600" />}
+              title="Structured Data"
+              score={result.schema.score}
+              description="10% weight"
+            />
+            <PillarCard
+              icon={<Globe className="w-4 h-4 text-pink-600" />}
+              title="Platforms"
+              score={result.platforms.average}
+              description="10% weight"
+            />
+            <PillarCard
+              icon={<Layers className="w-4 h-4 text-slate-600" />}
+              title="llms.txt"
+              score={result.llmstxt.score}
+              description="llms.txt quality"
+            />
+          </div>
         </div>
       </div>
 
@@ -445,17 +486,26 @@ function AuditResults({ result }: { result: FullSiteAuditResult }) {
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Top Recommendations</CardTitle>
+            <CardDescription>Prioritised actions to improve your GEO score.</CardDescription>
           </CardHeader>
           <CardContent>
-            <ol className="space-y-2 list-decimal list-inside">
+            <ol className="space-y-2">
               {result.top_recommendations.map((rec, i) => (
-                <li key={i} className="text-sm text-foreground">
-                  {rec}
+                <li key={i} className="flex items-start gap-3 rounded-lg border bg-muted/20 px-4 py-3">
+                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-teal-100 dark:bg-teal-950 text-teal-700 dark:text-teal-300 text-xs font-bold flex items-center justify-center mt-0.5">
+                    {i + 1}
+                  </span>
+                  <p className="text-sm text-foreground leading-relaxed">{rec}</p>
                 </li>
               ))}
             </ol>
           </CardContent>
         </Card>
+      )}
+
+      {/* AI Insights (when anthropic key is configured) */}
+      {result.ai_insights && (
+        <AiInsightsPanel insights={result.ai_insights} />
       )}
 
       {/* Technical detail */}
@@ -544,15 +594,20 @@ function AuditResults({ result }: { result: FullSiteAuditResult }) {
               { label: "Expertise", score: result.content.score_expertise, max: 25 },
               { label: "Authority", score: result.content.score_authoritativeness, max: 25 },
               { label: "Trust", score: result.content.score_trustworthiness, max: 25 },
-            ].map(({ label, score, max }) => (
-              <div key={label} className="flex flex-col items-center p-3 rounded-lg border bg-background/60">
-                <span className={`text-xl font-bold ${scoreColour((score / max) * 100)}`}>
-                  {score.toFixed(0)}
-                  <span className="text-xs text-muted-foreground font-normal">/{max}</span>
-                </span>
-                <span className="text-xs text-muted-foreground">{label}</span>
-              </div>
-            ))}
+            ].map(({ label, score, max }) => {
+              const pct = (score / max) * 100;
+              return (
+                <div key={label} className="flex flex-col items-center gap-2 p-4 rounded-xl border bg-background/60 hover:shadow-sm transition-shadow">
+                  <ScoreGauge score={pct} label={label} size="sm" />
+                  <div className="text-center">
+                    <span className={`text-lg font-bold tabular-nums ${scoreColour(pct)}`}>
+                      {score.toFixed(0)}
+                    </span>
+                    <span className="text-xs text-muted-foreground">/{max}</span>
+                  </div>
+                </div>
+              );
+            })}
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-sm">
             {[
@@ -576,6 +631,126 @@ function AuditResults({ result }: { result: FullSiteAuditResult }) {
           )}
         </CardContent>
       </Card>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// AI Insights panel
+// ---------------------------------------------------------------------------
+
+function AiInsightsPanel({ insights }: { insights: AiInsights }) {
+  const [openWeek, setOpenWeek] = useState<string | null>("week1");
+  const weekLabels: Record<string, string> = {
+    week1: "Week 1",
+    week2: "Week 2",
+    week3: "Week 3",
+    week4: "Week 4",
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Executive Summary */}
+      {insights.executive_summary && (
+        <Card className="border-teal-200 dark:border-teal-800 bg-teal-50/40 dark:bg-teal-950/20">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-teal-100 dark:bg-teal-900 text-teal-700 dark:text-teal-300 text-xs font-bold">AI</span>
+              AI Executive Summary
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm leading-relaxed text-foreground whitespace-pre-line">
+              {insights.executive_summary}
+            </p>
+            {insights.root_cause && (
+              <div className="mt-4 rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 px-4 py-3">
+                <p className="text-xs font-semibold text-amber-700 dark:text-amber-400 uppercase tracking-wide mb-1">Root Cause</p>
+                <p className="text-sm text-foreground">{insights.root_cause}</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Critical Issues */}
+      {insights.critical_issues.length > 0 && (
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base">Critical Issues</CardTitle>
+            <CardDescription>AI-identified blockers sorted by impact.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {insights.critical_issues.map((issue) => (
+                <div
+                  key={issue.id}
+                  className="rounded-lg border border-border bg-background p-4 space-y-2"
+                >
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="font-mono text-[10px] shrink-0">
+                      {issue.id}
+                    </Badge>
+                    <span className="font-medium text-sm text-foreground">
+                      {issue.title}
+                    </span>
+                  </div>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {issue.detail}
+                  </p>
+                  <div className="rounded-md bg-teal-50 dark:bg-teal-950/30 border border-teal-100 dark:border-teal-900 px-3 py-2">
+                    <p className="text-xs font-semibold text-teal-700 dark:text-teal-400 uppercase tracking-wide mb-0.5">Fix</p>
+                    <p className="text-sm text-foreground">{issue.fix}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* 30-Day Action Plan */}
+      {Object.keys(insights.action_plan).length > 0 && (
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base">30-Day Action Plan</CardTitle>
+            <CardDescription>Prioritised implementation roadmap.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {(["week1", "week2", "week3", "week4"] as const).map((week) => {
+                const items = insights.action_plan[week];
+                if (!items?.length) return null;
+                const isOpen = openWeek === week;
+                return (
+                  <div key={week} className="rounded-lg border border-border overflow-hidden">
+                    <button
+                      type="button"
+                      className="w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-foreground bg-muted/30 hover:bg-muted/50 transition-colors"
+                      onClick={() => setOpenWeek(isOpen ? null : week)}
+                    >
+                      <span>{weekLabels[week]}</span>
+                      <span className="text-muted-foreground">{isOpen ? "▲" : "▼"}</span>
+                    </button>
+                    {isOpen && (
+                      <ul className="px-4 py-3 space-y-2">
+                        {items.map((item, i) => (
+                          <li key={i} className="flex items-start gap-3 text-sm text-foreground">
+                            <span className="flex-shrink-0 w-5 h-5 rounded-full bg-teal-100 dark:bg-teal-950 text-teal-700 dark:text-teal-300 text-xs font-bold flex items-center justify-center mt-0.5">
+                              {i + 1}
+                            </span>
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

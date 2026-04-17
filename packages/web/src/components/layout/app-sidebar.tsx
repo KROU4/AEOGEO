@@ -1,5 +1,4 @@
 import { Link, useLocation } from "@tanstack/react-router";
-import { Settings } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import {
   Sidebar,
@@ -14,7 +13,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useCurrentUser } from "@/hooks/use-auth";
-import { projectsNavItems, systemNavItems } from "@/lib/constants";
+import { analyticsNavItems, projectsNavItems, systemNavItems } from "@/lib/constants";
 
 export function AppSidebar() {
   const location = useLocation();
@@ -66,6 +65,26 @@ export function AppSidebar() {
         </SidebarGroup>
 
         <SidebarGroup>
+          <SidebarGroupLabel>{t("navGroups.analytics")}</SidebarGroupLabel>
+          <SidebarMenu>
+            {analyticsNavItems.map((item) => (
+              <SidebarMenuItem key={item.href}>
+                <SidebarMenuButton
+                  asChild
+                  isActive={location.pathname.startsWith(item.href)}
+                  tooltip={t(item.labelKey)}
+                >
+                  <Link to={item.href}>
+                    <item.icon />
+                    <span>{t(item.labelKey)}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            ))}
+          </SidebarMenu>
+        </SidebarGroup>
+
+        <SidebarGroup>
           <SidebarGroupLabel>{t("navGroups.settings")}</SidebarGroupLabel>
           <SidebarMenu>
             {systemNavItems.map((item) => (
@@ -76,7 +95,7 @@ export function AppSidebar() {
                   tooltip={t(item.labelKey)}
                 >
                   <Link to={item.href}>
-                    <Settings />
+                    <item.icon />
                     <span>{t(item.labelKey)}</span>
                   </Link>
                 </SidebarMenuButton>
