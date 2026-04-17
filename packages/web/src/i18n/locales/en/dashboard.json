@@ -135,6 +135,8 @@
       "youSuffix": " (you)"
     },
     "citations": {
+      "inDevelopmentTitle": "Citation analytics in development",
+      "inDevelopmentBody": "This section is not ready yet. We are building citation insights here — check back soon.",
       "statTotal": "Total citation rows",
       "statTotalHint": "Unique domains in explorer",
       "statTop": "Top engine (by cites)",

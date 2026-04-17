@@ -124,20 +124,22 @@
   }
 }
 
-/* Stitch landing: бесшовный бегущий ряд — два одинаковых сегмента, -50% = ровно один цикл */
+/* Stitch landing: бесшовный бегущий ряд — 4 одинаковых сегмента, -25% = ровно один цикл */
 @keyframes avop-marquee {
   0% {
     transform: translate3d(0, 0, 0);
   }
   100% {
-    transform: translate3d(-50%, 0, 0);
+    transform: translate3d(-25%, 0, 0);
   }
 }
 
 .avop-landing-marquee {
   width: max-content;
+  flex-wrap: nowrap;
   animation: avop-marquee 30s linear infinite;
   will-change: transform;
+  backface-visibility: hidden;
 }
 
 @keyframes quick-audit-scanline {

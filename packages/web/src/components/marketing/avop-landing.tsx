@@ -246,13 +246,21 @@ function MarqueeSection() {
       );
     });
 
+  // Must match translate3d(-25%) in globals.css @keyframes avop-marquee (100% / segmentCount).
+  const segmentCount = 4;
+
   return (
     <div className="overflow-hidden border-y border-white/5 bg-[#0d0e0f] py-8">
       <div className="avop-landing-marquee flex items-center opacity-40 grayscale transition-all hover:opacity-100 hover:grayscale-0">
-        <div className="flex shrink-0 items-center gap-16 pr-16">{renderSegment("a")}</div>
-        <div className="flex shrink-0 items-center gap-16 pr-16" aria-hidden>
-          {renderSegment("b")}
-        </div>
+        {Array.from({ length: segmentCount }, (_, i) => (
+          <div
+            key={i}
+            className="flex shrink-0 items-center gap-16 pr-16"
+            aria-hidden={i > 0}
+          >
+            {renderSegment(`m${i}`)}
+          </div>
+        ))}
       </div>
     </div>
   );

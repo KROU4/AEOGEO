@@ -8,17 +8,14 @@ import {
   YAxis,
   Tooltip,
   ResponsiveContainer,
-  BarChart,
-  Bar,
 } from "recharts";
 import { useTranslation } from "react-i18next";
 import { AnalyticsEmptyState, AnalyticsProjectBar } from "@/components/dashboard/analytics-project-bar";
+import { CompetitorsAnalyticsSection } from "@/components/dashboard/competitors-analytics-section";
 import { useExplorerProjectId } from "@/hooks/use-explorer-project";
 import { useDashboardPeriod } from "@/hooks/use-dashboard-period";
 import { useProjectDashboard } from "@/hooks/use-project-dashboard";
 import { useProjectTrends } from "@/hooks/use-project-trends";
-import { useProjectDashboardPlatforms } from "@/hooks/use-project-dashboard-platforms";
-import { useProjectCitations } from "@/hooks/use-project-explorer";
 import { useSentiment } from "@/hooks/use-visibility";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -40,20 +37,12 @@ function VisibilityPage() {
 
   const dash = useProjectDashboard(projectId ?? undefined, period);
   const trends = useProjectTrends(projectId ?? undefined, 12);
-  const platforms = useProjectDashboardPlatforms(projectId ?? undefined);
   const sentiment = useSentiment(projectId ?? undefined, { enabled: !!projectId });
-  const recentCitations = useProjectCitations(projectId ?? undefined, { limit: 8, page: 1 });
 
   const trendData =
     trends.data?.labels.map((label, i) => ({
       label,
       score: trends.data?.series.visibility[i] ?? 0,
-    })) ?? [];
-
-  const barData =
-    platforms.data?.platforms.map((p) => ({
-      name: p.engine,
-      share: p.visibility_pct,
     })) ?? [];
 
   const d = dash.data;
@@ -177,67 +166,9 @@ function VisibilityPage() {
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-2 gap-4">
-        <Card>
-          <CardHeader>
-            <CardTitle style={{ fontFamily: "var(--font-avop-heading)" }}>{t("stitch.visibility.platformBreakdown")}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {platforms.isLoading ? (
-              <Skeleton className="h-[180px] w-full" />
-            ) : barData.length === 0 ? (
-              <p className="text-sm text-muted-foreground py-8 text-center">{t("noMetrics")}</p>
-            ) : (
-              <ResponsiveContainer width="100%" height={180}>
-                <BarChart data={barData} layout="vertical" margin={{ left: 0 }}>
-                  <XAxis type="number" tick={{ fontSize: 10, fill: "#737373" }} axisLine={false} tickLine={false} domain={[0, 100]} />
-                  <YAxis dataKey="name" type="category" tick={{ fontSize: 11, fill: "#a3a3a3" }} axisLine={false} tickLine={false} width={100} />
-                  <Tooltip
-                    contentStyle={TOOLTIP_STYLE}
-                    formatter={(v) => [`${v}%`, t("stitch.visibility.barTooltipVisibility")]}
-                  />
-                  <Bar dataKey="share" fill="#4cd7f6" radius={[0, 2, 2, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle style={{ fontFamily: "var(--font-avop-heading)" }}>{t("stitch.visibility.recentSection")}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {recentCitations.isLoading ? (
-              <Skeleton className="h-[200px] w-full" />
-            ) : (
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="text-xs text-muted-foreground uppercase tracking-wider">
-                    <th className="text-left pb-3">{t("stitch.visibility.colSource")}</th>
-                    <th className="text-left pb-3">{t("stitch.visibility.colEngine")}</th>
-                    <th className="text-left pb-3">{t("stitch.visibility.colPreview")}</th>
-                    <th className="text-left pb-3">{t("stitch.visibility.colCites")}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {(recentCitations.data?.citations ?? []).map((c, i) => (
-                    <tr key={`${c.domain}-${i}`} className="border-t border-border/50">
-                      <td className="py-2 pr-2 text-primary text-xs truncate max-w-[100px]">{c.domain}</td>
-                      <td className="py-2 pr-2 text-muted-foreground text-xs">{c.engine}</td>
-                      <td className="py-2 pr-2 text-foreground text-xs truncate max-w-[160px]">{c.query_preview ?? "—"}</td>
-                      <td className="py-2 font-avop-mono text-xs">{c.times_cited}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-            {!recentCitations.isLoading && (recentCitations.data?.citations.length ?? 0) === 0 ? (
-              <p className="text-sm text-muted-foreground py-4 text-center">{t("noMetrics")}</p>
-            ) : null}
-          </CardContent>
-        </Card>
-      </div>
+      <section id="competitors" className="scroll-mt-8 space-y-6">
+        <CompetitorsAnalyticsSection />
+      </section>
     </div>
   );
 }

@@ -169,21 +169,16 @@ function ProjectGridCard({
             </div>
 
             <div className="flex items-start gap-2">
-              <Badge
-                variant="outline"
-                className={cn(
-                  "font-medium",
-                  project.visibility_score != null
-                    ? "border-teal-200 bg-teal-50 text-teal-700"
-                    : "border-amber-200 bg-amber-50 text-amber-700"
-                )}
-              >
-                {project.visibility_score != null
-                  ? t("grid.visibilityScore", {
-                      score: formatVisibilityScore(project.visibility_score),
-                    })
-                  : t("grid.needsRun")}
-              </Badge>
+              {project.visibility_score != null ? (
+                <Badge
+                  variant="outline"
+                  className="font-medium border-teal-200 bg-teal-50 text-teal-700"
+                >
+                  {t("grid.visibilityScore", {
+                    score: formatVisibilityScore(project.visibility_score),
+                  })}
+                </Badge>
+              ) : null}
 
               <DropdownMenu modal={false}>
                 <DropdownMenuTrigger asChild>

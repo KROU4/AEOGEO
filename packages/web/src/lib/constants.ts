@@ -2,7 +2,6 @@ import {
   FolderOpen,
   Settings,
   Eye,
-  Swords,
   Quote,
   type LucideIcon,
 } from "lucide-react";
@@ -19,7 +18,6 @@ export const projectsNavItems: NavItem[] = [
 
 export const analyticsNavItems: NavItem[] = [
   { labelKey: "nav.visibility", href: "/visibility", icon: Eye },
-  { labelKey: "nav.competitors", href: "/competitors", icon: Swords },
   { labelKey: "nav.citations", href: "/citations", icon: Quote },
 ];
 
