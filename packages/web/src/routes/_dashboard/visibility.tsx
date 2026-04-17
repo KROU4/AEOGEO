@@ -39,11 +39,10 @@ function VisibilityPage() {
   const trends = useProjectTrends(projectId ?? undefined, 12);
   const sentiment = useSentiment(projectId ?? undefined, { enabled: !!projectId });
 
-  const trendData =
-    trends.data?.labels.map((label, i) => ({
-      label,
-      score: trends.data?.series.visibility[i] ?? 0,
-    })) ?? [];
+  const trendData = (trends.data?.labels ?? []).map((label, i) => ({
+    label,
+    score: trends.data?.series.visibility[i] ?? 0,
+  }));
 
   const d = dash.data;
 
@@ -143,25 +142,31 @@ function VisibilityPage() {
             {t("stitch.visibility.trendTitle", { count: trends.data?.labels.length ?? 12 })}
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="min-w-0">
           {trends.isLoading ? (
             <Skeleton className="h-[240px] w-full" />
+          ) : trends.isError ? (
+            <p className="text-sm text-destructive py-8">
+              {(trends.error as Error)?.message ?? String(trends.error)}
+            </p>
           ) : (
-            <ResponsiveContainer width="100%" height={240}>
-              <LineChart data={trendData}>
-                <XAxis dataKey="label" tick={{ fontSize: 11, fill: "#737373" }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fontSize: 11, fill: "#737373" }} axisLine={false} tickLine={false} domain={[0, 100]} />
-                <Tooltip contentStyle={TOOLTIP_STYLE} />
-                <Line
-                  type="monotone"
-                  dataKey="score"
-                  stroke="#4cd7f6"
-                  strokeWidth={2}
-                  dot={false}
-                  name={t("stitch.visibility.chartVisibilityPct")}
-                />
-              </LineChart>
-            </ResponsiveContainer>
+            <div className="h-[240px] w-full min-w-0">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={trendData}>
+                  <XAxis dataKey="label" tick={{ fontSize: 11, fill: "#737373" }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 11, fill: "#737373" }} axisLine={false} tickLine={false} domain={[0, 100]} />
+                  <Tooltip contentStyle={TOOLTIP_STYLE} />
+                  <Line
+                    type="monotone"
+                    dataKey="score"
+                    stroke="#4cd7f6"
+                    strokeWidth={2}
+                    dot={false}
+                    name={t("stitch.visibility.chartVisibilityPct")}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
           )}
         </CardContent>
       </Card>

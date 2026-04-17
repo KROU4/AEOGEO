@@ -22,6 +22,9 @@ from app.schemas.project_dashboard_contract import (
 )
 from app.utils.datetime_compat import naive_utc
 
+# Runs that finished with usable scores — `partial` still has scored answers like `completed`.
+_RUN_STATUSES_FOR_METRICS = ("completed", "partial")
+
 
 def _period_start(period: str) -> datetime:
     days = {"7d": 7, "30d": 30, "90d": 90}.get(period, 7)
@@ -42,7 +45,7 @@ async def _completed_runs_in_window(
         select(EngineRun)
         .where(
             EngineRun.project_id == project_id,
-            EngineRun.status == "completed",
+            EngineRun.status.in_(_RUN_STATUSES_FOR_METRICS),
             EngineRun.created_at >= since,
         )
         .order_by(order)

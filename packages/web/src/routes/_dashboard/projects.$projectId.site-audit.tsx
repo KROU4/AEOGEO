@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { createFileRoute, useParams } from "@tanstack/react-router";
+import { useEffect, useRef, useState } from "react";
+import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import {
   AlertCircle,
@@ -43,7 +43,7 @@ import {
   type FullSiteAuditResult,
   type SiteAuditStatus,
 } from "@/hooks/use-site-audit";
-import { useLatestRun, useQuickStartRun } from "@/hooks/use-runs";
+import { useLatestRun } from "@/hooks/use-runs";
 import { getAccessToken } from "@/lib/auth";
 
 export const Route = createFileRoute(
@@ -389,6 +389,7 @@ function CrawlerTable({
 // ---------------------------------------------------------------------------
 
 function AuditResults({ result }: { result: FullSiteAuditResult }) {
+  const { t } = useTranslation("projects");
   return (
     <div className="space-y-8">
       {/* Overall Score + Pillar overview */}
@@ -398,7 +399,7 @@ function AuditResults({ result }: { result: FullSiteAuditResult }) {
           <div className="flex flex-col items-center justify-center gap-4 lg:pr-8 lg:border-r border-border">
             <ScoreGauge
               score={result.overall_geo_score}
-              label="Overall GEO Score"
+              label={t("siteAudit.overallScoreLabel")}
               size="lg"
             />
             <div className="text-center space-y-1">
@@ -487,7 +488,7 @@ function AuditResults({ result }: { result: FullSiteAuditResult }) {
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Top Recommendations</CardTitle>
-            <CardDescription>Prioritised actions to improve your GEO score.</CardDescription>
+            <CardDescription>{t("siteAudit.recommendationsHint")}</CardDescription>
           </CardHeader>
           <CardContent>
             <ol className="space-y-2">
@@ -876,6 +877,7 @@ function NoAuditState({
   onStart: () => void;
   isPending: boolean;
 }) {
+  const { t } = useTranslation("projects");
   return (
     <Card className="border-dashed">
       <CardContent className="flex flex-col items-center justify-center py-16 gap-4">
@@ -883,13 +885,8 @@ function NoAuditState({
           <Globe className="w-8 h-8 text-teal-600 dark:text-teal-400" />
         </div>
         <div className="text-center space-y-1">
-          <h3 className="text-lg font-semibold text-foreground">
-            No site audit yet
-          </h3>
-          <p className="text-sm text-muted-foreground max-w-sm">
-            Run a full GEO site audit to measure your AI citability, technical
-            health, structured data, and platform readiness.
-          </p>
+          <h3 className="text-lg font-semibold text-foreground">{t("siteAudit.emptyStateTitle")}</h3>
+          <p className="text-sm text-muted-foreground max-w-sm">{t("siteAudit.emptyStateBody")}</p>
         </div>
         <Button onClick={onStart} disabled={isPending} className="gap-2">
           {isPending ? (
@@ -897,7 +894,7 @@ function NoAuditState({
           ) : (
             <Play className="w-4 h-4" />
           )}
-          Run Site Audit
+          {t("siteAudit.runSiteAudit")}
         </Button>
       </CardContent>
     </Card>
@@ -908,45 +905,101 @@ function NoAuditState({
 // Page component
 // ---------------------------------------------------------------------------
 
-function GeoAnalysisBanner({ projectId }: { projectId: string }) {
+function VisibilityAnalyticsBanner({ projectId }: { projectId: string }) {
+  const { t } = useTranslation("projects");
   const latestRun = useLatestRun(projectId);
-  const quickStart = useQuickStartRun(projectId);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [dismissed, setDismissed] = useState(false);
+  const prevStatusRef = useRef<string | null>(null);
+  const initialisedRef = useRef(false);
 
-  const hasRun = latestRun.data != null;
-  const isRunning = latestRun.data?.status === "pending" || latestRun.data?.status === "running";
+  useEffect(() => {
+    const status = latestRun.data?.status;
+    if (latestRun.isLoading && !latestRun.data) return;
+    if (!status) return;
 
-  if (hasRun && !isRunning) return null;
+    if (!initialisedRef.current) {
+      initialisedRef.current = true;
+      prevStatusRef.current = status;
+      return;
+    }
 
-  return (
-    <div className="rounded-xl border border-primary/20 bg-primary/5 p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4">
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold text-foreground">
-          {isRunning ? "GEO Analysis is running…" : "Run GEO Visibility Analysis"}
-        </p>
-        <p className="text-xs text-muted-foreground mt-0.5">
-          {isRunning
-            ? "Checking how AI engines answer questions about your brand. This takes 1–3 minutes."
-            : "See how often AI engines mention your brand. We'll create a default query set and start analyzing."}
-        </p>
+    const prev = prevStatusRef.current;
+    prevStatusRef.current = status;
+
+    if (status === "pending" || status === "running") {
+      setDismissed(false);
+      setShowSuccess(false);
+      return;
+    }
+
+    if (
+      (prev === "pending" || prev === "running") &&
+      (status === "completed" || status === "partial")
+    ) {
+      setShowSuccess(true);
+      const tid = window.setTimeout(() => {
+        setDismissed(true);
+        setShowSuccess(false);
+      }, 7500);
+      return () => window.clearTimeout(tid);
+    }
+  }, [latestRun.data, latestRun.isLoading]);
+
+  const runStatus = latestRun.data?.status;
+  const isRunActive = runStatus === "pending" || runStatus === "running";
+  if (dismissed && !isRunActive && !showSuccess) return null;
+
+  if (showSuccess) {
+    return (
+      <div className="rounded-xl border border-emerald-500/35 bg-emerald-50/90 dark:bg-emerald-950/50 p-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0 space-y-1">
+          <p className="text-sm font-semibold text-emerald-900 dark:text-emerald-100">
+            {t("visibilityAnalytics.bannerSuccessTitle")}
+          </p>
+          <p className="text-xs text-emerald-800/90 dark:text-emerald-200/90">
+            {t("visibilityAnalytics.bannerSuccessBody")}
+          </p>
+        </div>
+        <Button asChild size="sm" variant="secondary" className="shrink-0 border-emerald-600/30">
+          <Link to="/visibility">{t("visibilityAnalytics.goToVisibility")}</Link>
+        </Button>
       </div>
-      <Button
-        size="sm"
-        className="shrink-0 gap-2"
-        disabled={quickStart.isPending || isRunning}
-        onClick={() => quickStart.mutate()}
-      >
-        {quickStart.isPending || isRunning ? (
-          <Loader2 className="w-4 h-4 animate-spin" />
-        ) : (
-          <Play className="w-4 h-4" />
-        )}
-        {isRunning ? "Running…" : "Start Analysis"}
-      </Button>
-    </div>
-  );
+    );
+  }
+
+  if (latestRun.isLoading && !latestRun.data && !latestRun.isError) {
+    return (
+      <div className="rounded-xl border border-primary/20 bg-primary/5 p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold text-foreground">{t("visibilityAnalytics.bannerStartingTitle")}</p>
+          <p className="text-xs text-muted-foreground mt-0.5">{t("visibilityAnalytics.bannerStartingBody")}</p>
+        </div>
+        <Loader2 className="h-5 w-5 animate-spin text-primary shrink-0" aria-hidden />
+      </div>
+    );
+  }
+
+  if (!latestRun.data) return null;
+
+  const status = latestRun.data.status;
+  if (status === "pending" || status === "running") {
+    return (
+      <div className="rounded-xl border border-sky-500/25 bg-sky-50/80 dark:bg-sky-950/30 p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold text-foreground">{t("visibilityAnalytics.bannerRunningTitle")}</p>
+          <p className="text-xs text-muted-foreground mt-0.5">{t("visibilityAnalytics.bannerRunningBody")}</p>
+        </div>
+        <Loader2 className="h-5 w-5 animate-spin text-sky-600 dark:text-sky-400 shrink-0" aria-hidden />
+      </div>
+    );
+  }
+
+  return null;
 }
 
 function SiteAuditPage() {
+  const { t } = useTranslation("projects");
   const { projectId } = useParams({
     from: "/_dashboard/projects/$projectId/site-audit",
   });
@@ -979,15 +1032,13 @@ function SiteAuditPage() {
 
   return (
     <div className="space-y-6">
-      <GeoAnalysisBanner projectId={projectId} />
+      <VisibilityAnalyticsBanner projectId={projectId} />
 
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-bold text-foreground">GEO Site Audit</h2>
-          <p className="text-sm text-muted-foreground">
-            Comprehensive AI visibility analysis — technical, schema, content &amp; platforms.
-          </p>
+          <h2 className="text-xl font-bold text-foreground">{t("siteAudit.pageTitle")}</h2>
+          <p className="text-sm text-muted-foreground">{t("siteAudit.pageSubtitle")}</p>
         </div>
         <div className="flex items-center gap-2">
           {audit?.status === "completed" && (

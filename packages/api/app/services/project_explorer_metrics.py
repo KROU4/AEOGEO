@@ -34,6 +34,8 @@ from app.schemas.project_explorer import (
 )
 from app.utils.datetime_compat import naive_utc
 
+_RUN_STATUSES_FOR_METRICS = ("completed", "partial")
+
 
 def _domain_from_url(url: str) -> str:
     u = (url or "").strip()
@@ -265,7 +267,7 @@ async def build_trends(
         r = await db.execute(
             select(EngineRun.id).where(
                 EngineRun.project_id == project_id,
-                EngineRun.status == "completed",
+                EngineRun.status.in_(_RUN_STATUSES_FOR_METRICS),
                 EngineRun.created_at >= start_dt,
                 EngineRun.created_at < end_dt,
             ),
@@ -337,7 +339,7 @@ async def build_citations_list(
         select(EngineRun.id)
         .where(
             EngineRun.project_id == project_id,
-            EngineRun.status == "completed",
+            EngineRun.status.in_(_RUN_STATUSES_FOR_METRICS),
         )
         .order_by(EngineRun.created_at.desc())
         .limit(7),

@@ -70,6 +70,8 @@ export function useQuickStartRun(projectId: string) {
       queryClient.invalidateQueries({ queryKey: ["runs", projectId] });
       queryClient.invalidateQueries({ queryKey: ["runs", projectId, "latest"] });
       queryClient.invalidateQueries({ queryKey: ["projects"] });
+      queryClient.invalidateQueries({ queryKey: ["project-dashboard", projectId] });
+      queryClient.invalidateQueries({ queryKey: ["project-trends", projectId] });
     },
   });
 }

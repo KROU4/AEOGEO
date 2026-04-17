@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   createFileRoute,
   Link,
@@ -9,6 +9,8 @@ import {
   useNavigate,
 } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
+import { Loader2, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -22,8 +24,10 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { ArrowLeft, Globe, Trash2 } from "lucide-react";
+import { useQuickStartRun } from "@/hooks/use-runs";
 import { useProject, useDeleteProject } from "@/hooks/use-projects";
 import { formatVisibilityScore } from "@/lib/report";
+import { writeStoredAnalyticsProjectId } from "@/lib/overview-project";
 import { Badge } from "@/components/ui/badge";
 
 export const Route = createFileRoute("/_dashboard/projects/$projectId")({
@@ -39,7 +43,12 @@ function ProjectDetailLayout() {
   const navigate = useNavigate();
   const { data: project, isLoading } = useProject(projectId);
   const deleteProject = useDeleteProject();
+  const rerunAnalytics = useQuickStartRun(projectId);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+
+  useEffect(() => {
+    writeStoredAnalyticsProjectId(projectId);
+  }, [projectId]);
 
   const isProjectRoot =
     location.pathname === `/projects/${projectId}` ||
@@ -100,7 +109,26 @@ function ProjectDetailLayout() {
             )}
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2"
+            disabled={rerunAnalytics.isPending}
+            onClick={() =>
+              rerunAnalytics.mutate(undefined, {
+                onError: () =>
+                  toast.error(t("visibilityAnalytics.rerunFailed")),
+              })
+            }
+          >
+            {rerunAnalytics.isPending ? (
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+            ) : (
+              <Play className="h-4 w-4" aria-hidden />
+            )}
+            {t("visibilityAnalytics.rerunAnalytics")}
+          </Button>
           <Button
             variant="outline"
             size="sm"

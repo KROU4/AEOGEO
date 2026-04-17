@@ -88,6 +88,11 @@ function NewProjectSimple() {
       await apiPost<SiteAudit>(`/projects/${project.id}/site-audit`, {
         url: parsed!.auditUrl,
       });
+      try {
+        await apiPost(`/projects/${project.id}/runs/quick-start`, {});
+      } catch {
+        toast.error(t("createFlow.visibilityAnalyticsFailed"));
+      }
       toast.success(t("createFlow.auditStarted"));
       setPendingNavigation(project.id);
       setShowProgress(true);
