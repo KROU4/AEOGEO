@@ -112,7 +112,10 @@ export function App() {
   }
 
   return (
-    <ClerkProvider publishableKey={clerkPublishableKey}>
+    <ClerkProvider
+      publishableKey={clerkPublishableKey}
+      appearance={{ layout: { unsafe_disableDevelopmentModeWarnings: true } }}
+    >
       <PersistQueryClientProvider
         client={queryClient}
         persistOptions={{ persister, maxAge: 5 * 60 * 1000 }}
