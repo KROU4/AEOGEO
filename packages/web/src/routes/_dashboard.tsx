@@ -128,7 +128,7 @@ function DashboardLayout() {
     currentUserQuery.error instanceof ApiError &&
     currentUserQuery.error.code === "auth.bootstrap_required"
   ) {
-    return <Navigate to="/projects/new" replace />;
+    return <Navigate to="/complete-signup" replace />;
   }
 
   /** Empty workspace: force first project creation, but allow Reports, Settings, and Analytics stubs so nav is usable. */
