@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from datetime import UTC, datetime
+from datetime import datetime
 from uuid import UUID
 
 from redis.asyncio import Redis
@@ -59,7 +59,7 @@ async def run_full_pipeline(run_id: str) -> None:
                 run = await db.get(EngineRun, run_uuid)
                 if run is not None and run.status not in {"completed", "partial"}:
                     run.status = "failed"
-                    run.completed_at = datetime.now(UTC)
+                    run.completed_at = datetime.utcnow()
                     if not run.error_message:
                         run.error_message = "Unexpected pipeline error"
                 await db.commit()
@@ -86,8 +86,8 @@ async def _engine_stage(
             parse_status="pending",
             score_status="pending",
             clear_error_message=True,
-            started_at=datetime.now(UTC),
-            engine_started_at=datetime.now(UTC),
+            started_at=datetime.utcnow(),
+            engine_started_at=datetime.utcnow(),
         )
         await db.commit()
 
@@ -142,7 +142,7 @@ async def _engine_stage(
                     engine_status="failed",
                     error_message=f"No API key for provider '{engine.provider}'",
                     set_completed=True,
-                    engine_completed_at=datetime.now(UTC),
+                    engine_completed_at=datetime.utcnow(),
                 )
                 await db2.commit()
             return False
@@ -162,7 +162,7 @@ async def _engine_stage(
             await svc.update_run_status(
                 run_uuid,
                 engine_status="completed",
-                engine_completed_at=datetime.now(UTC),
+                engine_completed_at=datetime.utcnow(),
             )
             await db.commit()
         return True
@@ -253,7 +253,7 @@ async def _engine_stage(
             run_uuid,
             engine_status=engine_status,
             error_message=(f"{failed_queries} queries failed" if failed_queries and not all_failed else last_error) if failed_queries else None,
-            engine_completed_at=datetime.now(UTC),
+            engine_completed_at=datetime.utcnow(),
             set_completed=all_failed,
         )
         await db.commit()
@@ -278,7 +278,7 @@ async def _parse_stage(
         await svc.update_run_status(
             run_uuid,
             parse_status="running",
-            parse_started_at=datetime.now(UTC),
+            parse_started_at=datetime.utcnow(),
         )
         await db.commit()
 
@@ -313,7 +313,7 @@ async def _parse_stage(
                 parse_status=parse_status,
                 parse_completed=parsed + skipped,
                 error_message=f"parse: {errors} answers failed" if errors else None,
-                parse_completed_at=datetime.now(UTC),
+                parse_completed_at=datetime.utcnow(),
             )
             await db.commit()
 
@@ -325,7 +325,7 @@ async def _parse_stage(
                 run_uuid,
                 parse_status="failed",
                 error_message=f"parse: {exc}"[:2000],
-                parse_completed_at=datetime.now(UTC),
+                parse_completed_at=datetime.utcnow(),
             )
             await db.commit()
 
@@ -344,7 +344,7 @@ async def _score_stage(
         await svc.update_run_status(
             run_uuid,
             score_status="running",
-            score_started_at=datetime.now(UTC),
+            score_started_at=datetime.utcnow(),
         )
         await db.commit()
 
@@ -365,7 +365,7 @@ async def _score_stage(
                 score_status=score_status,
                 score_completed=result.get("total_scored", 0),
                 error_message=f"score: {errors} answers failed" if errors else None,
-                score_completed_at=datetime.now(UTC),
+                score_completed_at=datetime.utcnow(),
                 set_completed=True,
                 set_score_completed=True,
             )
@@ -379,7 +379,7 @@ async def _score_stage(
                 run_uuid,
                 score_status="failed",
                 error_message=f"score: {exc}"[:2000],
-                score_completed_at=datetime.now(UTC),
+                score_completed_at=datetime.utcnow(),
                 set_completed=True,
             )
             await db.commit()
