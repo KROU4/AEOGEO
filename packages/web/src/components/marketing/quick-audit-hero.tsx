@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import {
   ArrowRight,
@@ -143,12 +144,6 @@ export function QuickAuditHero({ landingInline = false }: QuickAuditHeroProps) {
       setEmailStatus("error");
     }
   };
-
-  const registerHref = result
-    ? `/register?audit_id=${encodeURIComponent(result.audit_id)}&site=${encodeURIComponent(
-        normalizeAuditUrl(urlInput),
-      )}`
-    : "/register";
 
   const fallbackChecks: InfrastructureCheck[] = [
     {
@@ -504,10 +499,10 @@ export function QuickAuditHero({ landingInline = false }: QuickAuditHeroProps) {
 
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                   <Button size="lg" asChild className="group w-full sm:w-auto">
-                    <a href={registerHref}>
+                    <Link to="/login">
                       {t("auditCta")}
                       <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                    </a>
+                    </Link>
                   </Button>
                 </div>
               </div>
