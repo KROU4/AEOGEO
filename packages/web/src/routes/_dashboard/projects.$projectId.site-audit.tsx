@@ -43,6 +43,7 @@ import {
   type FullSiteAuditResult,
   type SiteAuditStatus,
 } from "@/hooks/use-site-audit";
+import { useLatestRun, useQuickStartRun } from "@/hooks/use-runs";
 import { getAccessToken } from "@/lib/auth";
 
 export const Route = createFileRoute(
@@ -907,6 +908,44 @@ function NoAuditState({
 // Page component
 // ---------------------------------------------------------------------------
 
+function GeoAnalysisBanner({ projectId }: { projectId: string }) {
+  const latestRun = useLatestRun(projectId);
+  const quickStart = useQuickStartRun(projectId);
+
+  const hasRun = latestRun.data != null;
+  const isRunning = latestRun.data?.status === "pending" || latestRun.data?.status === "running";
+
+  if (hasRun && !isRunning) return null;
+
+  return (
+    <div className="rounded-xl border border-primary/20 bg-primary/5 p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-semibold text-foreground">
+          {isRunning ? "GEO Analysis is running…" : "Run GEO Visibility Analysis"}
+        </p>
+        <p className="text-xs text-muted-foreground mt-0.5">
+          {isRunning
+            ? "Checking how AI engines answer questions about your brand. This takes 1–3 minutes."
+            : "See how often AI engines mention your brand. We'll create a default query set and start analyzing."}
+        </p>
+      </div>
+      <Button
+        size="sm"
+        className="shrink-0 gap-2"
+        disabled={quickStart.isPending || isRunning}
+        onClick={() => quickStart.mutate()}
+      >
+        {quickStart.isPending || isRunning ? (
+          <Loader2 className="w-4 h-4 animate-spin" />
+        ) : (
+          <Play className="w-4 h-4" />
+        )}
+        {isRunning ? "Running…" : "Start Analysis"}
+      </Button>
+    </div>
+  );
+}
+
 function SiteAuditPage() {
   const { projectId } = useParams({
     from: "/_dashboard/projects/$projectId/site-audit",
@@ -940,6 +979,8 @@ function SiteAuditPage() {
 
   return (
     <div className="space-y-6">
+      <GeoAnalysisBanner projectId={projectId} />
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>

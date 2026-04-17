@@ -61,6 +61,19 @@ export function useCreateRun(projectId: string) {
   });
 }
 
+export function useQuickStartRun(projectId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () =>
+      apiPost<EngineRun>(`/projects/${projectId}/runs/quick-start`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["runs", projectId] });
+      queryClient.invalidateQueries({ queryKey: ["runs", projectId, "latest"] });
+      queryClient.invalidateQueries({ queryKey: ["projects"] });
+    },
+  });
+}
+
 export function useRetryRun(projectId: string) {
   const queryClient = useQueryClient();
 

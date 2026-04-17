@@ -33,7 +33,6 @@ function CompleteSignupPage() {
     }
 
     if (currentUserQuery.data) {
-      void router.navigate({ to: "/overview" });
       return;
     }
 
@@ -93,7 +92,6 @@ function CompleteSignupPage() {
     currentUserQuery.error,
     isLoaded,
     isSignedIn,
-    router,
     t,
     tc,
     user?.fullName,

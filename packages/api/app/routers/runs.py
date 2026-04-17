@@ -19,7 +19,7 @@ from app.models.answer import Answer
 from app.models.engine import Engine, ProjectEngine
 from app.models.engine_run import EngineRun
 from app.models.project import Project
-from app.models.query import Query as QueryModel
+from app.models.query import Query as QueryModel, QuerySet
 from app.models.user import User
 from app.schemas.answer import AnswerDetail, AnswerResponse
 from app.schemas.engine_run import (
@@ -96,6 +96,108 @@ async def _enforce_run_trigger_rate(redis: Redis, tenant_id: UUID) -> None:
         error_code="runs.rate_limited",
         message="Too many run launches. Try again later.",
     )
+
+
+# ---------------------------------------------------------------------------
+# POST /projects/{project_id}/runs/quick-start  — create default setup + run
+# ---------------------------------------------------------------------------
+
+_DEFAULT_QUERIES_EN = [
+    "What AI tools or services are recommended for {domain}?",
+    "Which companies are leaders in the {domain} space?",
+    "What are the best solutions for {domain}?",
+    "Tell me about {domain} — what is it and who uses it?",
+    "What are the top alternatives to companies like {domain}?",
+]
+
+_DEFAULT_QUERIES_RU = [
+    "Какие AI-инструменты или сервисы рекомендуются для {domain}?",
+    "Какие компании являются лидерами в сфере {domain}?",
+    "Какие лучшие решения существуют для {domain}?",
+    "Расскажи о {domain} — что это и кто использует?",
+    "Какие лучшие альтернативы компаниям вроде {domain}?",
+]
+
+
+@router.post("/quick-start", response_model=EngineRunResponse, status_code=201)
+async def quick_start_run(
+    project_id: UUID,
+    background_tasks: BackgroundTasks,
+    db: AsyncSession = Depends(get_db),
+    redis: Redis = Depends(get_redis),
+    user: User = Depends(get_current_user),
+) -> EngineRunResponse:
+    """Create a default query set + pick first available engine + trigger a run.
+
+    Designed for projects with no prior setup — one-click first analysis.
+    """
+    from app.services.pipeline import run_full_pipeline
+
+    project = await _verify_project(project_id, user.tenant_id, db)
+    await _enforce_run_trigger_rate(redis, user.tenant_id)
+
+    # Pick any active engine (prefer openai provider); auto-create if none exist
+    engine_result = await db.execute(
+        select(Engine)
+        .where(Engine.is_active == True)  # noqa: E712
+        .order_by(
+            (Engine.provider == "openai").desc(),
+            Engine.created_at.asc(),
+        )
+        .limit(1)
+    )
+    engine = engine_result.scalar_one_or_none()
+    if engine is None:
+        engine = Engine(
+            name="ChatGPT",
+            slug="chatgpt",
+            provider="openai",
+            model_name="gpt-4o-mini",
+            is_active=True,
+            adapter_config=None,
+        )
+        db.add(engine)
+        await db.flush()
+
+    # Build default queries from project domain
+    domain = project.domain or project.name
+    locale = getattr(project, "content_locale", "en") or "en"
+    templates = _DEFAULT_QUERIES_RU if locale == "ru" else _DEFAULT_QUERIES_EN
+    query_texts = [t.replace("{domain}", domain) for t in templates]
+
+    # Create query set
+    qs = QuerySet(
+        name=f"Default — {domain}",
+        project_id=project_id,
+    )
+    db.add(qs)
+    await db.flush()
+
+    for text in query_texts:
+        db.add(QueryModel(
+            query_set_id=qs.id,
+            text=text,
+            status="approved",
+            priority=3,
+        ))
+    await db.flush()
+
+    run = EngineRun(
+        status="pending",
+        sample_count=1,
+        triggered_by="manual",
+        query_set_id=qs.id,
+        engine_id=engine.id,
+        project_id=project_id,
+    )
+    db.add(run)
+    await db.flush()
+    await db.refresh(run)
+    await db.commit()
+    await db.refresh(run)
+
+    background_tasks.add_task(run_full_pipeline, str(run.id))
+    return EngineRunResponse.model_validate(run)
 
 
 # ---------------------------------------------------------------------------
