@@ -23,7 +23,9 @@ RUN set -eux; \
 COPY packages/api/app ./app
 COPY packages/api/alembic ./alembic
 COPY packages/api/alembic.ini ./
+COPY packages/api/entrypoint.sh ./entrypoint.sh
+RUN chmod +x ./entrypoint.sh
 
 EXPOSE 8000
 
-CMD ["sh", "-c", "uv run uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000} --no-access-log"]
+ENTRYPOINT ["sh", "./entrypoint.sh"]

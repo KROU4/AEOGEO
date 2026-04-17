@@ -44,14 +44,6 @@ services:
       - db
       - redis
     restart: unless-stopped
-    command:
-      - sh
-      - -ec
-      - |
-          if [ "$$SKIP_ALEMBIC" != "1" ]; then
-            uv run alembic upgrade head
-          fi
-          exec uv run uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000} --no-access-log
 
   web:
     build:
