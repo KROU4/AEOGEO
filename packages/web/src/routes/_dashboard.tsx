@@ -24,6 +24,7 @@ import {
   parseDashboardSearch,
   persistProjectAliasFromSearch,
 } from "@/lib/dashboard-search";
+import { isDemoMode } from "@/lib/demo-mode";
 import { useSessionAuth } from "@/lib/session-auth";
 
 export const Route = createFileRoute("/_dashboard")({
@@ -120,11 +121,14 @@ function DashboardLayout() {
     return <div className="flex min-h-screen items-center justify-center text-sm text-muted-foreground">Loading...</div>;
   }
 
+  const demo = isDemoMode();
+
   if (!isSignedIn) {
     return <Navigate to="/login" search={{ redirect_url: location.pathname }} />;
   }
 
   if (
+    !demo &&
     currentUserQuery.error instanceof ApiError &&
     currentUserQuery.error.code === "auth.bootstrap_required"
   ) {
@@ -143,6 +147,7 @@ function DashboardLayout() {
     location.pathname.startsWith("/platforms");
 
   if (
+    !demo &&
     currentUserQuery.data &&
     projectsQuery.data &&
     projectsQuery.data.items.length === 0 &&

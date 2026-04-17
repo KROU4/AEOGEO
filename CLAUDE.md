@@ -59,7 +59,9 @@ packages/
 
 **API structure:** `app/routers/` (endpoints) → `app/services/` (business logic) → `app/models/` (SQLAlchemy ORM). Pydantic schemas live in `app/schemas/`. Temporal workflow definitions are in `app/workflows/`.
 
-**Web routing:** TanStack Router with file-based routes under `src/routes/`. Data fetching uses TanStack Query v5. UI components are shadcn/ui (Radix + Tailwind v4).
+**Web routing:** TanStack Router with file-based routes under `src/routes/`. Data fetching uses TanStack Query v5. UI components are shadcn/ui (Radix + Tailwind v4). Clerk `SignIn`/`SignUp` with `routing="path"` need splat routes (e.g. `/login/$`) so OAuth and multi-step flows do not hit the router’s Not Found page.
+
+**Demo (remove after stakeholder meetings):** set `DEMO_MODE=true` (API) and `VITE_DEMO_MODE=true` (web). API auto-bootstraps new Clerk users; web skips forced redirects to `/complete-signup` and `/projects/new` when the workspace has no projects.
 
 ## Environment
 
@@ -88,3 +90,4 @@ CI (`.github/workflows/ci.yml`): three parallel jobs — web lint/typecheck/vite
 - API tests use `FakeRedis` (via conftest.py fixture) — no real Redis needed for tests.
 - Database URL format: the API normalizes `postgresql://` → `postgresql+asyncpg://` automatically.
 - `geo-audit` is a local editable install (`uv pip install -e ../geo-audit`) — changes there are immediately reflected in the API.
+- Full site audit (`run_full_audit`) overlaps sitemap extra-page fetches with the first parallel module batch; optional Claude summary uses a bounded HTTP timeout.

@@ -230,7 +230,7 @@
     "emptyStateTitle": "No site audit yet",
     "emptyStateBody": "Run a full SEO site audit to measure your AI citability, technical health, structured data, and platform readiness.",
     "runSiteAudit": "Run Site Audit",
-    "runningHint": "A full SEO audit usually takes about 10–25 minutes; large or slow sites can take longer. You can leave this page — we keep checking until it finishes.",
+    "runningHint": "Most audits finish in about 2–10 minutes, depending on how fast the site responds and whether the optional AI summary runs. Very large or slow sites can take longer. You can leave this page — the audit continues on the server.",
     "runningFor": "Running for {{time}}",
     "phasesNote": "Typical stages (order may vary).",
     "phase0": "Crawl & technical SEO",

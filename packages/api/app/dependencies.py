@@ -125,7 +125,8 @@ async def get_current_user(
     clerk_identity: ClerkIdentity = Depends(get_clerk_identity),
     db: AsyncSession = Depends(get_db),
 ) -> User:
-    service = AuthService(db, settings=settings)
+    svc_settings = get_settings()
+    service = AuthService(db, settings=svc_settings)
 
     try:
         user = await service.resolve_local_user(clerk_identity)
@@ -136,10 +137,27 @@ async def get_current_user(
         ) from exc
 
     if user is None:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail={"code": "auth.bootstrap_required"},
-        )
+        if svc_settings.demo_mode:
+            try:
+                user = await service.bootstrap_clerk_user(
+                    clerk_identity,
+                    company_name=svc_settings.demo_default_company_name,
+                    preferred_name=None,
+                )
+                logger.warning(
+                    "demo_mode: auto-bootstrapped user for clerk_id=%s",
+                    clerk_identity.clerk_user_id,
+                )
+            except ValueError:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail={"code": "auth.bootstrap_required"},
+                ) from None
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail={"code": "auth.bootstrap_required"},
+            )
 
     if not user.is_active:
         raise HTTPException(

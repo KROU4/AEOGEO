@@ -34,6 +34,10 @@ import { Route as SharedReportsShareTokenRouteImport } from "./routes/shared.rep
 import { Route as DashboardReportsReportIdRouteImport } from "./routes/_dashboard/reports.$reportId"
 import { Route as DashboardProjectsNewRouteImport } from "./routes/_dashboard/projects_.new"
 import { Route as DashboardProjectsProjectIdRouteImport } from "./routes/_dashboard/projects.$projectId"
+import { Route as AuthResetPasswordSplatRouteImport } from "./routes/_auth/reset-password.$"
+import { Route as AuthRegisterSplatRouteImport } from "./routes/_auth/register.$"
+import { Route as AuthLoginSplatRouteImport } from "./routes/_auth/login.$"
+import { Route as AuthForgotPasswordSplatRouteImport } from "./routes/_auth/forgot-password.$"
 import { Route as DashboardProjectsProjectIdSiteAuditRouteImport } from "./routes/_dashboard/projects.$projectId.site-audit"
 import { Route as DashboardProjectsProjectIdRunsRouteImport } from "./routes/_dashboard/projects.$projectId.runs"
 import { Route as DashboardProjectsProjectIdQueriesRouteImport } from "./routes/_dashboard/projects.$projectId.queries"
@@ -163,6 +167,26 @@ const DashboardProjectsProjectIdRoute =
     path: "/$projectId",
     getParentRoute: () => DashboardProjectsRoute,
   } as any)
+const AuthResetPasswordSplatRoute = AuthResetPasswordSplatRouteImport.update({
+  id: "/$",
+  path: "/$",
+  getParentRoute: () => AuthResetPasswordRoute,
+} as any)
+const AuthRegisterSplatRoute = AuthRegisterSplatRouteImport.update({
+  id: "/$",
+  path: "/$",
+  getParentRoute: () => AuthRegisterRoute,
+} as any)
+const AuthLoginSplatRoute = AuthLoginSplatRouteImport.update({
+  id: "/$",
+  path: "/$",
+  getParentRoute: () => AuthLoginRoute,
+} as any)
+const AuthForgotPasswordSplatRoute = AuthForgotPasswordSplatRouteImport.update({
+  id: "/$",
+  path: "/$",
+  getParentRoute: () => AuthForgotPasswordRoute,
+} as any)
 const DashboardProjectsProjectIdSiteAuditRoute =
   DashboardProjectsProjectIdSiteAuditRouteImport.update({
     id: "/site-audit",
@@ -192,10 +216,10 @@ export interface FileRoutesByFullPath {
   "/": typeof IndexRoute
   "/accept-invite": typeof AuthAcceptInviteRoute
   "/complete-signup": typeof AuthCompleteSignupRoute
-  "/forgot-password": typeof AuthForgotPasswordRoute
-  "/login": typeof AuthLoginRoute
-  "/register": typeof AuthRegisterRoute
-  "/reset-password": typeof AuthResetPasswordRoute
+  "/forgot-password": typeof AuthForgotPasswordRouteWithChildren
+  "/login": typeof AuthLoginRouteWithChildren
+  "/register": typeof AuthRegisterRouteWithChildren
+  "/reset-password": typeof AuthResetPasswordRouteWithChildren
   "/assistant": typeof DashboardAssistantRoute
   "/citations": typeof DashboardCitationsRoute
   "/competitors": typeof DashboardCompetitorsRoute
@@ -207,6 +231,10 @@ export interface FileRoutesByFullPath {
   "/settings": typeof DashboardSettingsRoute
   "/visibility": typeof DashboardVisibilityRoute
   "/new-project": typeof FunnelNewProjectRoute
+  "/forgot-password/$": typeof AuthForgotPasswordSplatRoute
+  "/login/$": typeof AuthLoginSplatRoute
+  "/register/$": typeof AuthRegisterSplatRoute
+  "/reset-password/$": typeof AuthResetPasswordSplatRoute
   "/projects/$projectId": typeof DashboardProjectsProjectIdRouteWithChildren
   "/projects/new": typeof DashboardProjectsNewRoute
   "/reports/$reportId": typeof DashboardReportsReportIdRoute
@@ -220,10 +248,10 @@ export interface FileRoutesByTo {
   "/": typeof IndexRoute
   "/accept-invite": typeof AuthAcceptInviteRoute
   "/complete-signup": typeof AuthCompleteSignupRoute
-  "/forgot-password": typeof AuthForgotPasswordRoute
-  "/login": typeof AuthLoginRoute
-  "/register": typeof AuthRegisterRoute
-  "/reset-password": typeof AuthResetPasswordRoute
+  "/forgot-password": typeof AuthForgotPasswordRouteWithChildren
+  "/login": typeof AuthLoginRouteWithChildren
+  "/register": typeof AuthRegisterRouteWithChildren
+  "/reset-password": typeof AuthResetPasswordRouteWithChildren
   "/assistant": typeof DashboardAssistantRoute
   "/citations": typeof DashboardCitationsRoute
   "/competitors": typeof DashboardCompetitorsRoute
@@ -235,6 +263,10 @@ export interface FileRoutesByTo {
   "/settings": typeof DashboardSettingsRoute
   "/visibility": typeof DashboardVisibilityRoute
   "/new-project": typeof FunnelNewProjectRoute
+  "/forgot-password/$": typeof AuthForgotPasswordSplatRoute
+  "/login/$": typeof AuthLoginSplatRoute
+  "/register/$": typeof AuthRegisterSplatRoute
+  "/reset-password/$": typeof AuthResetPasswordSplatRoute
   "/projects/$projectId": typeof DashboardProjectsProjectIdRouteWithChildren
   "/projects/new": typeof DashboardProjectsNewRoute
   "/reports/$reportId": typeof DashboardReportsReportIdRoute
@@ -252,10 +284,10 @@ export interface FileRoutesById {
   "/_funnel": typeof FunnelRouteWithChildren
   "/_auth/accept-invite": typeof AuthAcceptInviteRoute
   "/_auth/complete-signup": typeof AuthCompleteSignupRoute
-  "/_auth/forgot-password": typeof AuthForgotPasswordRoute
-  "/_auth/login": typeof AuthLoginRoute
-  "/_auth/register": typeof AuthRegisterRoute
-  "/_auth/reset-password": typeof AuthResetPasswordRoute
+  "/_auth/forgot-password": typeof AuthForgotPasswordRouteWithChildren
+  "/_auth/login": typeof AuthLoginRouteWithChildren
+  "/_auth/register": typeof AuthRegisterRouteWithChildren
+  "/_auth/reset-password": typeof AuthResetPasswordRouteWithChildren
   "/_dashboard/assistant": typeof DashboardAssistantRoute
   "/_dashboard/citations": typeof DashboardCitationsRoute
   "/_dashboard/competitors": typeof DashboardCompetitorsRoute
@@ -267,6 +299,10 @@ export interface FileRoutesById {
   "/_dashboard/settings": typeof DashboardSettingsRoute
   "/_dashboard/visibility": typeof DashboardVisibilityRoute
   "/_funnel/new-project": typeof FunnelNewProjectRoute
+  "/_auth/forgot-password/$": typeof AuthForgotPasswordSplatRoute
+  "/_auth/login/$": typeof AuthLoginSplatRoute
+  "/_auth/register/$": typeof AuthRegisterSplatRoute
+  "/_auth/reset-password/$": typeof AuthResetPasswordSplatRoute
   "/_dashboard/projects/$projectId": typeof DashboardProjectsProjectIdRouteWithChildren
   "/_dashboard/projects_/new": typeof DashboardProjectsNewRoute
   "/_dashboard/reports/$reportId": typeof DashboardReportsReportIdRoute
@@ -297,6 +333,10 @@ export interface FileRouteTypes {
     | "/settings"
     | "/visibility"
     | "/new-project"
+    | "/forgot-password/$"
+    | "/login/$"
+    | "/register/$"
+    | "/reset-password/$"
     | "/projects/$projectId"
     | "/projects/new"
     | "/reports/$reportId"
@@ -325,6 +365,10 @@ export interface FileRouteTypes {
     | "/settings"
     | "/visibility"
     | "/new-project"
+    | "/forgot-password/$"
+    | "/login/$"
+    | "/register/$"
+    | "/reset-password/$"
     | "/projects/$projectId"
     | "/projects/new"
     | "/reports/$reportId"
@@ -356,6 +400,10 @@ export interface FileRouteTypes {
     | "/_dashboard/settings"
     | "/_dashboard/visibility"
     | "/_funnel/new-project"
+    | "/_auth/forgot-password/$"
+    | "/_auth/login/$"
+    | "/_auth/register/$"
+    | "/_auth/reset-password/$"
     | "/_dashboard/projects/$projectId"
     | "/_dashboard/projects_/new"
     | "/_dashboard/reports/$reportId"
@@ -551,6 +599,34 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof DashboardProjectsProjectIdRouteImport
       parentRoute: typeof DashboardProjectsRoute
     }
+    "/_auth/reset-password/$": {
+      id: "/_auth/reset-password/$"
+      path: "/$"
+      fullPath: "/reset-password/$"
+      preLoaderRoute: typeof AuthResetPasswordSplatRouteImport
+      parentRoute: typeof AuthResetPasswordRoute
+    }
+    "/_auth/register/$": {
+      id: "/_auth/register/$"
+      path: "/$"
+      fullPath: "/register/$"
+      preLoaderRoute: typeof AuthRegisterSplatRouteImport
+      parentRoute: typeof AuthRegisterRoute
+    }
+    "/_auth/login/$": {
+      id: "/_auth/login/$"
+      path: "/$"
+      fullPath: "/login/$"
+      preLoaderRoute: typeof AuthLoginSplatRouteImport
+      parentRoute: typeof AuthLoginRoute
+    }
+    "/_auth/forgot-password/$": {
+      id: "/_auth/forgot-password/$"
+      path: "/$"
+      fullPath: "/forgot-password/$"
+      preLoaderRoute: typeof AuthForgotPasswordSplatRouteImport
+      parentRoute: typeof AuthForgotPasswordRoute
+    }
     "/_dashboard/projects/$projectId/site-audit": {
       id: "/_dashboard/projects/$projectId/site-audit"
       path: "/site-audit"
@@ -582,22 +658,68 @@ declare module "@tanstack/react-router" {
   }
 }
 
+interface AuthForgotPasswordRouteChildren {
+  AuthForgotPasswordSplatRoute: typeof AuthForgotPasswordSplatRoute
+}
+
+const AuthForgotPasswordRouteChildren: AuthForgotPasswordRouteChildren = {
+  AuthForgotPasswordSplatRoute: AuthForgotPasswordSplatRoute,
+}
+
+const AuthForgotPasswordRouteWithChildren =
+  AuthForgotPasswordRoute._addFileChildren(AuthForgotPasswordRouteChildren)
+
+interface AuthLoginRouteChildren {
+  AuthLoginSplatRoute: typeof AuthLoginSplatRoute
+}
+
+const AuthLoginRouteChildren: AuthLoginRouteChildren = {
+  AuthLoginSplatRoute: AuthLoginSplatRoute,
+}
+
+const AuthLoginRouteWithChildren = AuthLoginRoute._addFileChildren(
+  AuthLoginRouteChildren,
+)
+
+interface AuthRegisterRouteChildren {
+  AuthRegisterSplatRoute: typeof AuthRegisterSplatRoute
+}
+
+const AuthRegisterRouteChildren: AuthRegisterRouteChildren = {
+  AuthRegisterSplatRoute: AuthRegisterSplatRoute,
+}
+
+const AuthRegisterRouteWithChildren = AuthRegisterRoute._addFileChildren(
+  AuthRegisterRouteChildren,
+)
+
+interface AuthResetPasswordRouteChildren {
+  AuthResetPasswordSplatRoute: typeof AuthResetPasswordSplatRoute
+}
+
+const AuthResetPasswordRouteChildren: AuthResetPasswordRouteChildren = {
+  AuthResetPasswordSplatRoute: AuthResetPasswordSplatRoute,
+}
+
+const AuthResetPasswordRouteWithChildren =
+  AuthResetPasswordRoute._addFileChildren(AuthResetPasswordRouteChildren)
+
 interface AuthRouteChildren {
   AuthAcceptInviteRoute: typeof AuthAcceptInviteRoute
   AuthCompleteSignupRoute: typeof AuthCompleteSignupRoute
-  AuthForgotPasswordRoute: typeof AuthForgotPasswordRoute
-  AuthLoginRoute: typeof AuthLoginRoute
-  AuthRegisterRoute: typeof AuthRegisterRoute
-  AuthResetPasswordRoute: typeof AuthResetPasswordRoute
+  AuthForgotPasswordRoute: typeof AuthForgotPasswordRouteWithChildren
+  AuthLoginRoute: typeof AuthLoginRouteWithChildren
+  AuthRegisterRoute: typeof AuthRegisterRouteWithChildren
+  AuthResetPasswordRoute: typeof AuthResetPasswordRouteWithChildren
 }
 
 const AuthRouteChildren: AuthRouteChildren = {
   AuthAcceptInviteRoute: AuthAcceptInviteRoute,
   AuthCompleteSignupRoute: AuthCompleteSignupRoute,
-  AuthForgotPasswordRoute: AuthForgotPasswordRoute,
-  AuthLoginRoute: AuthLoginRoute,
-  AuthRegisterRoute: AuthRegisterRoute,
-  AuthResetPasswordRoute: AuthResetPasswordRoute,
+  AuthForgotPasswordRoute: AuthForgotPasswordRouteWithChildren,
+  AuthLoginRoute: AuthLoginRouteWithChildren,
+  AuthRegisterRoute: AuthRegisterRouteWithChildren,
+  AuthResetPasswordRoute: AuthResetPasswordRouteWithChildren,
 }
 
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)

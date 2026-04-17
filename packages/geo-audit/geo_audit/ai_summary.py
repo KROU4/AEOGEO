@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 _ANTHROPIC_URL = "https://api.anthropic.com/v1/messages"
 _MODEL = "claude-sonnet-4-6"
-_TIMEOUT = 90.0
+_TIMEOUT = 48.0
 
 
 def _build_prompt(data: dict[str, Any]) -> str:
@@ -149,7 +149,7 @@ async def generate_ai_insights(
                 },
                 json={
                     "model": _MODEL,
-                    "max_tokens": 3000,
+                    "max_tokens": 2048,
                     "temperature": 0.3,
                     "messages": [{"role": "user", "content": prompt}],
                 },

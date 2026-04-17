@@ -44,7 +44,9 @@ _MODULE_TIMEOUTS = {
     "citability": 5.0,
     "brand": 5.0,
 }
-_SITEMAP_PAGE_LIMIT = 15  # max additional pages to fetch for multi-page analysis
+_SITEMAP_PAGE_LIMIT = 10  # max additional pages to fetch for multi-page analysis
+_SITEMAP_FETCH_BUDGET_SEC = 18.0  # cap wait for sitemap crawl (runs parallel to phase 1)
+_AI_INSIGHTS_BUDGET_SEC = 52.0  # hard cap for optional Claude summary (HTTP client has its own limit)
 
 
 def _normalize_url(url: str) -> str:
@@ -277,24 +279,21 @@ async def run_full_audit(
     else:
         fetch_error = None
 
-    # Multi-page crawl: fetch additional pages from sitemap in parallel
-    extra_pages_html: list[str] = []
-    pages_fetched = 0
-    if html:
+    brand_name = _extract_likely_brand_name(html, parsed_url.netloc)
+
+    # Sitemap crawl runs concurrently with phase 1 (technical / schema / llms / brand) to save wall time.
+    async def _sitemap_safe() -> tuple[list[str], int]:
+        if not html:
+            return [], 0
         try:
-            extra_pages_html, pages_fetched = await asyncio.wait_for(
+            return await asyncio.wait_for(
                 _fetch_sitemap_pages(normalized_url, client),
-                timeout=20.0,
+                timeout=_SITEMAP_FETCH_BUDGET_SEC,
             )
         except Exception:
-            extra_pages_html, pages_fetched = [], 0
+            return [], 0
 
-    # Combine all HTML for content analysis (homepage + extra pages)
-    all_html = html
-    if extra_pages_html:
-        all_html = html + "\n\n".join(extra_pages_html)
-
-    brand_name = _extract_likely_brand_name(html, parsed_url.netloc)
+    sitemap_task = asyncio.create_task(_sitemap_safe())
 
     async def _run_technical() -> TechnicalAuditResult:
         try:
@@ -315,6 +314,41 @@ async def run_full_audit(
             return await run_llmstxt_audit(normalized_url, client=client)
         except Exception as exc:
             return _make_failed_llmstxt(str(exc))
+
+    async def _run_brand() -> float:
+        try:
+            return await run_brand_authority_audit(brand_name, domain)
+        except Exception:
+            return 0.0
+
+    (
+        technical,
+        schema,
+        llmstxt,
+        brand_authority,
+    ) = await asyncio.gather(
+        _with_timeout(
+            _run_technical(),
+            _MODULE_TIMEOUTS["technical"],
+            _make_failed_technical,
+        ),
+        _with_timeout(_run_schema(), _MODULE_TIMEOUTS["schema"], _make_failed_schema),
+        _with_timeout(
+            _run_llmstxt(), _MODULE_TIMEOUTS["llmstxt"], _make_failed_llmstxt
+        ),
+        _with_timeout(
+            _run_brand(),
+            30.0,  # brand checks hit external APIs, give more time
+            lambda _error: 0.0,
+        ),
+    )
+
+    extra_pages_html, pages_fetched = await sitemap_task
+
+    # Combine all HTML for content analysis (homepage + extra pages)
+    all_html = html
+    if extra_pages_html:
+        all_html = html + "\n\n".join(extra_pages_html)
 
     async def _run_content() -> ContentQualityResult:
         try:
@@ -338,40 +372,16 @@ async def run_full_audit(
         except Exception:
             return 0.0
 
-    async def _run_brand() -> float:
-        try:
-            return await run_brand_authority_audit(brand_name, domain)
-        except Exception:
-            return 0.0
-
     (
-        technical,
-        schema,
-        llmstxt,
         content,
         citability_score,
-        brand_authority,
     ) = await asyncio.gather(
-        _with_timeout(
-            _run_technical(),
-            _MODULE_TIMEOUTS["technical"],
-            _make_failed_technical,
-        ),
-        _with_timeout(_run_schema(), _MODULE_TIMEOUTS["schema"], _make_failed_schema),
-        _with_timeout(
-            _run_llmstxt(), _MODULE_TIMEOUTS["llmstxt"], _make_failed_llmstxt
-        ),
         _with_timeout(
             _run_content(), _MODULE_TIMEOUTS["content"], _make_failed_content
         ),
         _with_timeout(
             _run_citability(),
             _MODULE_TIMEOUTS["citability"],
-            lambda _error: 0.0,
-        ),
-        _with_timeout(
-            _run_brand(),
-            30.0,  # brand checks hit external APIs, give more time
             lambda _error: 0.0,
         ),
     )
@@ -437,9 +447,15 @@ async def run_full_audit(
 
     # AI-powered insights (optional — requires anthropic_api_key)
     if anthropic_api_key:
-        result.ai_insights = await generate_ai_insights(
-            result.model_dump(),
-            anthropic_api_key=anthropic_api_key,
-        )
+        try:
+            result.ai_insights = await asyncio.wait_for(
+                generate_ai_insights(
+                    result.model_dump(),
+                    anthropic_api_key=anthropic_api_key,
+                ),
+                timeout=_AI_INSIGHTS_BUDGET_SEC,
+            )
+        except asyncio.TimeoutError:
+            result.ai_insights = None
 
     return result

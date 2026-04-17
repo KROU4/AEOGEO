@@ -94,6 +94,8 @@ services:
       - "${WEB_PORT:-5173}:5173"
     environment:
       VITE_API_URL: ${VITE_API_URL:-http://localhost:${API_PORT:-8000}}
+      # Stakeholder demo (optional): set VITE_DEMO_MODE=true in repo root .env
+      VITE_DEMO_MODE: ${VITE_DEMO_MODE:-false}
       CHOKIDAR_USEPOLLING: ${DEV_WATCH_POLLING:-true}
       CHOKIDAR_INTERVAL: ${CHOKIDAR_INTERVAL:-1000}
     volumes:

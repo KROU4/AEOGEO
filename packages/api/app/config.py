@@ -71,6 +71,9 @@ class Settings(BaseSettings):
     log_json: bool = False
     referral_track_webhook_url: str = ""
     site_audit_timeout_minutes: int = 10
+    # Demo only: auto-create tenant on first Clerk request (skip /complete-signup).
+    demo_mode: bool = False
+    demo_default_company_name: str = "Demo"
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 

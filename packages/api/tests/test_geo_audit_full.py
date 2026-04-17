@@ -156,7 +156,10 @@ def test_full_audit_uses_geo_seo_claude_weighting(monkeypatch) -> None:
             "analyze_html_citability",
             lambda *_a, **_k: {"average_citability_score": 80},
         )
-        monkeypatch.setattr(full_audit, "_run_brand_authority_audit", lambda *_a: 40)
+        async def _fake_brand(*_a, **_k):
+            return 40
+
+        monkeypatch.setattr(full_audit, "run_brand_authority_audit", _fake_brand)
 
         result = await full_audit.run_full_audit("https://example.com")
 

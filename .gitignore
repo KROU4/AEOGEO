@@ -41,3 +41,7 @@ npm-debug.log*
 
 # Docker
 docker-compose.override.yml
+.claude/settings.local.json
+.claude/worktrees/loving-booth/
+geo-seo-claude/
+.claude/settings.local.json
