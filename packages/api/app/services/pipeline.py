@@ -141,7 +141,6 @@ async def _engine_stage(
                     run_uuid,
                     engine_status="failed",
                     error_message=f"No API key for provider '{engine.provider}'",
-                    set_completed=True,
                     engine_completed_at=datetime.utcnow(),
                 )
                 await db2.commit()
@@ -254,7 +253,6 @@ async def _engine_stage(
             engine_status=engine_status,
             error_message=(f"{failed_queries} queries failed" if failed_queries and not all_failed else last_error) if failed_queries else None,
             engine_completed_at=datetime.utcnow(),
-            set_completed=all_failed,
         )
         await db.commit()
 
@@ -366,8 +364,6 @@ async def _score_stage(
                 score_completed=result.get("total_scored", 0),
                 error_message=f"score: {errors} answers failed" if errors else None,
                 score_completed_at=datetime.utcnow(),
-                set_completed=True,
-                set_score_completed=True,
             )
             await db.commit()
 
@@ -380,7 +376,6 @@ async def _score_stage(
                 score_status="failed",
                 error_message=f"score: {exc}"[:2000],
                 score_completed_at=datetime.utcnow(),
-                set_completed=True,
             )
             await db.commit()
 
